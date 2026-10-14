@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Newtonsoft.Json.Linq;
@@ -69,8 +71,47 @@ namespace RvtMcp.Plugin.Handlers
                     rolledBack = false;
                 }
 
-                return CommandResult.Ok(new { results = outcome.Results, rolledBack });
+                object undo = null;
+                if (!rolledBack)
+                    undo = TryRecordUndo(doc, outcome);
+
+                return CommandResult.Ok(new { results = outcome.Results, rolledBack, undo });
             }
+        }
+
+        private static object TryRecordUndo(Document doc, BatchExecutor.Outcome outcome)
+        {
+            try
+            {
+                var created = new List<long>();
+                foreach (var r in outcome.Results)
+                {
+                    var dataProp = r?.GetType().GetProperty("data");
+                    var okProp = r?.GetType().GetProperty("ok");
+                    if (okProp == null || !(okProp.GetValue(r) is bool ok) || !ok) continue;
+                    created.AddRange(UndoJournal.ExtractCreatedIds(dataProp?.GetValue(r)));
+                }
+                created = created.Distinct().ToList();
+                if (created.Count == 0)
+                    return new { recorded = false, reason = "no created elements to track" };
+                var batch = UndoJournal.Record(doc.Title, SaveStamp(doc), "batch_execute", created);
+                return new { recorded = true, batch_id = batch.Id, tracked = created.Count };
+            }
+            catch (Exception ex)
+            {
+                return new { recorded = false, reason = ex.Message };
+            }
+        }
+
+        private static string SaveStamp(Document doc)
+        {
+            try
+            {
+                var v = Document.GetDocumentVersion(doc);
+                if (v == null) return "unsaved";
+                return v.VersionGUID + "#" + v.NumberOfSaves;
+            }
+            catch { return "unsaved"; }
         }
     }
 }

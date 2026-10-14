@@ -27,7 +27,8 @@ namespace RvtMcp.Tests
             "revit_read_memory_notes",
             "revit_set_project_info",
             "revit_show_message",
-            "revit_switch_target"
+            "revit_switch_target",
+            "revit_undo_batch"
         };
 
         [Fact]

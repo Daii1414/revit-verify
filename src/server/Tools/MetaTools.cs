@@ -379,6 +379,20 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_undo_batch", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("List recorded write batches or undo the newest one (created elements are deleted, cascade-guarded, post-verified). Refuses when the model was saved since the batch. Params: operation ('list' default | 'undo_last'), dry_run (default true). Recorded automatically by batch_execute.")]
+        public static async Task<string> UndoBatch(string operation = "list", bool dry_run = true)
+        {
+            var blocked = ServerState.BlockIfReadOnly("undo_batch");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("undo_batch", new { operation, dry_run });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_set_project_info", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace project information fields; restore them with Revit Undo. Set typed fields on doc.ProjectInformation. Params: name, number, client_name, address, status, issue_date (all optional, at least one required). Returns changed_fields and skipped reasons for read-only/missing parameters.")]
         public static async Task<string> SetProjectInfo(
             string name = null, string number = null,

@@ -281,6 +281,7 @@ namespace RvtMcp.Plugin
 
             // A6 batch execution — needs dispatcher ref to look up sub-commands
             Register(new Handlers.BatchExecuteHandler(this));
+            Register(new Handlers.UndoBatchHandler());
             // ToolBaker runtime access.
             Register(new Handlers.ApplyBakeSuggestionHandler(runtimeCache));
             Register(new Handlers.ListBakedToolsHandler());
