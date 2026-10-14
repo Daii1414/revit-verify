@@ -110,7 +110,7 @@ contract-пробы (параметр JSON-текста называть *_json,
    radial_debug.py, cleanup.py, mem_stdio2.py, open_sandbox.py.
 2. ~~save_document, health-score, create_array~~ СДЕЛАНО 2026-10-14, коммит 35a314c
    (revit_save_document + revit_check_model_health/HealthScorer + revit_create_array
-   + distance_mm; тесты 1883 зелёных + 1 флаки-тост; counts 56/244/247/96).
+   + distance_mm; последний полный прогон 2026-10-14: 1884 теста зелёные; counts 56/244/247/96).
 3. ~~FrameCalculator: distance_mm~~ СДЕЛАНО (ResolveDistance + тесты, там же).
 4. Установщик для публикации — СЛЕДУЮЩИЙ: install.ps1 в репо ОТСУТСТВУЕТ (только
    tests/installer/* + docs/install.md под апстрим Bimwright-пути). Нужен свой
