@@ -7979,16 +7979,16 @@
     },
     {
       "name": "revit_verify_assert",
-      "description_hash": "sha256:adc8b88ef017005f1861f91f504891feabba2f6177116f64c18b9814ed14b628",
+      "description_hash": "sha256:8175bb2dbd1e5290d070eea9b0fe3abcbf704292c60acfeb7a3953f2c7350166",
       "inputSchema": {
         "properties": {
-          "assertions": {
+          "assertions_json": {
             "description": "",
             "type": "String"
           }
         },
         "required": [
-          "assertions"
+          "assertions_json"
         ],
         "type": "object"
       },

@@ -100,15 +100,15 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox (union box of ids or category+level filter vs box_mm within tol_mm) and count (instances vs expect). Read-only. Returns per-assertion pass/fail. Params: assertions array (required).")]
-        public static async Task<string> VerifyAssert(string assertions)
+        [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox (union box of ids or category+level filter vs box_mm within tol_mm) and count (instances vs expect). Read-only. Returns per-assertion pass/fail. Params: assertions_json (required JSON array).")]
+        public static async Task<string> VerifyAssert(string assertions_json)
         {
             var blocked = ServerState.BlockIfReadOnly("verify_assert");
             if (blocked != null) return blocked;
 
             try
             {
-                var parsed = JArray.Parse(assertions);
+                var parsed = JArray.Parse(assertions_json);
                 var result = await ToolGateway.SendToRevit("verify_assert", new { assertions = parsed });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
