@@ -71,6 +71,15 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_cad_plan", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Create a deterministic, versioned, read-only axis candidate plan from revit_cad_extract output. Never applies geometry changes.")]
+        public static string CadPlan(
+            [System.ComponentModel.Description("Complete JSON response from revit_cad_extract, including results and provenance.")] string extraction_json,
+            [System.ComponentModel.Description("Versioned JSON rules: version, exact x_axis_layers/y_axis_layers, optional ordered labels, and tolerances.")] string rules_json)
+        {
+            try { return Handlers.CadPlanBuilder.Build(extraction_json, rules_json).ToString(Formatting.Indented); }
+            catch (Exception ex) { return JsonConvert.SerializeObject(new { success = false, error = ex.Message }); }
+        }
+
         [McpServerTool(Name = "revit_import_cad_to_view", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Import or link a CAD drawing (.dwg, .dxf) into a specific view.")]
         public static async Task<string> ImportCadToView(string path, long? viewId = null, bool link = false, string placement = "origin", string unit = "default", bool thisViewOnly = true, bool visibleLayersOnly = true)
         {

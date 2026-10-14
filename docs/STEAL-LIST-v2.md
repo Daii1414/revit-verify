@@ -26,10 +26,10 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    freshness-checks от naviscoord (кадр протух — не верить).
 4. **DWG→BIM pipeline (extract → plan → apply с provenance + ревизии).**
    От: Horizun `horizun_plan_from_cad` + 13 CAD-инструментов (Apache-2.0).
-   Теперь есть первая read-only ступень `revit_cad_extract`: слои и ограниченная
-   векторная геометрия уже загруженных CAD-import/link. Это не lossless DWG
-   parser: исходный текст и атрибуты блоков могут отсутствовать. Следом нужны
-   правила интерпретации, план с provenance и отдельное подтверждённое применение.
+   Есть read-only `revit_cad_extract` и `revit_cad_plan`: кандидаты осей строятся
+   по точным слоям и versioned rules; план хранит hash и provenance источников.
+   Обрезанная геометрия отвергается. Это не lossless DWG parser; audit плана
+   против Revit-модели и отдельное подтверждённое применение ещё впереди.
 
 ## Дополнительная сверка идей из STEAL-LIST-v2
 

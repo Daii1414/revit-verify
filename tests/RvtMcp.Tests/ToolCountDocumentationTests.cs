@@ -28,7 +28,7 @@ namespace RvtMcp.Tests
 
             var changelog = File.ReadAllText(Path.Combine(root, "CHANGELOG.md"));
             Assert.Contains("Current source counts: default **57**, all **" + standard
-                + "**, adaptive bake **" + adaptive + "**, read-only **100** (including target switching).", changelog);
+                + "**, adaptive bake **" + adaptive + "**, read-only **101** (including target switching).", changelog);
         }
 
         private static int ReadToolCount(string path)

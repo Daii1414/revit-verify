@@ -20,6 +20,7 @@ namespace RvtMcp.Plugin
             "audit_families",
             "check_model_health",
             "cad_extract",
+            "cad_plan",
             "clash_detection",
             "compute_element_area",
             "compute_element_volume",

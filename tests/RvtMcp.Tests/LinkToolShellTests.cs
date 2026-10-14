@@ -16,6 +16,7 @@ namespace RvtMcp.Tests
         {
             "revit_acquire_coordinates_from_link",
             "revit_cad_extract",
+            "revit_cad_plan",
             "revit_get_link_coordinate_system",
             "revit_get_link_elements",
             "revit_get_project_coordinate_system",
@@ -74,6 +75,19 @@ namespace RvtMcp.Tests
             Assert.Equal(new long[] { 11, 12 }, json["instance_ids"].Values<long>());
             Assert.Equal(80, json.Value<int>("entity_limit"));
             Assert.True(json.Value<bool>("include_vertices"));
+        }
+
+        [Fact]
+        public void Cad_plan_is_local_read_only_analysis_and_does_not_send_a_model_command()
+        {
+            const string extraction = "{\"results\":[]}";
+            const string rules = "{\"version\":\"church-v1\",\"x_axis_layers\":[\"GRID-X\"]}";
+
+            var response = LinksTools.CadPlan(extraction, rules);
+            var json = JObject.Parse(response);
+
+            Assert.False(json.Value<bool>("success"));
+            Assert.Contains("results", json.Value<string>("error"));
         }
 
         [Fact]

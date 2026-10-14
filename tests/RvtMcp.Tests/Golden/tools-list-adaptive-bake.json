@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 249,
+  "tool_count": 250,
   "tools": [
     {
       "name": "revit_accept_bake_suggestion",
@@ -860,6 +860,33 @@
         },
         "required": [
           "instance_ids"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "revit_cad_plan",
+      "description_hash": "sha256:5943bc8ac3989ab52b4e861ba0be19f43502321659dc2384341bbdd38d59bf34",
+      "inputSchema": {
+        "properties": {
+          "extraction_json": {
+            "description": "Complete JSON response from revit_cad_extract, including results and provenance.",
+            "type": "String"
+          },
+          "rules_json": {
+            "description": "Versioned JSON rules: version, exact x_axis_layers/y_axis_layers, optional ordered labels, and tolerances.",
+            "type": "String"
+          }
+        },
+        "required": [
+          "extraction_json",
+          "rules_json"
         ],
         "type": "object"
       },

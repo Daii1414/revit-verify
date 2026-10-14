@@ -35,6 +35,7 @@ namespace RvtMcp.Tests
             ["revit_analyze_usage_patterns"] = "MetaToolShellTests",
             ["revit_create_memory_note"] = "MemoryNotesTests",
             ["revit_read_memory_notes"] = "MemoryNotesTests",
+            ["revit_cad_plan"] = "CadPlanBuilderTests",
         };
 
         // Tools that parse JSON text or arrays before sending need a minimal valid value for that parameter.
