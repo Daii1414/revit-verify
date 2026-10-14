@@ -1,4 +1,10 @@
-# HANDOFF — продолжи работу с этого места (2026-10-14)
+# HANDOFF — продолжи работу с этого места (2026-10-14, вечер)
+
+## 0. Пользователь и стиль — ОБНОВЛЕНО юзером
+- Русский язык. Новичок — объясняй просто. Токены НЕ ограничены: режим экономии
+  ВЫКЛЮЧЕН юзером («делай по максимуму, чтобы круто»). Отвечай подробно.
+- Остальное как было: автономно, спрашивать только перед деструктивным,
+  коммитить и пушить сам (main в revit-verify).
 
 ## 0. Пользователь и стиль
 - Язык: русский. Daii1414, eshirotanaka@gmail.com. Новичок в программировании:
@@ -88,9 +94,22 @@ contract-пробы (параметр JSON-текста называть *_json,
 не влияет).
 
 ## 7. Бэклог по приоритету
-1. Живая проверка новых тулзов после рестарта Revit (snapshot v2, dry-run,
-   resolve, verify_assert, undo, memory через pipe).
-2. save_document, health-score, create_array (проверенные дыры каталога).
-3. FrameCalculator: distance_mm явный (убрать factor-хак).
-4. Установщик для публикации. Single-registration — НА ПАУЗЕ (решил юзер).
+1. ~~Живая проверка новых тулзов после рестарта Revit~~ ЧАСТИЧНО: set_view_orientation
+   + export_element_snapshot проверены на СТАРОМ DLL 19:20 (успех). resolve/memory/
+   undo/verify/transform/save/health/array/distance_mm — только в новом DLL,
+   ждут рестарта. pipe-токен добыт инъекцией: QVUZ9sAAdpMXPQsV+TuD8FXv1P79f0oYFXUWbv1q3IQ=
+   (pipe RvtVerify-6868; скрипты verify1.py/probe_all.py в Temp\opencode).
+   БАГ: discovery-файл %LOCALAPPDATA%\RvtVerify\revit-2025-6868.json ОТСУТСТВУЕТ
+   при живом pipe — stdio-сервер наш плагин не найдёт. Проверить после рестарта.
+2. ~~save_document, health-score, create_array~~ СДЕЛАНО 2026-10-14, коммит 35a314c
+   (revit_save_document + revit_check_model_health/HealthScorer + revit_create_array
+   + distance_mm; тесты 1883 зелёных + 1 флаки-тост; counts 56/244/247/96).
+3. ~~FrameCalculator: distance_mm~~ СДЕЛАНО (ResolveDistance + тесты, там же).
+4. Установщик для публикации — СЛЕДУЮЩИЙ: install.ps1 в репо ОТСУТСТВУЕТ (только
+   tests/installer/* + docs/install.md под апстрим Bimwright-пути). Нужен свой
+   install.ps1 (r25+r26, %LOCALAPPDATA%\RvtVerify, наши URL) + упаковка релиза.
+   Single-registration — НА ПАУЗЕ (решил юзер).
 5. Церковь: крыша/окна/второе здание (нужен юзер: разрезы, высоты).
+6. DEPLOY-ПРАВИЛО: сборка при открытом Revit падает на копировании DLL в Addins
+   (MSB3021, файл залочен) — собирать с /p:RvtVerifySkipDeploy=true; деплой
+   происходит сам при сборке с закрытым Revit (Deploy-таргет в csproj).
