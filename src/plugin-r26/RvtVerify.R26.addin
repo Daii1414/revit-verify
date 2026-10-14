@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Application">
+    <Name>RvtVerify</Name>
+    <Assembly>RvtVerify\RvtVerify.Plugin.dll</Assembly>
+    <FullClassName>RvtMcp.Plugin.App</FullClassName>
+    <AddInId>{ba68ad6a-d42c-4d9c-b4fe-d7035056ed64}</AddInId>
+    <VendorId>RvtVerify</VendorId>
+    <VendorDescription>https://github.com/Daii1414/revit-verify</VendorDescription>
+  </AddIn>
+</RevitAddIns>

@@ -1,0 +1,329 @@
+using System;
+using System.Collections.Generic;
+using RvtMcp.Plugin;
+using RvtMcp.Server;
+using RvtMcp.Server.Prompts;
+using Xunit;
+
+namespace RvtMcp.Tests
+{
+    [Collection("ServerStateConfig")]
+    public class RevitPromptsTests : IDisposable
+    {
+        public RevitPromptsTests() { ServerState.Config = new RvtMcpConfig(); }
+        public void Dispose() { ServerState.Config = null; }
+
+        [Theory]
+        [InlineData("getting_started")]
+        [InlineData("change")]
+        [InlineData("model_audit")]
+        [InlineData("pre_issue_check")]
+        [InlineData("stairs")]
+        public void Embedded_prompt_body_loads(string name)
+        {
+            Assert.False(string.IsNullOrWhiteSpace(PromptBody.Load(name)), $"missing RvtMcp.Prompts.{name}.md");
+        }
+
+        [Fact]
+        public void GettingStarted_renders_steps_under_default_config()
+        {
+            var rendered = RevitPrompts.GettingStarted();
+
+            Assert.Contains("revit_get_current_view_info", rendered);
+            Assert.Contains("revit_analyze_model_statistics", rendered);
+            Assert.DoesNotContain("--toolsets", rendered);
+        }
+
+        [Theory]
+        [InlineData("meta", "query")]
+        [InlineData("query", "meta")]
+        public void GettingStarted_missing_read_only_toolset_does_not_require_disabling_read_only(
+            string enabledSet, string missingSet)
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                ReadOnly = true,
+                Toolsets = new List<string> { enabledSet }
+            };
+
+            var notice = RevitPrompts.GettingStarted();
+
+            Assert.Contains("Missing: " + missingSet, notice);
+            Assert.Contains("--toolsets query,meta", notice);
+            Assert.DoesNotContain("--read-only", notice);
+            Assert.DoesNotContain("# Getting started", notice);
+
+            ServerState.Config.Toolsets.Add(missingSet);
+            Assert.True(ServerState.Config.ReadOnlyOrDefault);
+            Assert.Contains("# Getting started", RevitPrompts.GettingStarted());
+        }
+
+        [Theory]
+        [InlineData(null, false, true)]
+        [InlineData("all", false, false)]
+        [InlineData("query,meta", false, false)]
+        [InlineData(null, true, false)]
+        [InlineData("all", true, false)]
+        [InlineData("query,meta", true, false)]
+        public void Change_renders_without_send_code_and_identifies_read_only_mode(
+            string toolsets, bool readOnly, bool sendCode)
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = toolsets == null ? null : new List<string>(toolsets.Split(',')),
+                ReadOnly = readOnly,
+                EnableSendCode = sendCode
+            };
+            const string request = "Set Comments on element 123 to \"kiểm tra\".\nReason: coordination. {mode}";
+
+            var rendered = RevitPrompts.Change(request);
+
+            Assert.Contains("# Disciplined model change", rendered);
+            Assert.Contains("Requested change: " + request, rendered);
+            Assert.DoesNotContain("{change}", rendered);
+            Assert.Equal(readOnly, rendered.Contains("Session: READ-ONLY:"));
+            Assert.DoesNotContain("--toolsets", rendered);
+            Assert.DoesNotContain("not exposed right now", rendered);
+        }
+
+        [Theory]
+        [InlineData("query", "meta")]
+        [InlineData("meta", "query")]
+        public void Change_missing_core_toolset_replaces_body_without_removing_read_only(
+            string enabledSet, string missingSet)
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = new List<string> { enabledSet }, ReadOnly = true, EnableSendCode = false
+            };
+
+            var notice = RevitPrompts.Change("Set Comments on element 123");
+
+            Assert.Contains("Missing: " + missingSet, notice);
+            Assert.Contains("--toolsets query,meta", notice);
+            Assert.DoesNotContain("--read-only", notice);
+            Assert.DoesNotContain("# Disciplined model change", notice);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" \t\r\n")]
+        public void Change_empty_request_asks_for_scope_instead_of_defaulting_to_all(string request)
+        {
+            var rendered = RevitPrompts.Change(request);
+
+            Assert.Contains("Requested change: Not specified. Ask me what change I want", rendered);
+            Assert.DoesNotContain("{change}", rendered);
+            Assert.DoesNotContain("Requested change: all", rendered);
+        }
+
+        [Fact]
+        public void Change_keeps_confirmation_coverage_and_readback_limits_explicit()
+        {
+            var rendered = RevitPrompts.Change("Set Comments on element 123");
+
+            Assert.Contains("Nothing is written before I confirm the concrete proposal", rendered);
+            Assert.Contains("There is no fixed element-count threshold", rendered);
+            Assert.Contains("revit_survey_change_impact", rendered);
+            Assert.Contains("scopeThreshold agreed for this request", rendered);
+            Assert.Contains("maxViews=0", rendered);
+            Assert.Contains("view_scan_not_requested_set_maxViews", rendered);
+            Assert.Contains("lower bound, not a complete inventory", rendered);
+            Assert.Contains("not a trusted snapshot token", rendered);
+            Assert.Contains("historySnapshot.status=selection_in_memory", rendered);
+            Assert.Contains("optional history coverage neither authorizes nor blocks a write", rendered);
+            Assert.Contains("parameterSnapshot", rendered);
+            Assert.Contains("A changed scope requires renewed confirmation", rendered);
+            Assert.Contains("not checked, never none", rendered);
+            Assert.Contains("not a complete inventory of every element changed indirectly", rendered);
+            Assert.Contains("never replay a possibly completed mutation", rendered);
+            Assert.Contains("at most 20 commands, with continueOnError=false", rendered);
+            Assert.Contains("Do not put arbitrary code, baked tools, nested batches", rendered);
+            Assert.Contains("Do not include a full model path", rendered);
+            Assert.Contains("not a server-enforced workflow lock", rendered);
+            Assert.DoesNotContain("<N>", rendered);
+            Assert.Equal(10, System.Text.RegularExpressions.Regex.Matches(rendered,
+                @"(?m)^\s*\| (Type / instances|Host / hosted elements|Join / attach|Connectors|Group / assembly|Rooms / spaces / areas|Tags / dimensions / keynotes|Views / sheets / schedules|Datums|Proximity) \|").Count);
+        }
+
+        [Fact]
+        public void ModelAudit_returns_enable_notice_under_default_config()
+        {
+            var rendered = RevitPrompts.ModelAudit();
+
+            Assert.Contains("workflows", rendered);
+            Assert.Contains("families", rendered);
+            Assert.Contains("lint", rendered);
+            Assert.Contains("--toolsets", rendered);
+            Assert.DoesNotContain("revit_workflow_model_audit", rendered);
+        }
+
+        [Fact]
+        public void ModelAudit_renders_body_with_scope_substituted_under_all_toolsets()
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = new List<string> { "all" }
+            };
+
+            var rendered = RevitPrompts.ModelAudit("the HVAC wing");
+
+            Assert.Contains("the HVAC wing", rendered);
+            Assert.Contains("revit_workflow_model_audit", rendered);
+            Assert.Contains("dry_run", rendered);
+            Assert.DoesNotContain("{scope}", rendered);
+        }
+
+        [Fact]
+        public void ModelAudit_empty_scope_falls_back_to_all()
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = new List<string> { "all" }
+            };
+
+            var rendered = RevitPrompts.ModelAudit("");
+
+            Assert.DoesNotContain("{scope}", rendered);
+            Assert.Contains("all", rendered);
+        }
+
+        [Fact]
+        public void PreIssueCheck_returns_enable_notice_under_default_config()
+        {
+            var rendered = RevitPrompts.PreIssueCheck();
+
+            Assert.Contains("annotation", rendered);
+            Assert.Contains("lint", rendered);
+            Assert.Contains("sheets", rendered);
+            Assert.Contains("--toolsets", rendered);
+            Assert.DoesNotContain("revit_list_sheets", rendered);
+        }
+
+        [Fact]
+        public void PreIssueCheck_renders_body_with_scope_under_all_toolsets()
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = new List<string> { "all" }
+            };
+
+            var rendered = RevitPrompts.PreIssueCheck("ISSUE-SET-01");
+
+            Assert.Contains("ISSUE-SET-01", rendered);
+            Assert.Contains("revit_list_sheets", rendered);
+            Assert.Contains("revit_list_revisions", rendered);
+            Assert.DoesNotContain("{scope}", rendered);
+        }
+
+        [Fact]
+        public void PreIssueCheck_requires_member_sheets_instead_of_guessing_a_named_sheet_set()
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = new List<string> { "all" }
+            };
+
+            var rendered = RevitPrompts.PreIssueCheck("ISSUE-SET-01");
+
+            Assert.Contains("Requested scope: ISSUE-SET-01.", rendered);
+            Assert.Contains("cannot resolve saved sheet-set membership", rendered);
+            Assert.Contains("stop and ask me for its member sheet numbers or IDs", rendered);
+            Assert.Contains("Do not treat a sheet set name as numberFilter or namePattern", rendered);
+            Assert.DoesNotContain("sheets in ISSUE-SET-01", rendered);
+        }
+
+        [Fact]
+        public void PreIssueCheck_marks_sampled_or_incomplete_evidence_as_not_verified()
+        {
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = new List<string> { "sheets", "view", "annotation", "lint", "meta" }
+            };
+
+            var rendered = RevitPrompts.PreIssueCheck("A-101");
+
+            Assert.Contains("model-wide warning context", rendered);
+            Assert.Contains("not a view-filtered warning list", rendered);
+            Assert.Contains("absence from examples does not prove absence of warnings", rendered);
+            Assert.Contains("even when truncated=false", rendered);
+            Assert.Contains("Per-sheet warning status is NOT VERIFIED when total_warnings > 0", rendered);
+            Assert.Contains("Only a successful total_warnings=0 establishes absence of model warnings", rendered);
+            Assert.Contains("sheet | check | PASS/FAIL/NOT VERIFIED | element ids | coverage", rendered);
+            Assert.Contains("limit_hit", rendered);
+            Assert.Contains("skipped", rendered);
+            Assert.DoesNotContain("only warnings touching those views", rendered);
+        }
+
+        [Fact]
+        public void Stairs_renders_body_under_default_config()
+        {
+            var rendered = RevitPrompts.Stairs();
+
+            Assert.Contains("revit_send_code_to_revit", rendered);
+            Assert.Contains("confirm", rendered, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("--toolsets", rendered);
+        }
+
+        [Fact]
+        public void Stairs_includes_failure_and_cleanup_template_without_checkout_docs()
+        {
+            var rendered = RevitPrompts.Stairs();
+
+            Assert.DoesNotContain("docs/", rendered);
+            Assert.Contains("```csharp", rendered);
+            Assert.Contains("new RvtMcp.Plugin.SafeFailuresPreprocessor()", rendered);
+            Assert.Contains("new StairsEditScope(doc", rendered);
+            Assert.Contains("new Transaction(doc", rendered);
+            Assert.Contains("SetFailuresPreprocessor(failures).SetClearAfterRollback(true)", rendered);
+            Assert.Contains("txStatus != TransactionStatus.Committed", rendered);
+            Assert.Contains("scope.Commit(failures)", rendered);
+            Assert.Contains("!failures.HadErrors", rendered);
+            Assert.Contains("doc.GetElement(stairsId) != null", rendered);
+            Assert.Contains("failures.Messages", rendered);
+            Assert.Contains("finally", rendered);
+            Assert.Contains("if (scope.IsActive) scope.Cancel();", rendered);
+            Assert.Contains("not a complete stair generator", rendered);
+            Assert.Contains("Get my confirmation before writing anything", rendered);
+        }
+
+        [Fact]
+        public void Stairs_returns_sendcode_notice_under_read_only()
+        {
+            ServerState.Config = new RvtMcpConfig { ReadOnly = true };
+
+            var rendered = RevitPrompts.Stairs();
+
+            Assert.Contains("--read-only", rendered);
+            Assert.DoesNotContain("resolved design", rendered);
+        }
+
+        [Fact]
+        public void ModelAudit_does_not_instruct_read_only_clients_to_call_hidden_dry_run_tools()
+        {
+            ServerState.Config = new RvtMcpConfig { ReadOnly = true, Toolsets = new List<string> { "all" } };
+            var rendered = RevitPrompts.ModelAudit();
+            Assert.Contains("not exposed: revit_purge_unused", rendered);
+            Assert.Contains("--read-only", rendered);
+            Assert.DoesNotContain("# Model audit", rendered);
+        }
+
+        [Fact]
+        public void Stairs_returns_enable_notice_when_meta_off_even_with_toolbaker()
+        {
+            // send_code stays available via the toolbaker set, but the body's step-0
+            // revit_get_current_target lives in meta — the prompt must gate on it.
+            ServerState.Config = new RvtMcpConfig
+            {
+                Toolsets = new List<string> { "toolbaker" }
+            };
+
+            var rendered = RevitPrompts.Stairs();
+
+            Assert.Contains("meta", rendered);
+            Assert.Contains("--toolsets", rendered);
+            Assert.DoesNotContain("resolved design", rendered);
+        }
+    }
+}

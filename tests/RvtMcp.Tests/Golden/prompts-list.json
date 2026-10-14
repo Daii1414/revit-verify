@@ -1,0 +1,64 @@
+{
+  "generated_by": "PromptsListSnapshotTests",
+  "prompt_count": 6,
+  "prompts": [
+    {
+      "name": "revit_change",
+      "description_hash": "sha256:605949a12368ea387879f25148f5c42494fb92c326a67f2677b150f2ed210f11",
+      "arguments": [
+        {
+          "name": "change",
+          "required": true,
+          "default": null,
+          "description_hash": "sha256:54167c07df02c21bc5767d4e42405cdc56783e0c9aad13febdfbaa4c859b0603"
+        }
+      ]
+    },
+    {
+      "name": "revit_drawing_layout",
+      "description_hash": "sha256:50b21b06bdd6cfbbe68f87396aa32bc43bf033aa3c1e952a46f4857646fb92f7",
+      "arguments": [
+        {
+          "name": "request",
+          "required": true,
+          "default": null,
+          "description_hash": "sha256:a8697b09faf17315b0fb983b2413b20dd2e7a628e5aa1e7178055b9fdfa9cbbb"
+        }
+      ]
+    },
+    {
+      "name": "revit_getting_started",
+      "description_hash": "sha256:19067ff5ae4a40c32ec8422141482604957a5832e51f9e89d282751b8255d431",
+      "arguments": []
+    },
+    {
+      "name": "revit_model_audit",
+      "description_hash": "sha256:3e4a28de3a4fa169fb8caf1b809a4ada21b10bd45088c7f1ccee5088e8ff133c",
+      "arguments": [
+        {
+          "name": "scope",
+          "required": false,
+          "default": "all",
+          "description_hash": "sha256:abfd5f8525c96a1cfe8fe1ae972342ddbf3cec71ce7674bd99033cc4d4ca869c"
+        }
+      ]
+    },
+    {
+      "name": "revit_pre_issue_check",
+      "description_hash": "sha256:da97ba588fc93226a65cc8b841cc722edcd98d2fd13f76f02e96e50f4797c188",
+      "arguments": [
+        {
+          "name": "scope",
+          "required": false,
+          "default": "all",
+          "description_hash": "sha256:3ecc22b6607f26507b3d4513b883ab9abf830ce3401f94f9326f5adec212c447"
+        }
+      ]
+    },
+    {
+      "name": "revit_stairs",
+      "description_hash": "sha256:6ee83d96cfe8b4a2670d316cdf62cda417f3ba4417167399a4cc5ade5de296f7",
+      "arguments": []
+    }
+  ]
+}

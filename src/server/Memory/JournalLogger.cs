@@ -1,0 +1,86 @@
+﻿using System;
+using System.IO;
+using Newtonsoft.Json;
+
+namespace RvtMcp.Server.Memory
+{
+    public class JournalLogger
+    {
+        private readonly string _journalDir;
+        private readonly object _lock = new object();
+        private string _currentDate;
+        private string _currentPath;
+        private readonly bool _enabled;
+
+        public string JournalDir => _journalDir;
+
+        public JournalLogger(bool enabled = false, string journalDir = null)
+        {
+            _enabled = enabled;
+            _journalDir = journalDir ?? Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "RvtVerify", "journal");
+        }
+
+        public void Log(JournalEntry entry)
+        {
+            if (!_enabled) return;
+            lock (_lock)
+            {
+                var today = DateTime.UtcNow.ToString("yyyy-MM-dd");
+                if (today != _currentDate)
+                {
+                    _currentDate = today;
+                    _currentPath = Path.Combine(_journalDir, $"{today}.jsonl");
+                }
+
+                try
+                {
+                    Directory.CreateDirectory(_journalDir);
+                    var line = JsonConvert.SerializeObject(entry, Formatting.None);
+                    File.AppendAllText(_currentPath, line + "\n");
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"[RvtMcp] Journal write failed: {ex.Message}");
+                }
+            }
+        }
+
+        public JournalEntry[] ReadDay(string date)
+        {
+            lock (_lock)
+            {
+                var path = Path.Combine(_journalDir, $"{date}.jsonl");
+                if (!File.Exists(path)) return Array.Empty<JournalEntry>();
+
+                var lines = File.ReadAllLines(path);
+                var entries = new System.Collections.Generic.List<JournalEntry>(lines.Length);
+                foreach (var line in lines)
+                {
+                    if (string.IsNullOrWhiteSpace(line)) continue;
+                    try
+                    {
+                        entries.Add(JsonConvert.DeserializeObject<JournalEntry>(line));
+                    }
+                    catch { }
+                }
+                return entries.ToArray();
+            }
+        }
+
+        public string[] ListDates()
+        {
+            lock (_lock)
+            {
+                if (!Directory.Exists(_journalDir)) return Array.Empty<string>();
+                var files = Directory.GetFiles(_journalDir, "*.jsonl");
+                var dates = new string[files.Length];
+                for (int i = 0; i < files.Length; i++)
+                    dates[i] = Path.GetFileNameWithoutExtension(files[i]);
+                Array.Sort(dates);
+                return dates;
+            }
+        }
+    }
+}

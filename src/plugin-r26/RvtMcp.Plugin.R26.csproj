@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <RootNamespace>RvtMcp.Plugin</RootNamespace>
+    <AssemblyName>RvtVerify.Plugin</AssemblyName>
+    <Version>0.1.0</Version>
+    <GenerateTargetPlatformAttribute>false</GenerateTargetPlatformAttribute>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <UseWPF>true</UseWPF>
+    <EnableDynamicLoading>true</EnableDynamicLoading>
+    <RevitVersion>2026</RevitVersion>
+    <DefineConstants>REVIT2026;REVIT2024_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Shared source (same glob as plugin-r22) -->
+  <ItemGroup>
+    <Compile Include="..\shared\**\*.cs" LinkBase="Shared" />
+    <EmbeddedResource Include="..\shared\Localization\Catalog\strings.*.json" WithCulture="false">
+      <LogicalName>RvtMcp.Localization.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\shared\Localization\ToolSummaries\summary.*.json" WithCulture="false">
+      <LogicalName>RvtMcp.ToolSummaries.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\LICENSE">
+      <LogicalName>RvtMcp.LICENSE</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <!-- Revit 2026 API via Nice3point NuGet packages -->
+  <ItemGroup>
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2026.1.0" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2026.1.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.11" />
+    <!-- Pin patched native SQLite without changing managed assembly bindings. -->
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+  </ItemGroup>
+
+  <Target Name="Deploy" AfterTargets="Build" Condition="'$(Configuration)' != '' and '$(RvtVerifySkipDeploy)' != 'true'">
+    <PropertyGroup>
+      <DeployDir>$(APPDATA)\Autodesk\Revit\Addins\2026\RvtVerify\</DeployDir>
+    </PropertyGroup>
+    <ItemGroup>
+      <DeployFiles Include="$(OutputPath)RvtVerify.*.dll;$(OutputPath)Newtonsoft.Json.dll;$(OutputPath)Microsoft.Data.Sqlite.dll;$(OutputPath)SQLitePCLRaw*.dll;$(OutputPath)Microsoft.CodeAnalysis*.dll" />
+      <DeployNativeSqlite Include="$(OutputPath)runtimes\win-x64\native\e_sqlite3.dll" Condition="Exists('$(OutputPath)runtimes\win-x64\native\e_sqlite3.dll')" />
+    </ItemGroup>
+    <MakeDir Directories="$(DeployDir)" />
+    <Error Condition="'@(DeployNativeSqlite)' == ''" Text="Native SQLite is missing; rebuild before deploying." />
+    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(DeployDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DeployNativeSqlite)" DestinationFolder="$(DeployDir)" SkipUnchangedFiles="true" />
+    <Exec Command="if exist &quot;$(OutputPath)runtimes&quot; xcopy /Y /Q /S /E /I &quot;$(OutputPath)runtimes&quot; &quot;$(DeployDir)runtimes&quot;" IgnoreExitCode="true" />
+    <Copy SourceFiles="RvtVerify.R26.addin" DestinationFolder="$(APPDATA)\Autodesk\Revit\Addins\2026\" SkipUnchangedFiles="true" />
+  </Target>
+</Project>
