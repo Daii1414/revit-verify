@@ -27,7 +27,8 @@ namespace RvtMcp.Tests
             Assert.Contains(standard + " Revit tools with `--toolsets all` (" + adaptive + " with adaptive bake)", claude);
 
             var changelog = File.ReadAllText(Path.Combine(root, "CHANGELOG.md"));
-            Assert.Contains("`--toolsets all` **" + standard + "**, adaptive bake **" + adaptive + "**", changelog);
+            Assert.Contains("Current source counts: default **56**, all **" + standard
+                + "**, adaptive bake **" + adaptive + "**, read-only **100** (including target switching).", changelog);
         }
 
         private static int ReadToolCount(string path)

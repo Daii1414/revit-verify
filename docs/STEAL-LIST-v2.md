@@ -8,8 +8,9 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 ## P0 — прямо в цель verify-цикла
 
 1. **assert_geometry (bbox/envelope/count/watertight/supported + offending IDs)**
-   От: rhino-mcp (MIT). У нас: нет. Куда: новый `VerifyAssertHandler`
-   + `revit_verify_assert`. Это измеримое ядро цикла.
+   От: rhino-mcp (MIT). Частично есть `revit_verify_assert`: bbox/count и
+   диагностика отсутствующих ID. Watertight/support-проверок и автоматического
+   сбора ID виновников при создании нет.
 2. **Delivery diffs (snapshot/compare/colorize + quality trend).**
    От: Horizun `horizun_model_diff`, naviscoord (persistent issue IDs).
    У нас: history + capture раздельно. Куда: `revit_verify_diff`
@@ -20,9 +21,10 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    freshness-checks от naviscoord (кадр протух — не верить).
 4. **DWG→BIM pipeline (extract → plan → apply с provenance + ревизии).**
    От: Horizun `horizun_plan_from_cad` + 13 CAD-инструментов (Apache-2.0).
-   У нас: только `import_cad_to_view` (проверено на церкви: слепой импорт).
-   Куда: `revit_cad_extract` (слои/кривые/текст) + `revit_cad_plan`.
-   Наша боль с DWG — ровно это.
+   Теперь есть первая read-only ступень `revit_cad_extract`: слои и ограниченная
+   векторная геометрия уже загруженных CAD-import/link. Это не lossless DWG
+   parser: исходный текст и атрибуты блоков могут отсутствовать. Следом нужны
+   правила интерпретации, план с provenance и отдельное подтверждённое применение.
 
 ## P1 — надёжность и контекст
 
@@ -43,16 +45,17 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 
 ## P2 — дыры в каталоге (проверено grep: у нас НЕТ)
 
-10. **transform_elements** (move/copy/rotate/mirror) — есть у Demolinator,
-    Horizun, schauh11-компаунды. Наш operate = select/hide/isolate/color.
-11. **save_document / save-as** (Demolinator; Horizun session: open/save/
-    close/new/sync). У нас только open_model!
-12. **check_model_health** (score 0–100 + grade + рекомендации, LuDattilo).
-    У нас warnings + statistics раздельно.
-13. **create_array** (linear/radial, LuDattilo).
+10. **transform_elements** — уже есть `revit_transform_elements` (move/copy/rotate).
+    Mirror в этот инструмент не входит.
+11. **save_document / save-as** — уже есть `revit_save_document`; SaveAs для
+    workshared-моделей запрещён.
+12. **check_model_health** — уже есть `revit_check_model_health` с оценкой,
+    grade и рекомендациями.
+13. **create_array** — уже есть `revit_create_array` (linear/radial).
 14. **renumber** дверей/окон/комнат (только sheets есть).
-15. **horizun_undo** (откат последнего verified-батча, с проверкой что модель
-    не менялась с тех пор!). У нас отката нет вообще.
+15. **horizun_undo** — частично есть `revit_undo_batch` для созданных элементов
+    `batch_execute`, с журналом и защитой от изменения модели после батча.
+    Универсальный откат любого verified-батча пока не реализован.
 16. **CRUD согласований/стен/слоёв тоньше**: wall joins, curtain grids,
     phases/design options mgmt, assemblies/parts, HQ schedules (Horizun);
     conduit QA + bend totals (schauh11); panel schedules (Demolinator).

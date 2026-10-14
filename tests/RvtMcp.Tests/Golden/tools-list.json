@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 244,
+  "tool_count": 245,
   "tools": [
     {
       "name": "revit_acquire_coordinates_from_link",
@@ -803,6 +803,36 @@
         "idempotentHint": false,
         "openWorldHint": false,
         "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_cad_extract",
+      "description_hash": "sha256:b3bc6fb16bebf630f9d043dd6c8cd3ff222f61a0a42f46e6b685f7b24b8fbdef",
+      "inputSchema": {
+        "properties": {
+          "entity_limit": {
+            "description": "Maximum entities returned across this call (1-1000), distributed across the selected instances.",
+            "type": "Int32"
+          },
+          "include_vertices": {
+            "description": "Include tessellated curve/polyline vertices in millimetres; response size grows with geometry complexity.",
+            "type": "Boolean"
+          },
+          "instance_ids": {
+            "description": "One to 20 CAD import/link instance IDs returned by revit_list_linked_cad.",
+            "type": "Int64[]"
+          }
+        },
+        "required": [
+          "instance_ids"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
       }
     },
     {

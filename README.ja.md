@@ -14,7 +14,7 @@
   <a href="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml"><img src="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="license" /></a>
   <a href="#supported-revit-versions"><img src="https://img.shields.io/badge/Revit-2022--2027-186BFF" alt="Revit 2022-2027" /></a>
-  <a href="#tools"><img src="https://img.shields.io/badge/MCP-244%20tools-6C47FF" alt="MCP tools" /></a>
+  <a href="#tools"><img src="https://img.shields.io/badge/MCP-245%20tools-6C47FF" alt="MCP tools" /></a>
   <a href="https://github.com/bimwright/rvt-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/bimwright/rvt-mcp" alt="latest release" /></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-version%20history-informational" alt="changelog" /></a>
 </p>
@@ -91,8 +91,8 @@ rvt-mcp を使ったコミュニティ動画です。動画内のインストー
 |--------|------:|------|
 | 新規インストール | **241** | `install.ps1` が `rvtmcp.config.json` に `"toolsets": ["all"]` をシード |
 | 素の `rvt-mcp.exe` | **46** | `query` + `create` + `view` + `meta` |
-| `--toolsets all` | **244** | フルカタログ |
-| `all` + adaptive bake | **247** | 提案ライフサイクル 3 ツールを追加 |
+| `--toolsets all` | **245** | フルカタログ |
+| `all` + adaptive bake | **248** | 提案ライフサイクル 3 ツールを追加 |
 
 件数に個人 baked ツールは含みません。インストーラーがシードするのは `rvtmcp.config.json` に `toolsets` が未設定の場合のみ——独自リストはアップグレード後も残り、キー削除（または独自 CSV）で素のサーバーは 46 ツールに戻ります。Read-only は `ReadOnly=true` のツールだけを残すため、混在 toolset 内の読み取りツールも使えます。既定の出力が inline でも、ファイルを書けるツールは除外されます。
 
@@ -116,7 +116,7 @@ rvt-mcp を使ったコミュニティ動画です。動画内のインストー
 | `materials` | マテリアル、外観、割当、拾い |
 | `geometry` | BBox、測距、干渉、体積/面積… |
 | `rooms` | 部屋/面積/スペース、仕上、セパレータ |
-| `links` | Revit/CAD リンク、座標監査、座標の取得/公開 |
+| `links` | Revit/CAD リンク、CAD形状の読み取り専用抽出、座標監査、座標の取得/公開 |
 | `parameters` | プロジェクト/共有パラメータ |
 | `organization` | 保存選択、ビューテンプレート |
 | `workflows` | 干渉/監査/シート/拾い系の複合 |
@@ -224,6 +224,7 @@ Annotations は各ツールのドキュメントとファイルへの影響を�
       "mcp__rvt-mcp__revit_analyze_usage_patterns",
       "mcp__rvt-mcp__revit_analyze_view_naming_patterns",
       "mcp__rvt-mcp__revit_audit_families",
+      "mcp__rvt-mcp__revit_cad_extract",
       "mcp__rvt-mcp__revit_check_model_health",
       "mcp__rvt-mcp__revit_clash_detection",
       "mcp__rvt-mcp__revit_compute_element_area",

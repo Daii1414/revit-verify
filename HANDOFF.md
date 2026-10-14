@@ -110,13 +110,21 @@ contract-пробы (параметр JSON-текста называть *_json,
    radial_debug.py, cleanup.py, mem_stdio2.py, open_sandbox.py.
 2. ~~save_document, health-score, create_array~~ СДЕЛАНО 2026-10-14, коммит 35a314c
    (revit_save_document + revit_check_model_health/HealthScorer + revit_create_array
-   + distance_mm; последний полный прогон 2026-10-14: 1884 теста зелёные; counts 56/244/247/96).
+   + distance_mm; последний полный прогон перед CAD-экстракцией: 1884 теста зелёные; counts 56/244/247/96 на тот момент).
 3. ~~FrameCalculator: distance_mm~~ СДЕЛАНО (ResolveDistance + тесты, там же).
-4. Установщик для публикации — СЛЕДУЮЩИЙ: install.ps1 в репо ОТСУТСТВУЕТ (только
+4. `revit_cad_extract` — реализован как read-only анализ слоёв и ограниченной
+   векторной геометрии уже загруженных CAD import/link; ограничения текста и
+   метаданных блоков описаны. Сборка прошла, полный suite: 1886 тестов зелёные;
+   tool counts: 56/245/248/100 (с target switching).
+5. До установщика ещё остаются P0-задачи из STEAL-LIST-v2: CAD plan/audit с
+   версионными правилами и provenance, расширение verify_assert за bbox/count,
+   доставка diff (before/after), правила QA. Реализовывать безопасными
+   read-only этапами; не выполнять импорт или запись в пользовательские модели.
+6. Установщик для публикации — после предшествующих задач: install.ps1 в репо ОТСУТСТВУЕТ (только
    tests/installer/* + docs/install.md под апстрим Bimwright-пути). Нужен свой
    install.ps1 (r25+r26, %LOCALAPPDATA%\RvtVerify, наши URL) + упаковка релиза.
    Single-registration — НА ПАУЗЕ (решил юзер).
-5. Церковь: крыша/окна/второе здание (нужен юзер: разрезы, высоты).
-6. DEPLOY-ПРАВИЛО: сборка при открытом Revit падает на копировании DLL в Addins
+7. Церковь: крыша/окна/второе здание (нужен юзер: разрезы, высоты).
+8. DEPLOY-ПРАВИЛО: сборка при открытом Revit падает на копировании DLL в Addins
    (MSB3021, файл залочен) — собирать с /p:RvtVerifySkipDeploy=true; деплой
    происходит сам при сборке с закрытым Revit (Deploy-таргет в csproj).

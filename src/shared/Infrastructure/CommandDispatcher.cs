@@ -212,6 +212,7 @@ namespace RvtMcp.Plugin
             // Wave 10: Links, CAD & Coordinates
             Register(new Handlers.ListLinkedModelsHandler());
             Register(new Handlers.ListLinkedCadHandler());
+            Register(new Handlers.CadExtractHandler());
             Register(new Handlers.ImportCadToViewHandler());
             Register(new Handlers.LinkRevitModelHandler());
             Register(new Handlers.UnloadLinkHandler());

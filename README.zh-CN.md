@@ -14,7 +14,7 @@
   <a href="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml"><img src="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="license" /></a>
   <a href="#supported-revit-versions"><img src="https://img.shields.io/badge/Revit-2022--2027-186BFF" alt="Revit 2022-2027" /></a>
-  <a href="#tools"><img src="https://img.shields.io/badge/MCP-244%20tools-6C47FF" alt="MCP tools" /></a>
+  <a href="#tools"><img src="https://img.shields.io/badge/MCP-245%20tools-6C47FF" alt="MCP tools" /></a>
   <a href="https://github.com/bimwright/rvt-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/bimwright/rvt-mcp" alt="latest release" /></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-version%20history-informational" alt="changelog" /></a>
 </p>
@@ -90,8 +90,8 @@ powershell -ExecutionPolicy Bypass -File "$dir\install.ps1" -Client claude-deskt
 |------|------:|------|
 | 全新安装 | **241** | `install.ps1` 在 `rvtmcp.config.json` 中写入 `"toolsets": ["all"]` |
 | 裸 `rvt-mcp.exe` | **46** | `query` + `create` + `view` + `meta` |
-| `--toolsets all` | **244** | 完整目录 |
-| `all` + adaptive bake | **247** | 再加 3 个 suggestion 生命周期工具 |
+| `--toolsets all` | **245** | 完整目录 |
+| `all` + adaptive bake | **248** | 再加 3 个 suggestion 生命周期工具 |
 
 数量不含个人 baked 工具。只有当 `rvtmcp.config.json` 尚未设置 `toolsets` 时安装器才会写入默认值——你的自定义列表在升级时保留；删除该键（或设置自己的 CSV）则裸服务器回到 46 个工具。Read-only 按 `ReadOnly=true` 逐个筛选工具，因此混合 toolset 中的读取工具仍可用。即使默认 output 是 inline，能写文件的工具也会被排除。
 
@@ -115,7 +115,7 @@ powershell -ExecutionPolicy Bypass -File "$dir\install.ps1" -Client claude-deskt
 | `materials` | 材质、外观、赋值、提量 |
 | `geometry` | 包围盒、测量、碰撞、体积/面积… |
 | `rooms` | 房间/面积/空间、装修、分隔 |
-| `links` | Revit/CAD 链接、坐标审计、获取/发布坐标 |
+| `links` | Revit/CAD 链接、只读 CAD 几何提取、坐标审计、获取/发布坐标 |
 | `parameters` | 项目/共享参数 |
 | `organization` | 保存选择、视图样板 |
 | `workflows` | 碰撞/审计/图纸/提量类组合流 |
@@ -223,6 +223,7 @@ Annotations 描述每个工具对文档和文件的影响。临时 selection、a
       "mcp__rvt-mcp__revit_analyze_usage_patterns",
       "mcp__rvt-mcp__revit_analyze_view_naming_patterns",
       "mcp__rvt-mcp__revit_audit_families",
+      "mcp__rvt-mcp__revit_cad_extract",
       "mcp__rvt-mcp__revit_check_model_health",
       "mcp__rvt-mcp__revit_clash_detection",
       "mcp__rvt-mcp__revit_compute_element_area",

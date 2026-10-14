@@ -14,7 +14,7 @@
   <a href="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml"><img src="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="license" /></a>
   <a href="#supported-revit-versions"><img src="https://img.shields.io/badge/Revit-2022--2027-186BFF" alt="Revit 2022-2027" /></a>
-  <a href="#tools"><img src="https://img.shields.io/badge/MCP-244%20tools-6C47FF" alt="MCP tools" /></a>
+  <a href="#tools"><img src="https://img.shields.io/badge/MCP-245%20tools-6C47FF" alt="MCP tools" /></a>
   <a href="https://github.com/bimwright/rvt-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/bimwright/rvt-mcp" alt="latest release" /></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-version%20history-informational" alt="changelog" /></a>
 </p>
@@ -91,8 +91,8 @@ Video cộng đồng giới thiệu rvt-mcp. Cách cài trong video có thể c�
 |------|------:|---------|
 | Fresh install | **244** | `install.ps1` seeds `"toolsets": ["all"]` trong `rvtmcp.config.json` |
 | Bare `rvt-mcp.exe` | **46** | `query` + `create` + `view` + `meta` |
-| `--toolsets all` | **244** | Full catalog |
-| `all` + adaptive bake | **247** | Thêm 3 tool vòng đời suggestion |
+| `--toolsets all` | **245** | Full catalog |
+| `all` + adaptive bake | **248** | Thêm 3 tool vòng đời suggestion |
 
 Số lượng chưa tính baked tool cá nhân. Installer chỉ seed khi `rvtmcp.config.json` chưa có `toolsets` — list của bạn sống sót qua upgrade; bỏ key (hoặc đặt CSV riêng) thì bare server về mặt 46 tool. Read-only lọc từng tool theo `ReadOnly=true`, nên vẫn giữ công cụ đọc trong nhóm hỗn hợp. Tool có thể ghi file sẽ bị loại, kể cả khi output mặc định là inline.
 
@@ -116,7 +116,7 @@ Số lượng chưa tính baked tool cá nhân. Installer chỉ seed khi `rvtmcp
 | `materials` | Material, appearance, gán, takeoff |
 | `geometry` | BBox, measure, clash, volume/area, … |
 | `rooms` | Room/area/space, finish, separator |
-| `links` | Link Revit/CAD, audit tọa độ, acquire/publish coordinates |
+| `links` | Link Revit/CAD, trích xuất hình học CAD chỉ đọc, audit tọa độ, acquire/publish coordinates |
 | `parameters` | Project/shared parameter |
 | `organization` | Saved selection, view template |
 | `workflows` | Flow ghép clash/audit/sheet/takeoff |
@@ -224,6 +224,7 @@ Annotations mô tả tác động lên document/file của từng tool. Đổi s
       "mcp__rvt-mcp__revit_analyze_usage_patterns",
       "mcp__rvt-mcp__revit_analyze_view_naming_patterns",
       "mcp__rvt-mcp__revit_audit_families",
+      "mcp__rvt-mcp__revit_cad_extract",
       "mcp__rvt-mcp__revit_check_model_health",
       "mcp__rvt-mcp__revit_clash_detection",
       "mcp__rvt-mcp__revit_compute_element_area",

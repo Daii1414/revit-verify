@@ -15,6 +15,7 @@ namespace RvtMcp.Tests
         private static readonly string[] LinksToolsInClass =
         {
             "revit_acquire_coordinates_from_link",
+            "revit_cad_extract",
             "revit_get_link_coordinate_system",
             "revit_get_link_elements",
             "revit_get_project_coordinate_system",
@@ -61,6 +62,18 @@ namespace RvtMcp.Tests
             var json = sent.Json();
             Assert.False(json.Value<bool>("include_imports"));
             Assert.True(json.Value<bool>("include_links"));
+        }
+
+        [Fact]
+        public async Task Cad_extract_sends_bounded_read_options()
+        {
+            var sent = await Capture.Send(() => LinksTools.CadExtract(new long[] { 11, 12 }, 80, true));
+
+            Assert.Equal("cad_extract", sent.Command);
+            var json = sent.Json();
+            Assert.Equal(new long[] { 11, 12 }, json["instance_ids"].Values<long>());
+            Assert.Equal(80, json.Value<int>("entity_limit"));
+            Assert.True(json.Value<bool>("include_vertices"));
         }
 
         [Fact]

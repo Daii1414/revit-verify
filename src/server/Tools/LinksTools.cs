@@ -57,6 +57,20 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_cad_extract", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Extract bounded layer and vector geometry data from CAD imports or links already in the model. Does not modify the model. Revit may not preserve source text or block metadata.")]
+        public static async Task<string> CadExtract(
+            [System.ComponentModel.Description("One to 20 CAD import/link instance IDs returned by revit_list_linked_cad.")] long[] instance_ids,
+            [System.ComponentModel.Description("Maximum entities returned across this call (1-1000), distributed across the selected instances.")] int entity_limit = 200,
+            [System.ComponentModel.Description("Include tessellated curve/polyline vertices in millimetres; response size grows with geometry complexity.")] bool include_vertices = false)
+        {
+            try
+            {
+                var result = await ToolGateway.SendToRevit("cad_extract", new { instance_ids, entity_limit, include_vertices });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_import_cad_to_view", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Import or link a CAD drawing (.dwg, .dxf) into a specific view.")]
         public static async Task<string> ImportCadToView(string path, long? viewId = null, bool link = false, string placement = "origin", string unit = "default", bool thisViewOnly = true, bool visibleLayersOnly = true)
         {
