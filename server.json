@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Daii1414/revit-verify",
+  "title": "RvtVerify",
+  "description": "Self-verifying MCP gateway for Autodesk Revit 2025-2026 - camera, capture and numeric-gate loop on top of the Revit API tool surface.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/Daii1414/revit-verify",
+    "source": "github"
+  },
+  "homepage": "https://github.com/Daii1414/revit-verify",
+  "license": "Apache-2.0",
+  "packages": [
+    {
+      "registryType": "nuget",
+      "identifier": "RvtVerify.Server",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

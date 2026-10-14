@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Newtonsoft.Json.Linq;
 using RvtMcp.Plugin;
 using Xunit;
@@ -44,7 +45,7 @@ namespace RvtMcp.Tests
             string[] mcpParameters)
         {
             var root = GetRepoRoot();
-            var program = File.ReadAllText(Path.Combine(root, "src", "server", "Program.cs"));
+            var program = ReadServerTree(root);
             var marker = "Name = \"" + toolName + "\"";
             var markerIndex = program.IndexOf(marker, StringComparison.Ordinal);
             Assert.True(markerIndex >= 0, "Missing tool marker: " + toolName);
@@ -113,7 +114,7 @@ namespace RvtMcp.Tests
         public void Adaptive_suggestion_list_exposes_state_and_bounded_paging()
         {
             var root = GetRepoRoot();
-            var program = File.ReadAllText(Path.Combine(root, "src", "server", "Program.cs"));
+            var program = ReadServerTree(root);
             var handler = File.ReadAllText(Path.Combine(root, "src", "server", "Handlers", "ListBakeSuggestionsHandler.cs"));
 
             Assert.Contains("ListBakeSuggestions(string state", program);
@@ -165,6 +166,19 @@ namespace RvtMcp.Tests
         private static object[] Scope(string toolName, string handlerFile, params string[] parameters)
         {
             return new object[] { toolName, handlerFile, parameters };
+        }
+
+        private static string ReadServerTree(string root)
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append(File.ReadAllText(Path.Combine(root, "src", "server", "Program.cs")));
+            var toolsDir = Path.Combine(root, "src", "server", "Tools");
+            if (Directory.Exists(toolsDir))
+            {
+                foreach (var file in Directory.GetFiles(toolsDir, "*.cs").OrderBy(f => f, StringComparer.Ordinal))
+                    sb.Append(File.ReadAllText(file));
+            }
+            return sb.ToString();
         }
 
         private static string ToWireName(string name)
