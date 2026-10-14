@@ -7,9 +7,9 @@
 ## Волна 1 — ядро сверки (актуальный аудит)
 
 1. **Частично есть `revit_verify_assert`**: bbox, точное/диапазонное
-   количество и диагностика отсутствующих ID. Следом: измеряемые solid-контракты,
-   ограничения scope и более точные ID нарушителей. Не называть это
-   watertight/support-проверкой без корректного Revit-измерения.
+   количество, bounded positive solid-volume checks (m³) и IDs отсутствующих/
+   нарушивших элементов. Watertight/support-проверок ещё нет; не называть
+   объёмный контракт проверкой опирания или watertightness.
 2. **Delivery diff пока нет**: локальная история изменений, одиночный
    `revit_export_element_snapshot`, точная камера и `revit_capture_review_set`
    существуют раздельно. Нужен baseline/after compare с доказуемой

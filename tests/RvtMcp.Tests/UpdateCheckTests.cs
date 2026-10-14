@@ -94,6 +94,21 @@ namespace RvtMcp.Tests
         }
 
         [Fact]
+        public void Cached_foreign_release_url_falls_back_to_the_project_release_page()
+        {
+            var state = new UpdateCheckState
+            {
+                LatestTag = "v0.9.0",
+                LatestUrl = "https://github.com/bimwright/rvt-mcp/releases/tag/v1.1.0"
+            };
+
+            var info = UpdateChecker.FromState("0.8.2", state);
+
+            Assert.NotNull(info);
+            Assert.Equal(UpdateChecker.ReleasesLatestUrl, info.ReleaseUrl);
+        }
+
+        [Fact]
         public async Task Skipped_version_is_flagged_until_a_newer_one_appears()
         {
             var now = DateTime.UtcNow;

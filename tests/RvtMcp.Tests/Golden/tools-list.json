@@ -8186,7 +8186,7 @@
     },
     {
       "name": "revit_verify_assert",
-      "description_hash": "sha256:abe333dad4ef4f9f8ff6c7e9977cf8f9e2be95bebecf3e4ed798d3029f85a594",
+      "description_hash": "sha256:9662c080b11217a19e5725d94a64dd821389fc5499abb6d8448504cfe28dbd2e",
       "inputSchema": {
         "properties": {
           "assertions_json": {

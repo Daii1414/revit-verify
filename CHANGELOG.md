@@ -5,7 +5,7 @@
 - Add read-only `revit_cad_extract` for bounded layer and vector-geometry extraction from CAD imports or links already loaded in Revit. It does not import files or modify the model. Revit's converted geometry is not a lossless DWG/DXF parse; source text and block attributes may be unavailable.
 - Extend `revit_set_view_orientation` with exact camera `eye_mm_json` + `target_mm_json` pose and optional `up_json` roll vector; direction/distance framing remains supported.
 - Add `revit_capture_review_set` to capture up to eight named review frames in one call, validating the whole request before capture and attempting to restore each view afterward. Current source counts: default **57**, all **246**, adaptive bake **249**, read-only **100** (including target switching).
-- Extend `revit_verify_assert` count checks to accept an exact `expect` or an inclusive `min_expect`/`max_expect` range; invalid or conflicting expectations fail explicitly.
+- Extend `revit_verify_assert` with bounded per-element positive solid-volume checks in m³, offending element IDs, and exact or inclusive count ranges. This does not assert support or prove the source geometry is watertight.
 
 ## Release history
 

@@ -100,7 +100,7 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox (union box of ids or category+level filter vs box_mm within tol_mm) and count (instances vs exact expect or inclusive min_expect/max_expect). Read-only. Returns per-assertion pass/fail. Params: assertions_json (required JSON array).")]
+        [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox (union box of ids or category+level filter vs box_mm within tol_mm), count (exact expect or inclusive min_expect/max_expect), and per-element positive solid volume bounds (ids or category/level scope, max 200). Read-only; solid volume does not prove support or source watertightness. Params: assertions_json (required JSON array).")]
         public static async Task<string> VerifyAssert(string assertions_json)
         {
             var blocked = ServerState.BlockIfReadOnly("verify_assert");

@@ -319,11 +319,11 @@ namespace RvtMcp.Server
         {
             opts.ServerInfo = new ModelContextProtocol.Protocol.Implementation
             {
-                Name = "rvt-mcp",
-                Title = "Revit MCP",
+                Name = "rvt-verify",
+                Title = "RvtVerify",
                 Version = ServerVersion,
-                Description = "Model Context Protocol gateway for Autodesk Revit 2022-2027",
-                WebsiteUrl = "https://github.com/bimwright/rvt-mcp"
+                Description = "Self-verifying Model Context Protocol gateway for Autodesk Revit 2022-2027",
+                WebsiteUrl = "https://github.com/Daii1414/revit-verify"
             };
             // A newer release known from the add-in's cached daily check (no network here).
             opts.ServerInstructions = RvtMcp.Plugin.Update.UpdateNoticeText.ComposeInstructions(
@@ -335,7 +335,7 @@ namespace RvtMcp.Server
         // signal for queries like "list Revit tools"), then a compact toolset-name index
         // — 2 examples per toolset — so semantic search for individual ops still resolves.
         private const string ServerInstructionsText =
-@"rvt-mcp — MCP gateway for Autodesk Revit 2022-2027. Use whenever user works with .rvt, Revit, BIM, walls, doors, windows, floors, ceilings, roofs, levels, grids, rooms, sheets, schedules, families, views, view templates, view filters, MEP (ducts, pipes, trays, conduits, HVAC, lighting, plumbing), structural (columns, beams, foundations, rebar), dimensions, tags, annotations, keynotes, worksets, phases, links, parameters, materials, IFC, DWG, NWC, PDF.
+@"RvtVerify — MCP gateway for Autodesk Revit 2022-2027. Use whenever user works with .rvt, Revit, BIM, walls, doors, windows, floors, ceilings, roofs, levels, grids, rooms, sheets, schedules, families, views, view templates, view filters, MEP (ducts, pipes, trays, conduits, HVAC, lighting, plumbing), structural (columns, beams, foundations, rebar), dimensions, tags, annotations, keynotes, worksets, phases, links, parameters, materials, IFC, DWG, NWC, PDF.
 
 Multi-Revit: list via revit_list_available_targets (a year can repeat); pin with revit_switch_target(""pid:<n>""); never guess. Defaults: query,create,view,meta. --toolsets all for export/clash. Do not retry clash/export after 60s timeout.
 

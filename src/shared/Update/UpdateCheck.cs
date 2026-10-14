@@ -195,10 +195,14 @@ namespace RvtMcp.Plugin.Update
             {
                 CurrentVersion = "v" + current,
                 LatestVersion = latestText,
-                ReleaseUrl = string.IsNullOrWhiteSpace(state.LatestUrl) ? ReleasesLatestUrl : state.LatestUrl,
+                ReleaseUrl = IsProjectReleaseUrl(state.LatestUrl) ? state.LatestUrl : ReleasesLatestUrl,
                 IsSkipped = SemanticVersion.TryParse(state.SkippedVersion, out var skipped) && skipped.CompareTo(latest) == 0,
             };
         }
+
+        private static bool IsProjectReleaseUrl(string url) =>
+            !string.IsNullOrWhiteSpace(url)
+            && url.StartsWith("https://github.com/Daii1414/revit-verify/", StringComparison.OrdinalIgnoreCase);
 
         public static UpdateInfo FromCache(string currentVersion, string statePath = null) =>
             FromState(currentVersion, UpdateCheckState.Load(statePath));

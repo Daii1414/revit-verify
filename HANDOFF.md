@@ -115,15 +115,19 @@ contract-пробы (параметр JSON-текста называть *_json,
 4. `revit_cad_extract` — реализован как read-only анализ слоёв и ограниченной
    векторной геометрии уже загруженных CAD import/link; ограничения текста и
    метаданных блоков описаны. `revit_set_view_orientation` расширен точным
-   eye/target/up pose. `revit_verify_assert` теперь принимает точное или
-   диапазонное ожидание count с валидацией границ. Сборка прошла, полный suite:
-   1904 теста зелёные;
+   eye/target/up pose. `revit_verify_assert` принимает точное/диапазонное
+   ожидание count и bounded positive solid-volume checks (m³) с offender IDs.
+   Сборка прошла, полный suite: 1915 тестов зелёные;
    `revit_capture_review_set` снимает до 8 именованных кадров за вызов после
    предварительной валидации всех элементов и видов. Tool
-   counts: 57/246/249/100 (с target switching). В Revit эти новые функции на
-   живых пользовательских моделях не прогонялись и модели не менялись.
+   counts: 57/246/249/100 (с target switching). Живой read-only прогон
+   solid-volume пока невозможен: процесс Revit найден, но `revit_list_available_targets`
+   вернул 0 целей; пользовательские модели не открывались и не менялись.
+   MCP identity исправлена на `rvt-verify` / `RvtVerify` и собственный GitHub URL;
+   устаревшая ссылка upstream из локального update-cache теперь безопасно
+   заменяется URL релизов RvtVerify.
 5. До установщика ещё остаются P0-задачи из STEAL-LIST-v2: CAD plan/audit с
-   версионными правилами и provenance, расширение verify_assert за bbox/count,
+   версионными правилами и provenance, watertight/support-контракты для verify_assert,
    доставка diff (before/after, camera eye/target/up уже точные), правила QA. Реализовывать безопасными
    read-only этапами; не выполнять импорт или запись в пользовательские модели.
 6. Установщик для публикации — после предшествующих задач: install.ps1 в репо ОТСУТСТВУЕТ (только
