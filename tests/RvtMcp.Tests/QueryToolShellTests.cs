@@ -31,6 +31,7 @@ namespace RvtMcp.Tests
             "revit_list_groups",
             "revit_list_project_parameters",
             "revit_list_worksets",
+            "revit_resolve_targets",
             "revit_survey_change_impact"
         };
 
@@ -55,6 +56,17 @@ namespace RvtMcp.Tests
             Assert.Equal("get_current_view_info", sent.Command);
             Assert.Null(sent.Parameters);
             Assert.Null(sent.TimeoutSeconds);
+        }
+
+        [Fact]
+        public async Task Resolve_targets_sends_term_and_kinds()
+        {
+            var sent = await Capture.Send(() => QueryTools.ResolveTargets("door", new[] { "family", "type" }, 10));
+
+            Assert.Equal("resolve_targets", sent.Command);
+            Assert.Equal("door", sent.Json().Value<string>("term"));
+            Assert.Equal(2, sent.Json()["kinds"].Count());
+            Assert.Equal(10, sent.Json().Value<int>("limit"));
         }
 
         [Fact]

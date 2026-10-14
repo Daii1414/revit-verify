@@ -96,7 +96,7 @@ Documentation-only follow-up to installation feedback. These changes update the 
 
 ## v1.0.0 - Change tracking, runtime controls, and viewport layout
 
-Follows v0.8.1. Tool counts: default **50**, `--toolsets all` **237**, adaptive bake **240**, `--read-only` **95** (without personal baked tools). Server and add-ins must come from the same release.
+Follows v0.8.1. Tool counts: default **51**, `--toolsets all` **238**, adaptive bake **241**, `--read-only` **95** (without personal baked tools). Server and add-ins must come from the same release.
 
 ### Added
 

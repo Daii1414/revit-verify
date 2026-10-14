@@ -86,6 +86,20 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_resolve_targets", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Resolve fuzzy user terms to exact Revit names (levels, categories, families, types) with ids. Call before creating or filtering when the exact name is unknown. Params: term (required substring), kinds subset of level/category/family/type (default all), limit (default 20).")]
+        public static async Task<string> ResolveTargets(string term, string[] kinds = null, int limit = 20)
+        {
+            var blocked = ServerState.BlockIfReadOnly("resolve_targets");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("resolve_targets", new { term, kinds, limit });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_analyze_model_statistics", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Count elements grouped by category (Walls, Doors, Pipes, etc.). Call to understand project scope before detailed queries. Iteration is capped at maxElements (default 100000); raise it for full accuracy on very large models at the cost of a longer UI freeze.")]
         public static async Task<string> AnalyzeModelStatistics(int? maxElements = null)
         {
