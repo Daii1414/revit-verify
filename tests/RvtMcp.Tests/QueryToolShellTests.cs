@@ -17,7 +17,9 @@ namespace RvtMcp.Tests
         {
             "revit_ai_element_filter",
             "revit_analyze_model_statistics",
+            "revit_capture_model_snapshot",
             "revit_check_model_health",
+            "revit_compare_model_snapshot",
             "revit_get_assembly_members",
             "revit_get_available_family_types",
             "revit_get_current_view_info",
@@ -273,6 +275,24 @@ namespace RvtMcp.Tests
 
             Assert.Equal("list_worksets", sent.Command);
             Assert.True(sent.Json().Value<bool>("includeElementCounts"));
+        }
+
+        [Fact]
+        public async Task Capture_model_snapshot_forwards_scope_object()
+        {
+            var scope = "{\"category_ids\":[-2000011]}";
+            var sent = await Capture.Send(() => QueryTools.CaptureModelSnapshot(scope));
+            Assert.Equal("capture_model_snapshot", sent.Command);
+            Assert.Equal(-2000011L, sent.Json().Value<JArray>("category_ids")[0].Value<long>());
+        }
+
+        [Fact]
+        public async Task Compare_model_snapshot_forwards_snapshot_json()
+        {
+            var snapshot = "{\"snapshot_version\":1}";
+            var sent = await Capture.Send(() => QueryTools.CompareModelSnapshot(snapshot));
+            Assert.Equal("compare_model_snapshot", sent.Command);
+            Assert.Equal(snapshot, sent.Json().Value<string>("snapshot_json"));
         }
 
     }

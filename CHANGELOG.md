@@ -2,11 +2,13 @@
 
 ## Unreleased
 
+- Add read-only `revit_capture_model_snapshot` and `revit_compare_model_snapshot` for bounded, privacy-minimized before/after element diffs. Snapshots are versioned and SHA-256 protected, tied to stable model identity, and compare Revit's tessellated geometry plus category/type/name/bounds. Category scopes detect additions; explicit element-ID scopes cannot, and incomplete geometry never passes. No model or file changes are made. Current source counts: default **59**, all **250**, adaptive bake **253**, read-only **104** (including target switching).
+
 - Add read-only `revit_cad_extract` for bounded layer and vector-geometry extraction from CAD imports or links already loaded in Revit. It does not import files or modify the model. Revit's converted geometry is not a lossless DWG/DXF parse; source text and block attributes may be unavailable.
 - Add read-only `revit_cad_plan` to derive ordered axis candidates from exact CAD layers using versioned rules. The plan carries rules/extraction hashes and source-instance/layer/entity provenance; truncated input and label-count mismatches are rejected, and no model changes are applied.
 - Add read-only `revit_cad_audit` to compare a hashed CAD axis plan with straight Revit grids by label, orientation, and coordinate tolerance; unmatched grid IDs are reported and the model is never changed.
 - Extend `revit_set_view_orientation` with exact camera `eye_mm_json` + `target_mm_json` pose and optional `up_json` roll vector; direction/distance framing remains supported.
-- Add `revit_capture_review_set` to capture up to eight named review frames in one call, validating the whole request before capture and attempting to restore each view afterward. Current source counts: default **57**, all **248**, adaptive bake **251**, read-only **102** (including target switching).
+- Add `revit_capture_review_set` to capture up to eight named review frames in one call, validating the whole request before capture and attempting to restore each view afterward..
 - Extend `revit_verify_assert` with bounded per-element positive solid-volume checks in m³, offending element IDs, and exact or inclusive count ranges. This does not assert support or prove the source geometry is watertight.
 - Add `edge_closure` assertions that check nonzero Revit solid volume and two adjacent faces for each inspected edge. Open shells fail; unavailable or degenerate geometry stays unverified. The result explicitly does not prove absence of self-intersections or structural support.
 

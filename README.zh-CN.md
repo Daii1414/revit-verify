@@ -14,7 +14,7 @@
   <a href="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml"><img src="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="license" /></a>
   <a href="#supported-revit-versions"><img src="https://img.shields.io/badge/Revit-2022--2027-186BFF" alt="Revit 2022-2027" /></a>
-  <a href="#tools"><img src="https://img.shields.io/badge/MCP-248%20tools-6C47FF" alt="MCP tools" /></a>
+  <a href="#tools"><img src="https://img.shields.io/badge/MCP-250%20tools-6C47FF" alt="MCP tools" /></a>
   <a href="https://github.com/bimwright/rvt-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/bimwright/rvt-mcp" alt="latest release" /></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-version%20history-informational" alt="changelog" /></a>
 </p>
@@ -90,10 +90,10 @@ powershell -ExecutionPolicy Bypass -File "$dir\install.ps1" -Client claude-deskt
 
 | 模式 | Tools | 说明 |
 |------|------:|------|
-| 计划中的 RvtVerify 安装器 | **248** | 目前不可用；分支安装器尚待实现 |
-| 裸 `rvt-mcp.exe` | **57** | `query` + `create` + `view` + `meta` |
-| `--toolsets all` | **248** | 完整目录 |
-| `all` + adaptive bake | **251** | 再加 3 个 suggestion 生命周期工具 |
+| 计划中的 RvtVerify 安装器 | **250** | 目前不可用；分支安装器尚待实现 |
+| 裸 `rvt-mcp.exe` | **59** | `query` + `create` + `view` + `meta` |
+| `--toolsets all` | **250** | 完整目录 |
+| `all` + adaptive bake | **253** | 再加 3 个 suggestion 生命周期工具 |
 
 数量不含个人 baked 工具。RvtVerify 安装器移植后，计划仅在 `rvtmcp.config.json` 尚未设置 `toolsets` 时写入 `all`；删除该键后裸服务器提供 57 个工具。Read-only 按 `ReadOnly=true` 逐个筛选工具，因此混合 toolset 中的读取工具仍可用。即使默认 output 是 inline，能写文件的工具也会被排除。
 
@@ -228,6 +228,8 @@ Annotations 描述每个工具对文档和文件的影响。临时 selection、a
       "mcp__rvt-mcp__revit_cad_extract",
       "mcp__rvt-mcp__revit_cad_audit",
       "mcp__rvt-mcp__revit_cad_plan",
+      "mcp__rvt-mcp__revit_capture_model_snapshot",
+      "mcp__rvt-mcp__revit_compare_model_snapshot",
       "mcp__rvt-mcp__revit_check_model_health",
       "mcp__rvt-mcp__revit_clash_detection",
       "mcp__rvt-mcp__revit_compute_element_area",

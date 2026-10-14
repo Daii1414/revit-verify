@@ -15,8 +15,12 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    автоматический сбор ID виновников при создании пока отсутствуют.
 2. **Delivery diffs (snapshot/compare/colorize + quality trend).**
    От: Horizun `horizun_model_diff`, naviscoord (persistent issue IDs).
-   У нас: history + capture раздельно. Куда: `revit_verify_diff`
-   (до/после одним кадром + diff по элементам).
+   Есть `revit_capture_model_snapshot` и `revit_compare_model_snapshot`:
+   bounded before/after JSON с проверкой модели и целостности; category scope
+   обнаруживает добавления, explicit ID scope — только изменения/удаления
+   выбранных элементов. Геометрия сравнивается по приблизительной Revit-
+   триангуляции с UNVERIFIED и неполным результатом вместо ложного pass.
+   Совместный кадр before/after, подсветка и quality trend ещё нужны.
    Точная камера частично закрыта: `revit_set_view_orientation` теперь принимает
    eye/target/up для повторяемой постановки кадра. `revit_capture_review_set`
    снимает до 8 именованных кадров за вызов; before/after diff, colorize и

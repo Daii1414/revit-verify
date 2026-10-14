@@ -115,6 +115,29 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_capture_model_snapshot", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Capture a bounded, hashed snapshot of explicit element IDs or categories in a saved model. Returns privacy-minimized JSON to pass to revit_compare_model_snapshot; no file or model changes. Geometry hashes use approximate Revit tessellation. Provide exactly one of element_ids or category_ids in scope_json.")]
+        public static async Task<string> CaptureModelSnapshot(string scope_json)
+        {
+            try
+            {
+                var parsed = JObject.Parse(scope_json ?? "{}");
+                var result = await ToolGateway.SendToRevit("capture_model_snapshot", parsed);
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
+        [McpServerTool(Name = "revit_compare_model_snapshot", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare a snapshot JSON returned by revit_capture_model_snapshot against the active model. Reports added/removed/modified/unchanged/unverified elements; incomplete evidence never passes. Read-only. Params: snapshot_json.")]
+        public static async Task<string> CompareModelSnapshot(string snapshot_json)
+        {
+            try
+            {
+                var result = await ToolGateway.SendToRevit("compare_model_snapshot", new { snapshot_json });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_check_model_health", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Single-call model health: warnings by severity, element/CAD/link/in-place counts, 0-100 score with grade (A-F) and recommendations. Read-only. One call instead of warnings + statistics separately. Params: maxElements (default 100000), max_warning_types (default 25).")]
         public static async Task<string> CheckModelHealth(int? maxElements = null, int max_warning_types = 25)
         {

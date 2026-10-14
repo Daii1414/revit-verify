@@ -19,6 +19,8 @@ namespace RvtMcp.Plugin
             "analyze_view_naming_patterns",
             "audit_families",
             "check_model_health",
+            "capture_model_snapshot",
+            "compare_model_snapshot",
             "cad_extract",
             "cad_audit",
             "cad_plan",
