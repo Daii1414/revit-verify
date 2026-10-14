@@ -94,13 +94,20 @@ contract-пробы (параметр JSON-текста называть *_json,
 не влияет).
 
 ## 7. Бэклог по приоритету
-1. ~~Живая проверка новых тулзов после рестарта Revit~~ ЧАСТИЧНО: set_view_orientation
-   + export_element_snapshot проверены на СТАРОМ DLL 19:20 (успех). resolve/memory/
-   undo/verify/transform/save/health/array/distance_mm — только в новом DLL,
-   ждут рестарта. pipe-токен добыт инъекцией: QVUZ9sAAdpMXPQsV+TuD8FXv1P79f0oYFXUWbv1q3IQ=
-   (pipe RvtVerify-6868; скрипты verify1.py/probe_all.py в Temp\opencode).
-   БАГ: discovery-файл %LOCALAPPDATA%\RvtVerify\revit-2025-6868.json ОТСУТСТВУЕТ
-   при живом pipe — stdio-сервер наш плагин не найдёт. Проверить после рестарта.
+1. ~~Живая проверка новых тулзов~~ СДЕЛАНО 2026-10-14 вечером (PID 26204, свежий
+   DLL 21:30): песочница = копия ChurchOfLight-v1.rvt в Temp\opencode\verify-sandbox.rvt
+   (твои модели НЕ тронуты). Прошло вживую: open_model, resolve_targets (壁→7
+   хитов, уровни с отметками), verify_assert (bbox стенки после move +2000мм,
+   count), check_model_health (score=100 grade=A), set_view_orientation
+   distance_mm=25000 (ответ distance_mm точный), create wall → transform move →
+   create_array linear x2 → delete dry_run+real → batch_execute 2 walls →
+   undo_batch list/dry_run/undo_last-real (deleted 2) → create_array radial x4
+   (угол 90°) → delete 4 → save_document x2, export_element_snapshot (png на
+   диске), memory create+read через stdio (зонд-нота удалена, store пуст).
+   Discovery-баг НЕ воспроизвёлся на свежем старте (revit-2025-26204.json на
+   месте). Revit ОСТАВЛЕН ОТКРЫТЫМ с verify-sandbox (со EMT1 стенкой 140740).
+   Скрипты: Temp\opencode\verify_full.py, verify_round2.py, verify_fix.py,
+   radial_debug.py, cleanup.py, mem_stdio2.py, open_sandbox.py.
 2. ~~save_document, health-score, create_array~~ СДЕЛАНО 2026-10-14, коммит 35a314c
    (revit_save_document + revit_check_model_health/HealthScorer + revit_create_array
    + distance_mm; тесты 1883 зелёных + 1 флаки-тост; counts 56/244/247/96).
