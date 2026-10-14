@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace RvtMcp.Server.Handlers
 {
-    /// <summary>Builds a deterministic, non-applying axis plan from bounded Revit CAD extraction data.</summary>
+    /// <summary>Builds a deterministic, non-applying axis and optional straight-wall plan from bounded CAD extraction data.</summary>
     internal static class CadPlanBuilder
     {
         private const int MaxPayloadCharacters = 5 * 1024 * 1024;
@@ -34,8 +34,9 @@ namespace RvtMcp.Server.Handlers
                 throw new ArgumentException("rules_json.version is required and must be 1-64 characters.");
             var xLayers = ReadNames(rules["x_axis_layers"], "x_axis_layers");
             var yLayers = ReadNames(rules["y_axis_layers"], "y_axis_layers");
-            if (xLayers.Count == 0 && yLayers.Count == 0)
-                throw new ArgumentException("At least one exact layer name is required in x_axis_layers or y_axis_layers.");
+            var wallLayers = ReadNames(rules["wall_layers"], "wall_layers");
+            if (xLayers.Count == 0 && yLayers.Count == 0 && wallLayers.Count == 0)
+                throw new ArgumentException("At least one exact layer name is required in axis or wall layer rules.");
 
             var coordinateTolerance = rules.Value<double?>("coordinate_tolerance_mm") ?? 5;
             var angleTolerance = rules.Value<double?>("angle_tolerance_degrees") ?? 1;
@@ -103,6 +104,7 @@ namespace RvtMcp.Server.Handlers
 
             var xAxes = Cluster(segments.Where(s => s.Axis == "x"), coordinateTolerance, ReadLabels(rules["x_axis_labels"], "x_axis_labels"));
             var yAxes = Cluster(segments.Where(s => s.Axis == "y"), coordinateTolerance, ReadLabels(rules["y_axis_labels"], "y_axis_labels"));
+            var wallAnalysis = CadWallCandidateBuilder.Build(results, rules);
             var plan = new JObject
             {
                 ["plan_version"] = 1,
@@ -115,9 +117,12 @@ namespace RvtMcp.Server.Handlers
                 ["coordinate_system"] = "Revit internal project coordinates, millimetres; CAD insertion transform already applied by Revit",
                 ["x_axes"] = xAxes,
                 ["y_axes"] = yAxes,
+                ["wall_candidates"] = wallAnalysis["wall_candidates"],
+                ["wall_analysis"] = wallAnalysis,
                 ["limitations"] = new JArray(
                     "Candidates are inferred only from straight or tessellated CAD segments on the exact configured layers.",
                     "Labels are assigned by coordinate order from versioned rules; source text and bubble association are not inferred.",
+                    "Wall candidates require two parallel boundary segments and a configured nominal thickness; openings, joins, height, and materials are not inferred.",
                     "This plan does not create or modify Revit elements.")
             };
             plan["plan_sha256"] = Sha256(plan.ToString(Formatting.None));

@@ -71,16 +71,16 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_cad_plan", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Create a deterministic, versioned, read-only axis candidate plan from revit_cad_extract output. Never applies geometry changes.")]
+        [McpServerTool(Name = "revit_cad_plan", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Create a deterministic, versioned, read-only axis plan and optional straight-wall candidates from revit_cad_extract output. Wall rules pair parallel boundaries and report incomplete analysis; no geometry changes are applied.")]
         public static string CadPlan(
             [System.ComponentModel.Description("Complete JSON response from revit_cad_extract, including results and provenance.")] string extraction_json,
-            [System.ComponentModel.Description("Versioned JSON rules: version, exact x_axis_layers/y_axis_layers, optional ordered labels, and tolerances.")] string rules_json)
+            [System.ComponentModel.Description("Versioned JSON rules: version and exact axis layers and/or wall_layers. wall_layers requires wall_thickness_mm; axis labels and tolerances are optional.")] string rules_json)
         {
             try { return Handlers.CadPlanBuilder.Build(extraction_json, rules_json).ToString(Formatting.Indented); }
             catch (Exception ex) { return JsonConvert.SerializeObject(new { success = false, error = ex.Message }); }
         }
 
-        [McpServerTool(Name = "revit_cad_audit", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare a versioned CAD axis plan against existing straight Revit grids. Returns matching and offending Revit element IDs; never changes the model.")]
+        [McpServerTool(Name = "revit_cad_audit", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare axis candidates in a versioned CAD plan against existing straight Revit grids. Wall candidates are not audited yet. Returns matching and offending Revit element IDs; never changes the model.")]
         public static async Task<string> CadAudit(
             [System.ComponentModel.Description("Complete JSON output from revit_cad_plan; its plan hash is verified before comparison.")] string plan_json,
             [System.ComponentModel.Description("Maximum permitted axis coordinate deviation in millimetres; default 10.")] double tolerance_mm = 10)

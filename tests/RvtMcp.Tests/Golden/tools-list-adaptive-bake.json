@@ -842,7 +842,7 @@
     },
     {
       "name": "revit_cad_audit",
-      "description_hash": "sha256:28b4e1a5dfceb01f39646150f59ae8997a60e0131cb47fce1e4f3b7cc1d6c8e3",
+      "description_hash": "sha256:f0ab9f821acc1861fd62922c3ee3c300bc519c1c6d2da90feb7080f9ea655edf",
       "inputSchema": {
         "properties": {
           "plan_json": {
@@ -898,7 +898,7 @@
     },
     {
       "name": "revit_cad_plan",
-      "description_hash": "sha256:5943bc8ac3989ab52b4e861ba0be19f43502321659dc2384341bbdd38d59bf34",
+      "description_hash": "sha256:34cd428ecfd76fd592c19205913e4e9e07be78242577114d7258283f71a268df",
       "inputSchema": {
         "properties": {
           "extraction_json": {
@@ -906,7 +906,7 @@
             "type": "String"
           },
           "rules_json": {
-            "description": "Versioned JSON rules: version, exact x_axis_layers/y_axis_layers, optional ordered labels, and tolerances.",
+            "description": "Versioned JSON rules: version and exact axis layers and/or wall_layers. wall_layers requires wall_thickness_mm; axis labels and tolerances are optional.",
             "type": "String"
           }
         },
