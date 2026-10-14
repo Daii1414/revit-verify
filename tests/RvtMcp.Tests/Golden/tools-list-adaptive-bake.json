@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 237,
+  "tool_count": 238,
   "tools": [
     {
       "name": "revit_accept_bake_suggestion",
@@ -3310,6 +3310,48 @@
         },
         "required": [
           "outputFolder"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_export_element_snapshot",
+      "description_hash": "sha256:8a599f1d5e08b157a4063306e5f90f3643824e0fe9b1a596760d6ba12ae09b1f",
+      "inputSchema": {
+        "properties": {
+          "element_ids": {
+            "description": "",
+            "type": "Int64[]"
+          },
+          "image_format": {
+            "description": "",
+            "type": "String"
+          },
+          "padding_mm": {
+            "description": "",
+            "type": "Double"
+          },
+          "pixel_size": {
+            "description": "",
+            "type": "Int32"
+          },
+          "tighten_section": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "view_id": {
+            "description": "",
+            "type": "Nullable`1"
+          }
+        },
+        "required": [
+          "element_ids"
         ],
         "type": "object"
       },

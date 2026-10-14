@@ -1307,6 +1307,31 @@ Tools (prefix revit_<verb>_<noun>, lengths in mm):
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_export_element_snapshot", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Isolate elements, optionally tighten the 3D section box, export a raster image, then restore the view; restore it with Revit Undo. Params: element_ids (required), view_id (optional, default active), padding_mm (default 500), tighten_section (default true, 3D only), pixel_size (default 1600), image_format ('png'|'jpeg', default 'png'). View is always restored, including on export failure.")]
+        public static async Task<string> ExportElementSnapshot(
+            long[] element_ids,
+            long? view_id = null, double padding_mm = 500, bool tighten_section = true,
+            int pixel_size = 1600, string image_format = "png")
+        {
+            var blocked = ServerState.BlockIfReadOnly("export_element_snapshot");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("export_element_snapshot", new
+                {
+                    element_ids,
+                    view_id,
+                    padding_mm,
+                    tighten_section,
+                    pixel_size,
+                    image_format
+                });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_set_view_crop", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace saved view crop settings; restore them with Revit Undo. Modify view crop: enabled, visible, explicit bounds_json (mm), or fit_element_ids with padding_mm. Params: view_id (optional, default active), enabled, visible, bounds_json, fit_element_ids, padding_mm (default 100).")]
         public static async Task<string> SetViewCrop(
             long? view_id = null, bool? enabled = null, bool? visible = null,

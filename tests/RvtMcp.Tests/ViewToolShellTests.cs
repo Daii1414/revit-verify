@@ -17,6 +17,7 @@ namespace RvtMcp.Tests
             "revit_analyze_sheet_layout",
             "revit_capture_view_image",
             "revit_create_view",
+            "revit_export_element_snapshot",
             "revit_place_view_on_sheet",
             "revit_set_view_crop",
             "revit_set_view_orientation",
@@ -115,6 +116,22 @@ namespace RvtMcp.Tests
             Assert.Equal(1, json["direction"]["x"].ToObject<double>());
             Assert.Equal(1.5, json.Value<double>("distance_factor"));
             Assert.True(json.Value<bool>("exclude_datums"));
+        }
+
+        [Fact]
+        public async Task Export_element_snapshot_sends_ids()
+        {
+            var sent = await Capture.Send(() => ViewTools.ExportElementSnapshot(
+                new long[] { 1, 2 }, 3, 500, true, 800, "jpeg"));
+
+            Assert.Equal("export_element_snapshot", sent.Command);
+            var json = sent.Json();
+            Assert.Equal(2, json["element_ids"].Count());
+            Assert.Equal(3, json.Value<long>("view_id"));
+            Assert.Equal(500, json.Value<double>("padding_mm"));
+            Assert.True(json.Value<bool>("tighten_section"));
+            Assert.Equal(800, json.Value<int>("pixel_size"));
+            Assert.Equal("jpeg", json.Value<string>("image_format"));
         }
 
         [Fact]
