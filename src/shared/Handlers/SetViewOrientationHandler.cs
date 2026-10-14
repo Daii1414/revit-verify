@@ -40,11 +40,13 @@ namespace RvtMcp.Plugin.Handlers
             if (view == null) return CommandResult.Fail("Could not resolve a 3D view (provide view_id of a 3D view).");
             if (view.IsTemplate) return CommandResult.Fail("Cannot modify a view template.");
 
-            var dir = new XYZ(
+            var dirArr = new[]
+            {
                 dirObj?.Value<double?>("x") ?? 1,
                 dirObj?.Value<double?>("y") ?? -1,
-                dirObj?.Value<double?>("z") ?? 0.7);
-            if (dir.IsZeroLength() || distanceFactor <= 0)
+                dirObj?.Value<double?>("z") ?? 0.7,
+            };
+            if (distanceFactor <= 0)
                 return CommandResult.Fail("direction must be non-zero and distance_factor positive.");
 
             XYZ target;
@@ -66,15 +68,22 @@ namespace RvtMcp.Plugin.Handlers
                 size = (box.Max - box.Min).GetLength();
             }
 
-            var forward = dir.Normalize().Negate();
-            var right = forward.CrossProduct(XYZ.BasisZ);
-            if (right.IsZeroLength())
-                return CommandResult.Fail("direction must not be parallel to vertical.");
-            right = right.Normalize();
-            var up = right.CrossProduct(forward).Normalize();
-
             if (size <= 0) size = 10;
-            var eye = target - forward * size * distanceFactor;
+            double[] fwdArr, upArr, eyeArr;
+            try
+            {
+                var targetMm = new[] { target.X * 304.8, target.Y * 304.8, target.Z * 304.8 };
+                fwdArr = FrameCalculator.ComputeForward(dirArr);
+                upArr = FrameCalculator.ComputeUp(fwdArr);
+                eyeArr = FrameCalculator.ComputeEye(targetMm, dirArr, size * 304.8 * distanceFactor);
+            }
+            catch (ArgumentException ex)
+            {
+                return CommandResult.Fail(ex.Message);
+            }
+            var forward = new XYZ(fwdArr[0], fwdArr[1], fwdArr[2]);
+            var up = new XYZ(upArr[0], upArr[1], upArr[2]);
+            var eye = new XYZ(eyeArr[0] / 304.8, eyeArr[1] / 304.8, eyeArr[2] / 304.8);
 
             using (var tx = new Transaction(doc, "RvtMcp: Set view orientation"))
             {
