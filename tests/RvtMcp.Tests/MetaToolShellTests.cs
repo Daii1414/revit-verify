@@ -25,6 +25,7 @@ namespace RvtMcp.Tests
             "revit_open_model",
             "revit_purge_unused",
             "revit_read_memory_notes",
+            "revit_save_document",
             "revit_set_project_info",
             "revit_show_message",
             "revit_switch_target",
@@ -173,6 +174,18 @@ namespace RvtMcp.Tests
             Assert.Equal("families", json["targets"][0].Value<string>());
             Assert.True(json.Value<bool>("dry_run"));
             Assert.Equal(50, json.Value<int>("limit"));
+        }
+
+        [Fact]
+        public async Task Save_document_sends_path_and_options()
+        {
+            var sent = await Capture.Send(() => MetaTools.SaveDocument(@"C:\models\b.rvt", true, true));
+
+            Assert.Equal("save_document", sent.Command);
+            var json = sent.Json();
+            Assert.Equal(@"C:\models\b.rvt", json.Value<string>("path"));
+            Assert.True(json.Value<bool>("compact"));
+            Assert.True(json.Value<bool>("overwrite"));
         }
 
         [Fact]

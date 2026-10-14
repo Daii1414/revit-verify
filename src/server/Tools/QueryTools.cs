@@ -115,6 +115,20 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_check_model_health", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Single-call model health: warnings by severity, element/CAD/link/in-place counts, 0-100 score with grade (A-F) and recommendations. Read-only. One call instead of warnings + statistics separately. Params: maxElements (default 100000), max_warning_types (default 25).")]
+        public static async Task<string> CheckModelHealth(int? maxElements = null, int max_warning_types = 25)
+        {
+            var blocked = ServerState.BlockIfReadOnly("check_model_health");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("check_model_health", new { maxElements, max_warning_types });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_analyze_model_statistics", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Count elements grouped by category (Walls, Doors, Pipes, etc.). Call to understand project scope before detailed queries. Iteration is capped at maxElements (default 100000); raise it for full accuracy on very large models at the cost of a longer UI freeze.")]
         public static async Task<string> AnalyzeModelStatistics(int? maxElements = null)
         {

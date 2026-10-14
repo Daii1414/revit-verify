@@ -36,6 +36,21 @@ namespace RvtMcp.Plugin
             };
         }
 
+        public static double ResolveDistance(double sizeMm, double factor, double? explicitMm)
+        {
+            if (explicitMm.HasValue)
+            {
+                if (explicitMm.Value <= 0)
+                    throw new ArgumentException("distance_mm must be positive.");
+                return explicitMm.Value;
+            }
+            if (factor <= 0)
+                throw new ArgumentException("distance_factor must be positive.");
+            if (sizeMm <= 0)
+                throw new ArgumentException("model size must be positive.");
+            return sizeMm * factor;
+        }
+
         public static double[] Normalize(double[] v)
         {
             var len = Length(v);

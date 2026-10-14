@@ -44,5 +44,21 @@ namespace RvtMcp.Tests
             Assert.Throws<ArgumentException>(() => FrameCalculator.ComputeEye(
                 new[] { 0.0, 0.0, 0.0 }, new[] { 1.0, 0.0, 0.0 }, -5.0));
         }
+
+        [Fact]
+        public void Explicit_distance_beats_factor()
+        {
+            Assert.Equal(25000.0, FrameCalculator.ResolveDistance(40000.0, 1.5, 25000.0));
+            Assert.Equal(60000.0, FrameCalculator.ResolveDistance(40000.0, 1.5, null));
+        }
+
+        [Fact]
+        public void Bad_distances_are_rejected()
+        {
+            Assert.Throws<ArgumentException>(() => FrameCalculator.ResolveDistance(40000.0, 1.5, 0.0));
+            Assert.Throws<ArgumentException>(() => FrameCalculator.ResolveDistance(40000.0, 1.5, -1.0));
+            Assert.Throws<ArgumentException>(() => FrameCalculator.ResolveDistance(40000.0, 0.0, null));
+            Assert.Throws<ArgumentException>(() => FrameCalculator.ResolveDistance(0.0, 1.5, null));
+        }
     }
 }

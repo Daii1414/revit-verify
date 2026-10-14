@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 244,
+  "tool_count": 247,
   "tools": [
     {
       "name": "revit_accept_bake_suggestion",
@@ -900,6 +900,30 @@
       }
     },
     {
+      "name": "revit_check_model_health",
+      "description_hash": "sha256:14fe68b7764c6d21893ff5de1914fd5dd18c0437697e70eb04d48cf5f1a79106",
+      "inputSchema": {
+        "properties": {
+          "maxElements": {
+            "description": "",
+            "type": "Nullable`1"
+          },
+          "max_warning_types": {
+            "description": "",
+            "type": "Int32"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
       "name": "revit_clash_detection",
       "description_hash": "sha256:4e489c9b1f115d05828589b3e6f048d796b3bc8c33347e18b8308b9b0d0bae9c",
       "inputSchema": {
@@ -1210,6 +1234,58 @@
         "required": [
           "x",
           "y"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_create_array",
+      "description_hash": "sha256:284b0df7910c59229e0e831ea59f869a5aefa43d28814023d66d5abc108a75c2",
+      "inputSchema": {
+        "properties": {
+          "angle_deg": {
+            "description": "",
+            "type": "Double"
+          },
+          "center_mm_json": {
+            "description": "",
+            "type": "String"
+          },
+          "count": {
+            "description": "",
+            "type": "Int32"
+          },
+          "element_ids": {
+            "description": "",
+            "type": "String"
+          },
+          "group_result": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "kind": {
+            "description": "",
+            "type": "String"
+          },
+          "max_count": {
+            "description": "",
+            "type": "Int32"
+          },
+          "step_mm_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "element_ids",
+          "kind",
+          "count"
         ],
         "type": "object"
       },
@@ -6685,6 +6761,34 @@
       }
     },
     {
+      "name": "revit_save_document",
+      "description_hash": "sha256:52dc756bbf438f37ae7d80502ecf8f7e533dab12abad222292429763412d4d18",
+      "inputSchema": {
+        "properties": {
+          "compact": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "overwrite": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "path": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
       "name": "revit_save_selection",
       "description_hash": "sha256:480e16b7ed47acb904fe665be725c228ca8e12e8b3254c88377c6c5dd910c0de",
       "inputSchema": {
@@ -7471,7 +7575,7 @@
     },
     {
       "name": "revit_set_view_orientation",
-      "description_hash": "sha256:a376aa26d785e6fa1e2fc7656c5a421856365a35b0c5b62d1a85a574381e3fa3",
+      "description_hash": "sha256:6c98c3bf0f27579bd6c6425b992caa8a94911f9abeec7ad47626da79c6854076",
       "inputSchema": {
         "properties": {
           "direction_json": {
@@ -7481,6 +7585,10 @@
           "distance_factor": {
             "description": "",
             "type": "Double"
+          },
+          "distance_mm": {
+            "description": "",
+            "type": "Nullable`1"
           },
           "element_ids": {
             "description": "",

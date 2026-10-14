@@ -20,6 +20,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.AiElementFilterHandler());
             Register(new Handlers.ResolveTargetsHandler());
             Register(new Handlers.VerifyAssertHandler());
+            Register(new Handlers.CheckModelHealthHandler());
             Register(new Handlers.AnalyzeModelStatisticsHandler());
             Register(new Handlers.GetMaterialQuantitiesHandler());
             Register(new Handlers.GetElementDetailsHandler());
@@ -41,6 +42,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.CreateGridHandler());
             Register(new Handlers.CreateRoomHandler());
             Register(new Handlers.CreateGroupFromElementsHandler());
+            Register(new Handlers.CreateArrayHandler());
             // Phase 4: Modify & Delete
             Register(new Handlers.OperateElementHandler());
             Register(new Handlers.TransformElementsHandler());
@@ -284,6 +286,7 @@ namespace RvtMcp.Plugin
             // A6 batch execution — needs dispatcher ref to look up sub-commands
             Register(new Handlers.BatchExecuteHandler(this));
             Register(new Handlers.UndoBatchHandler());
+            Register(new Handlers.SaveDocumentHandler());
             // ToolBaker runtime access.
             Register(new Handlers.ApplyBakeSuggestionHandler(runtimeCache));
             Register(new Handlers.ListBakedToolsHandler());

@@ -10,7 +10,7 @@ namespace RvtMcp.Plugin.Handlers
     {
         public string Name => "set_view_orientation";
         public string Description => "Point a 3D view camera: eye placed along direction from target, deterministic framing for screenshot comparison. Restores with Revit Undo.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to element box center, else model bbox center (datum categories excluded).""},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""},""description"":""Frame exactly these elements (ids). Beats model-wide auto framing.""},""distance_factor"":{""type"":""number"",""default"":1.5},""exclude_datums"":{""type"":""boolean"",""default"":true},""zoom_to_fit"":{""type"":""boolean"",""default"":true,""description"":""Zoom the open view to fit after orienting (deterministic framing). Skipped silently if the view is not open on screen.""}}}";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to element box center, else model bbox center (datum categories excluded).""},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""},""description"":""Frame exactly these elements (ids). Beats model-wide auto framing.""},""distance_factor"":{""type"":""number"",""default"":1.5},""distance_mm"":{""type"":""number"",""description"":""Explicit eye distance in mm. Beats distance_factor when positive.""},""exclude_datums"":{""type"":""boolean"",""default"":true},""zoom_to_fit"":{""type"":""boolean"",""default"":true,""description"":""Zoom the open view to fit after orienting (deterministic framing). Skipped silently if the view is not open on screen.""}}}";
 
         private static readonly long[] DatumCategories =
         {
@@ -32,6 +32,7 @@ namespace RvtMcp.Plugin.Handlers
             var dirObj = req["direction"] as JObject;
             var targetObj = req["target_mm"] as JObject;
             var distanceFactor = req.Value<double?>("distance_factor") ?? 1.5;
+            var distanceMmParam = req.Value<double?>("distance_mm");
             var excludeDatums = req.Value<bool?>("exclude_datums") ?? true;
             var zoomToFit = req.Value<bool?>("zoom_to_fit") ?? true;
             var elementIdsToken = req["element_ids"] as JArray;
@@ -94,12 +95,14 @@ namespace RvtMcp.Plugin.Handlers
 
             if (size <= 0) size = 10;
             double[] fwdArr, upArr, eyeArr;
+            double distanceMm;
             try
             {
                 var targetMm = new[] { target.X * 304.8, target.Y * 304.8, target.Z * 304.8 };
                 fwdArr = FrameCalculator.ComputeForward(dirArr);
                 upArr = FrameCalculator.ComputeUp(fwdArr);
-                eyeArr = FrameCalculator.ComputeEye(targetMm, dirArr, size * 304.8 * distanceFactor);
+                distanceMm = FrameCalculator.ResolveDistance(size * 304.8, distanceFactor, distanceMmParam);
+                eyeArr = FrameCalculator.ComputeEye(targetMm, dirArr, distanceMm);
             }
             catch (ArgumentException ex)
             {
@@ -125,6 +128,7 @@ namespace RvtMcp.Plugin.Handlers
                         eye_mm = new { x_mm = eye.X * 304.8, y_mm = eye.Y * 304.8, z_mm = eye.Z * 304.8 },
                         target_mm = new { x_mm = target.X * 304.8, y_mm = target.Y * 304.8, z_mm = target.Z * 304.8 },
                         size_mm = size * 304.8,
+                        distance_mm = distanceMm,
                         zoomed_to_fit = zoomed,
                         framed_ids = framedCount,
                         missing_ids = missingCount

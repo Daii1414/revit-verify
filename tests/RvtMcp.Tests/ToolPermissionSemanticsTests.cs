@@ -24,7 +24,7 @@ namespace RvtMcp.Tests
             "dismiss_bake_suggestion", "load_family_from_path", "operate_element", "override_element_graphics",
             "publish_coordinates_to_link", "purge_unused", "reload_link", "remove_filter_from_view",
             "remove_parameter_binding", "rename_family_type", "renumber_sheets", "replace_family_type",
-            "run_baked_tool", "save_selection", "set_category_visibility", "set_element_parameter_values",
+            "run_baked_tool", "save_document", "save_selection", "set_category_visibility", "set_element_parameter_values",
             "set_element_phase", "set_filter_overrides", "set_material_appearance", "set_material_identity",
             "set_material_structural_asset", "set_material_thermal_asset", "set_parameter_value_by_guid",
             "set_project_base_point", "set_project_info", "set_structural_load", "set_system_classification",

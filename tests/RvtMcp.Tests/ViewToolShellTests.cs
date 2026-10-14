@@ -108,7 +108,7 @@ namespace RvtMcp.Tests
         public async Task Set_view_orientation_sends_direction()
         {
             var sent = await Capture.Send(() => ViewTools.SetViewOrientation(
-                7, "{\"x\":1,\"y\":-1,\"z\":0.7}", null, new long[] { 11, 12 }, 1.5, true, true));
+                7, "{\"x\":1,\"y\":-1,\"z\":0.7}", null, new long[] { 11, 12 }, 1.5, true, true, 25000.0));
 
             Assert.Equal("set_view_orientation", sent.Command);
             var json = sent.Json();
@@ -116,6 +116,7 @@ namespace RvtMcp.Tests
             Assert.Equal(1, json["direction"]["x"].ToObject<double>());
             Assert.Equal(2, json["element_ids"].Count());
             Assert.Equal(1.5, json.Value<double>("distance_factor"));
+            Assert.Equal(25000.0, json.Value<double>("distance_mm"));
             Assert.True(json.Value<bool>("exclude_datums"));
             Assert.True(json.Value<bool>("zoom_to_fit"));
         }

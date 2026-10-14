@@ -112,5 +112,36 @@ namespace RvtMcp.Server
             }
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
+
+        [McpServerTool(Name = "revit_create_array", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Copy elements into a linear or radial array; restore them with Revit Undo. One array per call. Params: element_ids (JSON int array), kind ('linear'|'radial'), count (1-100 copies, sources excluded), step_mm_json ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}' per-copy offset, linear only), center_mm_json + angle_deg (per-copy rotation around vertical, radial only), group_result (default true), max_count (default 500 new elements).")]
+        public static async Task<string> CreateArray(string element_ids, string kind, int count, string step_mm_json = null, string center_mm_json = null, double angle_deg = 0, bool group_result = true, int max_count = 500)
+        {
+            var blocked = ServerState.BlockIfReadOnly("create_array");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var parsedIds = JArray.Parse(element_ids).ToObject<long[]>();
+                object stepObj = null;
+                if (!string.IsNullOrWhiteSpace(step_mm_json))
+                    stepObj = JObject.Parse(step_mm_json);
+                object centerObj = null;
+                if (!string.IsNullOrWhiteSpace(center_mm_json))
+                    centerObj = JObject.Parse(center_mm_json);
+                var result = await ToolGateway.SendToRevit("create_array", new
+                {
+                    element_ids = parsedIds,
+                    kind,
+                    count,
+                    step_mm = stepObj,
+                    center_mm = centerObj,
+                    angle_deg,
+                    group_result,
+                    max_count
+                });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
     }
 }

@@ -158,11 +158,11 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_set_view_orientation", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace a 3D view camera; restore it with Revit Undo. Point eye along direction from target for deterministic screenshots. Params: view_id (optional, default active 3D view), direction_json ('{\"x\":1,\"y\":-1,\"z\":0.7}', default iso), target_mm_json ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}', default element box or model bbox center), element_ids (optional, frame exactly these), distance_factor (default 1.5), exclude_datums (default true), zoom_to_fit (default true).")]
+        [McpServerTool(Name = "revit_set_view_orientation", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace a 3D view camera; restore it with Revit Undo. Point eye along direction from target for deterministic screenshots. Params: view_id (optional, default active 3D view), direction_json ('{\"x\":1,\"y\":-1,\"z\":0.7}', default iso), target_mm_json ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}', default element box or model bbox center), element_ids (optional, frame exactly these), distance_factor (default 1.5), distance_mm (optional absolute eye distance, beats distance_factor), exclude_datums (default true), zoom_to_fit (default true).")]
         public static async Task<string> SetViewOrientation(
             long? view_id = null, string direction_json = null, string target_mm_json = null,
             long[] element_ids = null, double distance_factor = 1.5, bool exclude_datums = true,
-            bool zoom_to_fit = true)
+            bool zoom_to_fit = true, double? distance_mm = null)
         {
             var blocked = ServerState.BlockIfReadOnly("set_view_orientation");
             if (blocked != null) return blocked;
@@ -184,6 +184,7 @@ namespace RvtMcp.Server
                     target_mm = targetObj,
                     element_ids,
                     distance_factor,
+                    distance_mm,
                     exclude_datums,
                     zoom_to_fit
                 });

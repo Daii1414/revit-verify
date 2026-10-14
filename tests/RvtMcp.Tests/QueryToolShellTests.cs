@@ -17,6 +17,7 @@ namespace RvtMcp.Tests
         {
             "revit_ai_element_filter",
             "revit_analyze_model_statistics",
+            "revit_check_model_health",
             "revit_get_assembly_members",
             "revit_get_available_family_types",
             "revit_get_current_view_info",
@@ -78,6 +79,16 @@ namespace RvtMcp.Tests
 
             Assert.Equal("verify_assert", sent.Command);
             Assert.Equal("count", sent.Json()["assertions"][0].Value<string>("kind"));
+        }
+
+        [Fact]
+        public async Task Check_model_health_sends_caps()
+        {
+            var sent = await Capture.Send(() => QueryTools.CheckModelHealth(5000, 10));
+
+            Assert.Equal("check_model_health", sent.Command);
+            Assert.Equal(5000, sent.Json().Value<int>("maxElements"));
+            Assert.Equal(10, sent.Json().Value<int>("max_warning_types"));
         }
 
         [Fact]

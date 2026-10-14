@@ -86,6 +86,20 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_save_document", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Save the active document in place (default) or as a copy under path (SaveAs). Saving writes the file and cannot be undone with Revit Undo. SaveAs on workshared models is refused: save the local file instead. Params: path (optional SaveAs target), compact (SaveAs only), overwrite (SaveAs target exists).")]
+        public static async Task<string> SaveDocument(string path = "", bool compact = false, bool overwrite = false)
+        {
+            var blocked = ServerState.BlockIfReadOnly("save_document");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("save_document", new { path, compact, overwrite });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_show_message", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Show a Revit TaskDialog. Message echo is off by default; opt in with echoMessage and cap it with maxEchoChars.")]
         public static async Task<string> ShowMessage(string message = null, string title = null, bool echoMessage = false, int maxEchoChars = 1024)
         {
