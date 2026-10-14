@@ -27,7 +27,9 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    freshness-checks от naviscoord (кадр протух — не верить).
 4. **DWG→BIM pipeline (extract → plan → apply с provenance + ревизии).**
    От: Horizun `horizun_plan_from_cad` + 13 CAD-инструментов (Apache-2.0).
-   Есть read-only `revit_cad_extract` и `revit_cad_plan`: кандидаты осей строятся
+   Есть read-only `revit_cad_extract` и `revit_cad_plan`: извлекатель
+   сохраняет параметры дуг (центр/радиус/нормаль/угол охвата) и отмечает
+   совпадение концов полилинии; кандидаты осей строятся
    по точным слоям и versioned rules; план хранит hash и provenance источников.
    Обрезанная геометрия отвергается. `revit_cad_audit` сверяет хешированный
    план с прямыми Revit-сетками по подписи/ориентации/координате и сообщает IDs.

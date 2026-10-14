@@ -833,7 +833,7 @@
     },
     {
       "name": "revit_cad_extract",
-      "description_hash": "sha256:b3bc6fb16bebf630f9d043dd6c8cd3ff222f61a0a42f46e6b685f7b24b8fbdef",
+      "description_hash": "sha256:dd5223528180b4da7d6b16b7aae83c936c0f92bb4fb2eb5100164fe26905bda8",
       "inputSchema": {
         "properties": {
           "entity_limit": {
@@ -841,7 +841,7 @@
             "type": "Int32"
           },
           "include_vertices": {
-            "description": "Include tessellated curve/polyline vertices in millimetres; response size grows with geometry complexity.",
+            "description": "Include bounded tessellated curve/polyline vertices in millimetres; arc parameters are included regardless. Response size grows with geometry complexity.",
             "type": "Boolean"
           },
           "instance_ids": {

@@ -172,6 +172,16 @@ namespace RvtMcp.Plugin.Handlers
                     ["length_mm"] = Math.Round(curve.Length * FeetToMm, 3),
                     ["is_bound"] = curve.IsBound
                 };
+                if (curve is Arc arc)
+                {
+                    entry["center_mm"] = Point(arc.Center);
+                    entry["radius_mm"] = Math.Round(arc.Radius * FeetToMm, 3);
+                    entry["normal"] = Vector(arc.Normal);
+                    if (CadArcMetrics.TryGetSweepDegrees(arc.Length, arc.Radius, arc.IsCyclic, out var sweepDegrees))
+                        entry["sweep_degrees"] = Math.Round(sweepDegrees, 6);
+                    else
+                        warnings.Add("An arc had invalid length or radius; its sweep angle was omitted.");
+                }
                 if (curve.IsBound)
                 {
                     entry["start_mm"] = Point(curve.GetEndPoint(0));
@@ -192,7 +202,8 @@ namespace RvtMcp.Plugin.Handlers
                 {
                     ["layer"] = layer,
                     ["type"] = type,
-                    ["vertex_count"] = points.Count
+                    ["vertex_count"] = points.Count,
+                    ["endpoints_coincident"] = points.Count > 2 && points[0].DistanceTo(points[points.Count - 1]) <= 1e-6
                 };
                 if (includeVertices)
                 {
@@ -242,6 +253,13 @@ namespace RvtMcp.Plugin.Handlers
             x_mm = Math.Round(p.X * FeetToMm, 3),
             y_mm = Math.Round(p.Y * FeetToMm, 3),
             z_mm = Math.Round(p.Z * FeetToMm, 3)
+        };
+
+        private static object Vector(XYZ v) => new
+        {
+            x = Math.Round(v.X, 9),
+            y = Math.Round(v.Y, 9),
+            z = Math.Round(v.Z, 9)
         };
 
         private static void Increment(Dictionary<string, int> counts, string key)

@@ -57,11 +57,11 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_cad_extract", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Extract bounded layer and vector geometry data from CAD imports or links already in the model. Does not modify the model. Revit may not preserve source text or block metadata.")]
+        [McpServerTool(Name = "revit_cad_extract", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Extract bounded layer and vector geometry data from CAD imports or links already in the model. Arc center, radius, normal and sweep are included; polylines report whether their endpoints coincide. Does not modify the model. Revit may not preserve source text or block metadata.")]
         public static async Task<string> CadExtract(
             [System.ComponentModel.Description("One to 20 CAD import/link instance IDs returned by revit_list_linked_cad.")] long[] instance_ids,
             [System.ComponentModel.Description("Maximum entities returned across this call (1-1000), distributed across the selected instances.")] int entity_limit = 200,
-            [System.ComponentModel.Description("Include tessellated curve/polyline vertices in millimetres; response size grows with geometry complexity.")] bool include_vertices = false)
+            [System.ComponentModel.Description("Include bounded tessellated curve/polyline vertices in millimetres; arc parameters are included regardless. Response size grows with geometry complexity.")] bool include_vertices = false)
         {
             try
             {

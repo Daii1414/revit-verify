@@ -31,6 +31,7 @@
     <Compile Include="..\..\src\shared\Handlers\VerifySolidVolumePolicy.cs" Link="Shared\VerifySolidVolumePolicy.cs" />
     <Compile Include="..\..\src\shared\Handlers\VerifyEdgeClosurePolicy.cs" Link="Shared\VerifyEdgeClosurePolicy.cs" />
     <Compile Include="..\..\src\shared\Handlers\CadAxisAuditPolicy.cs" Link="Shared\CadAxisAuditPolicy.cs" />
+    <Compile Include="..\..\src\shared\Handlers\CadArcMetrics.cs" Link="Shared\CadArcMetrics.cs" />
     <Compile Include="..\..\src\shared\Handlers\CadPlanIntegrity.cs" Link="Shared\CadPlanIntegrity.cs" />
     <Compile Include="..\..\src\shared\Handlers\ViewportLayoutMath.cs" Link="Shared\ViewportLayoutMath.cs" />
     <Compile Include="..\..\src\shared\Security\PathAllowlist.cs" Link="Shared\PathAllowlist.cs" />
