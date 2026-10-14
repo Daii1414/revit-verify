@@ -10,7 +10,7 @@ namespace RvtMcp.Plugin.Handlers
     {
         public string Name => "set_view_orientation";
         public string Description => "Point a 3D view camera: eye placed along direction from target, deterministic framing for screenshot comparison. Restores with Revit Undo.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to model bbox center (datum categories excluded).""},""distance_factor"":{""type"":""number"",""default"":1.5},""exclude_datums"":{""type"":""boolean"",""default"":true},""zoom_to_fit"":{""type"":""boolean"",""default"":true,""description"":""Zoom the open view to fit after orienting (deterministic framing). Skipped silently if the view is not open on screen.""}}}";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to element box center, else model bbox center (datum categories excluded).""},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""},""description"":""Frame exactly these elements (ids). Beats model-wide auto framing.""},""distance_factor"":{""type"":""number"",""default"":1.5},""exclude_datums"":{""type"":""boolean"",""default"":true},""zoom_to_fit"":{""type"":""boolean"",""default"":true,""description"":""Zoom the open view to fit after orienting (deterministic framing). Skipped silently if the view is not open on screen.""}}}";
 
         private static readonly long[] DatumCategories =
         {
@@ -34,6 +34,7 @@ namespace RvtMcp.Plugin.Handlers
             var distanceFactor = req.Value<double?>("distance_factor") ?? 1.5;
             var excludeDatums = req.Value<bool?>("exclude_datums") ?? true;
             var zoomToFit = req.Value<bool?>("zoom_to_fit") ?? true;
+            var elementIdsToken = req["element_ids"] as JArray;
 
             var view = viewIdParam.HasValue
                 ? doc.GetElement(RevitCompat.ToElementId(viewIdParam.Value)) as View3D
@@ -52,17 +53,39 @@ namespace RvtMcp.Plugin.Handlers
 
             XYZ target;
             double size;
+            int framedCount = 0;
+            int missingCount = 0;
+            BoundingBoxXYZ elementBox = null;
+            if (elementIdsToken != null && elementIdsToken.Count > 0)
+            {
+                var resolved = new List<ElementId>();
+                foreach (var t in elementIdsToken)
+                {
+                    var el = doc.GetElement(RevitCompat.ToElementId(t.Value<long>()));
+                    if (el == null) missingCount++;
+                    else { resolved.Add(el.Id); framedCount++; }
+                }
+                if (framedCount > 0)
+                    elementBox = BuildIdBox(doc, view, resolved);
+            }
             if (targetObj != null)
             {
                 target = new XYZ(
                     (targetObj.Value<double?>("x_mm") ?? 0) / 304.8,
                     (targetObj.Value<double?>("y_mm") ?? 0) / 304.8,
                     (targetObj.Value<double?>("z_mm") ?? 0) / 304.8);
-                var fitBox = BuildModelBox(doc, view, excludeDatums);
+                var fitBox = elementBox ?? BuildModelBox(doc, view, excludeDatums);
                 size = fitBox == null ? 0 : (fitBox.Max - fitBox.Min).GetLength();
+            }
+            else if (elementBox != null)
+            {
+                target = (elementBox.Min + elementBox.Max) * 0.5;
+                size = (elementBox.Max - elementBox.Min).GetLength();
             }
             else
             {
+                if (elementIdsToken != null && elementIdsToken.Count > 0)
+                    return CommandResult.Fail("None of the given element_ids resolved to visible geometry.");
                 var box = BuildModelBox(doc, view, excludeDatums);
                 if (box == null) return CommandResult.Fail("Model bounding box is empty.");
                 target = (box.Min + box.Max) * 0.5;
@@ -102,7 +125,9 @@ namespace RvtMcp.Plugin.Handlers
                         eye_mm = new { x_mm = eye.X * 304.8, y_mm = eye.Y * 304.8, z_mm = eye.Z * 304.8 },
                         target_mm = new { x_mm = target.X * 304.8, y_mm = target.Y * 304.8, z_mm = target.Z * 304.8 },
                         size_mm = size * 304.8,
-                        zoomed_to_fit = zoomed
+                        zoomed_to_fit = zoomed,
+                        framed_ids = framedCount,
+                        missing_ids = missingCount
                     });
                 }
                 catch (Exception ex)
@@ -128,6 +153,25 @@ namespace RvtMcp.Plugin.Handlers
             }
             catch { }
             return false;
+        }
+
+        private static BoundingBoxXYZ BuildIdBox(Document doc, View view, List<ElementId> ids)
+        {
+            XYZ min = null;
+            XYZ max = null;
+            foreach (var id in ids)
+            {
+                var box = doc.GetElement(id)?.get_BoundingBox(view);
+                if (box == null) continue;
+                min = min == null
+                    ? box.Min
+                    : new XYZ(Math.Min(min.X, box.Min.X), Math.Min(min.Y, box.Min.Y), Math.Min(min.Z, box.Min.Z));
+                max = max == null
+                    ? box.Max
+                    : new XYZ(Math.Max(max.X, box.Max.X), Math.Max(max.Y, box.Max.Y), Math.Max(max.Z, box.Max.Z));
+            }
+            if (min == null || max == null) return null;
+            return new BoundingBoxXYZ { Min = min, Max = max };
         }
 
         private static BoundingBoxXYZ BuildModelBox(Document doc, View view, bool excludeDatums)

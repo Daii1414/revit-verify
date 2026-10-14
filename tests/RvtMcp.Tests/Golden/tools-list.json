@@ -7381,7 +7381,7 @@
     },
     {
       "name": "revit_set_view_orientation",
-      "description_hash": "sha256:c67db36b44dbbd4ac72f0844429958d3b1420c219993c57ed24e7e7e0cf282c0",
+      "description_hash": "sha256:a376aa26d785e6fa1e2fc7656c5a421856365a35b0c5b62d1a85a574381e3fa3",
       "inputSchema": {
         "properties": {
           "direction_json": {
@@ -7391,6 +7391,10 @@
           "distance_factor": {
             "description": "",
             "type": "Double"
+          },
+          "element_ids": {
+            "description": "",
+            "type": "Int64[]"
           },
           "exclude_datums": {
             "description": "",
@@ -7403,6 +7407,10 @@
           "view_id": {
             "description": "",
             "type": "Nullable`1"
+          },
+          "zoom_to_fit": {
+            "description": "",
+            "type": "Boolean"
           }
         },
         "required": [],
