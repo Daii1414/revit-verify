@@ -9,9 +9,10 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 
 1. **assert_geometry (bbox/envelope/count/watertight/supported + offending IDs)**
    От: rhino-mcp (MIT). Частично есть `revit_verify_assert`: bbox, точное или
-   диапазонное count, bounded positive solid-volume checks (m³) и IDs
-   отсутствующих/нарушивших элементов. Watertight/support-проверок и
-   автоматического сбора ID виновников при создании нет.
+   диапазонное count, bounded positive solid-volume checks (m³), bounded
+   `edge_closure` (edge adjacency + nonzero volume) и IDs нарушителей. Edge
+   closure не доказывает отсутствие самопересечений; support-проверки и
+   автоматический сбор ID виновников при создании пока отсутствуют.
 2. **Delivery diffs (snapshot/compare/colorize + quality trend).**
    От: Horizun `horizun_model_diff`, naviscoord (persistent issue IDs).
    У нас: history + capture раздельно. Куда: `revit_verify_diff`

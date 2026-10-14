@@ -8,6 +8,7 @@
 - Extend `revit_set_view_orientation` with exact camera `eye_mm_json` + `target_mm_json` pose and optional `up_json` roll vector; direction/distance framing remains supported.
 - Add `revit_capture_review_set` to capture up to eight named review frames in one call, validating the whole request before capture and attempting to restore each view afterward. Current source counts: default **57**, all **248**, adaptive bake **251**, read-only **102** (including target switching).
 - Extend `revit_verify_assert` with bounded per-element positive solid-volume checks in m³, offending element IDs, and exact or inclusive count ranges. This does not assert support or prove the source geometry is watertight.
+- Add `edge_closure` assertions that check nonzero Revit solid volume and two adjacent faces for each inspected edge. Open shells fail; unavailable or degenerate geometry stays unverified. The result explicitly does not prove absence of self-intersections or structural support.
 
 ## Release history
 

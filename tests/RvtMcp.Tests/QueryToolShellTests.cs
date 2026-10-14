@@ -74,11 +74,12 @@ namespace RvtMcp.Tests
         [Fact]
         public async Task Verify_assert_sends_assertions()
         {
-            var assertions = "[{\"kind\":\"count\",\"category\":\"Walls\",\"expect\":8}]";
+            var assertions = "[{\"kind\":\"count\",\"category\":\"Walls\",\"expect\":8},{\"kind\":\"edge_closure\",\"ids\":[42]}]";
             var sent = await Capture.Send(() => QueryTools.VerifyAssert(assertions));
 
             Assert.Equal("verify_assert", sent.Command);
             Assert.Equal("count", sent.Json()["assertions"][0].Value<string>("kind"));
+            Assert.Equal("edge_closure", sent.Json()["assertions"][1].Value<string>("kind"));
         }
 
         [Fact]
