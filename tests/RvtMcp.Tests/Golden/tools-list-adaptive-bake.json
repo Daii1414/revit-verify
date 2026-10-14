@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 238,
+  "tool_count": 240,
   "tools": [
     {
       "name": "revit_accept_bake_suggestion",
@@ -1885,6 +1885,32 @@
         },
         "required": [
           "name"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_create_memory_note",
+      "description_hash": "sha256:ba8baef3ae9bfa10419ce0446c8bded15a9740fbe4bce051d1582be8d1f3960d",
+      "inputSchema": {
+        "properties": {
+          "model": {
+            "description": "",
+            "type": "String"
+          },
+          "text": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "text"
         ],
         "type": "object"
       },
@@ -6272,6 +6298,26 @@
           "dirZ",
           "view3dId"
         ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      }
+    },
+    {
+      "name": "revit_read_memory_notes",
+      "description_hash": "sha256:618b351ccdd8e82b25c85ba4970daf50c741ca3d79194501ae9f6e2ad1713902",
+      "inputSchema": {
+        "properties": {
+          "model": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [],
         "type": "object"
       },
       "annotations": {

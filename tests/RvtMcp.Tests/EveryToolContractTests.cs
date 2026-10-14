@@ -33,6 +33,8 @@ namespace RvtMcp.Tests
             ["revit_get_current_target"] = "MetaToolShellTests",
             ["revit_switch_target"] = "MetaToolShellTests",
             ["revit_analyze_usage_patterns"] = "MetaToolShellTests",
+            ["revit_create_memory_note"] = "MemoryNotesTests",
+            ["revit_read_memory_notes"] = "MemoryNotesTests",
         };
 
         // Tools that parse JSON text or arrays before sending need a minimal valid value for that parameter.

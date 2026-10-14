@@ -494,5 +494,90 @@ namespace RvtMcp.Server
                 return $"Error: {ex.Message}";
             }
         }
+
+        internal static string MemoryRootOverride { get; set; }
+
+        private static string MemoryNotesPath()
+        {
+            var dir = MemoryRootOverride
+                ?? Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "RvtVerify", "memory");
+            Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "notes.json");
+        }
+
+        private static JArray LoadMemoryNotes()
+        {
+            var path = MemoryNotesPath();
+            if (!File.Exists(path))
+                return new JArray();
+            try
+            {
+                var parsed = JToken.Parse(File.ReadAllText(path, Encoding.UTF8));
+                return parsed as JArray ?? new JArray();
+            }
+            catch
+            {
+                return new JArray();
+            }
+        }
+
+        [McpServerTool(Name = "revit_create_memory_note", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Append a standing project convention for future agent passes (units, naming, tolerances, assumptions). Stored locally, never sent anywhere. Params: text (required, max 2000 chars), model (optional tag). Max 200 notes.")]
+        public static async Task<string> CreateMemoryNote(string text, string model = null)
+        {
+            await Task.Yield();
+            var blocked = ServerState.BlockIfReadOnly("create_memory_note");
+            if (blocked != null) return blocked;
+            try
+            {
+                if (string.IsNullOrWhiteSpace(text))
+                    return "Error: text is required.";
+                text = text.Trim();
+                if (text.Length > 2000)
+                    return "Error: text exceeds 2000 chars.";
+                var notes = LoadMemoryNotes();
+                if (notes.Count >= 200)
+                    return "Error: note store full (200). Edit %LOCALAPPDATA%\\RvtVerify\\memory\\notes.json by hand.";
+                notes.Add(new JObject
+                {
+                    ["id"] = Guid.NewGuid().ToString("N"),
+                    ["text"] = text,
+                    ["model"] = model ?? "",
+                    ["created_utc"] = DateTimeOffset.UtcNow.ToString("o")
+                });
+                var path = MemoryNotesPath();
+                var tmp = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                File.WriteAllText(tmp, notes.ToString(Formatting.None), Encoding.UTF8);
+                if (File.Exists(path))
+                    File.Replace(tmp, path, destinationBackupFileName: null);
+                else
+                    File.Move(tmp, path);
+                return JsonConvert.SerializeObject(new { saved = true, count = notes.Count }, Formatting.Indented);
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
+        }
+
+        [McpServerTool(Name = "revit_read_memory_notes", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read saved project conventions for this and future passes. Params: model (optional filter tag). Local file only.")]
+        public static async Task<string> ReadMemoryNotes(string model = null)
+        {
+            await Task.Yield();
+            var blocked = ServerState.BlockIfReadOnly("read_memory_notes");
+            if (blocked != null) return blocked;
+            try
+            {
+                var notes = LoadMemoryNotes();
+                if (!string.IsNullOrWhiteSpace(model))
+                    notes = new JArray(notes.Where(n => string.Equals(n.Value<string>("model"), model, StringComparison.OrdinalIgnoreCase)));
+                return JsonConvert.SerializeObject(new { count = notes.Count, notes }, Formatting.Indented);
+            }
+            catch (Exception ex)
+            {
+                return $"Error: {ex.Message}";
+            }
+        }
     }
 }

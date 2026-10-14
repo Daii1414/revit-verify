@@ -18,11 +18,13 @@ namespace RvtMcp.Tests
         {
             "revit_analyze_usage_patterns",
             "revit_batch_execute",
+            "revit_create_memory_note",
             "revit_get_current_target",
             "revit_list_available_targets",
             "revit_list_recent_models",
             "revit_open_model",
             "revit_purge_unused",
+            "revit_read_memory_notes",
             "revit_set_project_info",
             "revit_show_message",
             "revit_switch_target"
