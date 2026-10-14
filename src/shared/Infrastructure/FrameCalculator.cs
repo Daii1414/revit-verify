@@ -23,6 +23,21 @@ namespace RvtMcp.Plugin
             return Normalize(Cross(right, forward));
         }
 
+        public static double[] ComputeUp(double[] forward, double[] preferredUp)
+        {
+            if (preferredUp == null) return ComputeUp(forward);
+            var fwd = Normalize(forward);
+            var projected = new[]
+            {
+                preferredUp[0] - Dot(preferredUp, fwd) * fwd[0],
+                preferredUp[1] - Dot(preferredUp, fwd) * fwd[1],
+                preferredUp[2] - Dot(preferredUp, fwd) * fwd[2],
+            };
+            if (Length(projected) < 1e-9)
+                throw new ArgumentException("up must not be parallel to the camera view direction.");
+            return Normalize(projected);
+        }
+
         public static double[] ComputeEye(double[] targetMm, double[] direction, double distanceMm)
         {
             if (distanceMm <= 0)

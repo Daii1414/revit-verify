@@ -19,6 +19,22 @@ namespace RvtMcp.Tests
         }
 
         [Fact]
+        public void Exact_camera_up_is_projected_onto_the_view_plane()
+        {
+            var up = FrameCalculator.ComputeUp(new[] { 0.0, 1.0, 0.0 }, new[] { 0.0, 1.0, 1.0 });
+            Assert.Equal(1.0, FrameCalculator.Length(up), 9);
+            Assert.Equal(0.0, FrameCalculator.Dot(up, new[] { 0.0, 1.0, 0.0 }), 9);
+            Assert.Equal(1.0, up[2], 9);
+        }
+
+        [Fact]
+        public void Exact_camera_up_parallel_to_forward_is_rejected()
+        {
+            Assert.Throws<ArgumentException>(() => FrameCalculator.ComputeUp(
+                new[] { 0.0, 1.0, 0.0 }, new[] { 0.0, -2.0, 0.0 }));
+        }
+
+        [Fact]
         public void Eye_lands_on_ray_at_given_distance()
         {
             var target = new[] { 15700.0, 7000.0, 3000.0 };

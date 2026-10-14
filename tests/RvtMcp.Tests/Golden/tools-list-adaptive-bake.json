@@ -7605,7 +7605,7 @@
     },
     {
       "name": "revit_set_view_orientation",
-      "description_hash": "sha256:6c98c3bf0f27579bd6c6425b992caa8a94911f9abeec7ad47626da79c6854076",
+      "description_hash": "sha256:70b1158a45941f2b019161a696387a37d3263356f0666d619d7884168b540d3b",
       "inputSchema": {
         "properties": {
           "direction_json": {
@@ -7628,7 +7628,15 @@
             "description": "",
             "type": "Boolean"
           },
+          "eye_mm_json": {
+            "description": "",
+            "type": "String"
+          },
           "target_mm_json": {
+            "description": "",
+            "type": "String"
+          },
+          "up_json": {
             "description": "",
             "type": "String"
           },

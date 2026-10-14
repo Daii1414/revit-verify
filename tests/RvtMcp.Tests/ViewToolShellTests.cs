@@ -122,6 +122,21 @@ namespace RvtMcp.Tests
         }
 
         [Fact]
+        public async Task Set_view_orientation_sends_exact_camera_pose()
+        {
+            var sent = await Capture.Send(() => ViewTools.SetViewOrientation(
+                7, null, "{\"x_mm\":100,\"y_mm\":200,\"z_mm\":300}", null, 1.5, true, false, null,
+                "{\"x_mm\":10000,\"y_mm\":20000,\"z_mm\":30000}", "{\"x\":0,\"y\":0,\"z\":1}"));
+
+            Assert.Equal("set_view_orientation", sent.Command);
+            var json = sent.Json();
+            Assert.Equal(100, json["target_mm"].Value<int>("x_mm"));
+            Assert.Equal(10000, json["eye_mm"].Value<int>("x_mm"));
+            Assert.Equal(1, json["up"].Value<int>("z"));
+            Assert.False(json.Value<bool>("zoom_to_fit"));
+        }
+
+        [Fact]
         public async Task Export_element_snapshot_sends_ids()
         {
             var sent = await Capture.Send(() => ViewTools.ExportElementSnapshot(

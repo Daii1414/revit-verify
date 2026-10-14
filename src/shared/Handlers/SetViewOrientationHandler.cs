@@ -9,8 +9,8 @@ namespace RvtMcp.Plugin.Handlers
     public class SetViewOrientationHandler : IRevitCommand
     {
         public string Name => "set_view_orientation";
-        public string Description => "Point a 3D view camera: eye placed along direction from target, deterministic framing for screenshot comparison. Restores with Revit Undo.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to element box center, else model bbox center (datum categories excluded).""},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""},""description"":""Frame exactly these elements (ids). Beats model-wide auto framing.""},""distance_factor"":{""type"":""number"",""default"":1.5},""distance_mm"":{""type"":""number"",""description"":""Explicit eye distance in mm. Beats distance_factor when positive.""},""exclude_datums"":{""type"":""boolean"",""default"":true},""zoom_to_fit"":{""type"":""boolean"",""default"":true,""description"":""Zoom the open view to fit after orienting (deterministic framing). Skipped silently if the view is not open on screen.""}}}";
+        public string Description => "Set a 3D view camera for repeatable review. Use eye_mm + target_mm for an exact camera position, optionally up for camera roll; or direction with a model-derived target and distance. Restores with Revit Undo.";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to element box center, else model bbox center (datum categories excluded).""},""eye_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Exact camera position in mm. Requires target_mm; overrides direction and distance.""},""up"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""description"":""Preferred camera up vector. Projected onto the plane perpendicular to the view direction.""},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""},""description"":""Frame exactly these elements (ids). Beats model-wide auto framing.""},""distance_factor"":{""type"":""number"",""default"":1.5},""distance_mm"":{""type"":""number"",""description"":""Explicit eye distance in mm. Beats distance_factor when positive.""},""exclude_datums"":{""type"":""boolean"",""default"":true},""zoom_to_fit"":{""type"":""boolean"",""default"":true,""description"":""Zoom the open view to fit after orienting (deterministic framing). Skipped silently if the view is not open on screen.""}}}";
 
         private static readonly long[] DatumCategories =
         {
@@ -31,6 +31,8 @@ namespace RvtMcp.Plugin.Handlers
             var viewIdParam = req.Value<long?>("view_id");
             var dirObj = req["direction"] as JObject;
             var targetObj = req["target_mm"] as JObject;
+            var eyeObj = req["eye_mm"] as JObject;
+            var upObj = req["up"] as JObject;
             var distanceFactor = req.Value<double?>("distance_factor") ?? 1.5;
             var distanceMmParam = req.Value<double?>("distance_mm");
             var excludeDatums = req.Value<bool?>("exclude_datums") ?? true;
@@ -49,7 +51,9 @@ namespace RvtMcp.Plugin.Handlers
                 dirObj?.Value<double?>("y") ?? -1,
                 dirObj?.Value<double?>("z") ?? 0.7,
             };
-            if (distanceFactor <= 0)
+            if (eyeObj != null && targetObj == null)
+                return CommandResult.Fail("eye_mm requires target_mm for an exact camera pose.");
+            if (eyeObj == null && distanceFactor <= 0)
                 return CommandResult.Fail("direction must be non-zero and distance_factor positive.");
 
             XYZ target;
@@ -71,10 +75,19 @@ namespace RvtMcp.Plugin.Handlers
             }
             if (targetObj != null)
             {
-                target = new XYZ(
-                    (targetObj.Value<double?>("x_mm") ?? 0) / 304.8,
-                    (targetObj.Value<double?>("y_mm") ?? 0) / 304.8,
-                    (targetObj.Value<double?>("z_mm") ?? 0) / 304.8);
+                if (eyeObj != null)
+                {
+                    var targetCoords = ReadPoint(targetObj, "x_mm", "y_mm", "z_mm");
+                    if (targetCoords == null) return CommandResult.Fail("target_mm needs finite x_mm, y_mm, and z_mm values for an exact camera pose.");
+                    target = new XYZ(targetCoords[0] / 304.8, targetCoords[1] / 304.8, targetCoords[2] / 304.8);
+                }
+                else
+                {
+                    target = new XYZ(
+                        (targetObj.Value<double?>("x_mm") ?? 0) / 304.8,
+                        (targetObj.Value<double?>("y_mm") ?? 0) / 304.8,
+                        (targetObj.Value<double?>("z_mm") ?? 0) / 304.8);
+                }
                 var fitBox = elementBox ?? BuildModelBox(doc, view, excludeDatums);
                 size = fitBox == null ? 0 : (fitBox.Max - fitBox.Min).GetLength();
             }
@@ -99,10 +112,24 @@ namespace RvtMcp.Plugin.Handlers
             try
             {
                 var targetMm = new[] { target.X * 304.8, target.Y * 304.8, target.Z * 304.8 };
-                fwdArr = FrameCalculator.ComputeForward(dirArr);
-                upArr = FrameCalculator.ComputeUp(fwdArr);
-                distanceMm = FrameCalculator.ResolveDistance(size * 304.8, distanceFactor, distanceMmParam);
-                eyeArr = FrameCalculator.ComputeEye(targetMm, dirArr, distanceMm);
+                if (eyeObj != null)
+                {
+                    eyeArr = ReadPoint(eyeObj, "x_mm", "y_mm", "z_mm");
+                    if (eyeArr == null) return CommandResult.Fail("eye_mm needs finite x_mm, y_mm, and z_mm values.");
+                    dirArr = new[] { eyeArr[0] - targetMm[0], eyeArr[1] - targetMm[1], eyeArr[2] - targetMm[2] };
+                    fwdArr = FrameCalculator.ComputeForward(dirArr);
+                    distanceMm = FrameCalculator.Length(dirArr);
+                }
+                else
+                {
+                    fwdArr = FrameCalculator.ComputeForward(dirArr);
+                    distanceMm = FrameCalculator.ResolveDistance(size * 304.8, distanceFactor, distanceMmParam);
+                    eyeArr = FrameCalculator.ComputeEye(targetMm, dirArr, distanceMm);
+                }
+                var preferredUp = upObj == null ? null : ReadPoint(upObj, "x", "y", "z");
+                if (upObj != null && preferredUp == null)
+                    return CommandResult.Fail("up needs finite x, y, and z values.");
+                upArr = FrameCalculator.ComputeUp(fwdArr, preferredUp);
             }
             catch (ArgumentException ex)
             {
@@ -157,6 +184,23 @@ namespace RvtMcp.Plugin.Handlers
             }
             catch { }
             return false;
+        }
+
+        private static double[] ReadPoint(JObject point, string xKey, string yKey, string zKey)
+        {
+            if (point == null) return null;
+            try
+            {
+                var x = point.Value<double?>(xKey);
+                var y = point.Value<double?>(yKey);
+                var z = point.Value<double?>(zKey);
+                if (!x.HasValue || !y.HasValue || !z.HasValue
+                    || double.IsNaN(x.Value) || double.IsInfinity(x.Value)
+                    || double.IsNaN(y.Value) || double.IsInfinity(y.Value)
+                    || double.IsNaN(z.Value) || double.IsInfinity(z.Value)) return null;
+                return new[] { x.Value, y.Value, z.Value };
+            }
+            catch { return null; }
         }
 
         private static BoundingBoxXYZ BuildIdBox(Document doc, View view, List<ElementId> ids)

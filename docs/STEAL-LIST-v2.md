@@ -15,6 +15,8 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    От: Horizun `horizun_model_diff`, naviscoord (persistent issue IDs).
    У нас: history + capture раздельно. Куда: `revit_verify_diff`
    (до/после одним кадром + diff по элементам).
+   Точная камера частично закрыта: `revit_set_view_orientation` теперь принимает
+   eye/target/up для повторяемой постановки кадра; мультикадр и diff ещё нужны.
 3. **YAML-правила QA (pass/fail + score + GUIDs).**
    От: alesdev88/Archicad-MCP (MIT). У нас: нет. Куда: `verify_run_rules`
    с YAML-файлами (стены замкнуты? комнаты? размеры?). Сюда же

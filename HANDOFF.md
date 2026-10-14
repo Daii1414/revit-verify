@@ -114,11 +114,13 @@ contract-пробы (параметр JSON-текста называть *_json,
 3. ~~FrameCalculator: distance_mm~~ СДЕЛАНО (ResolveDistance + тесты, там же).
 4. `revit_cad_extract` — реализован как read-only анализ слоёв и ограниченной
    векторной геометрии уже загруженных CAD import/link; ограничения текста и
-   метаданных блоков описаны. Сборка прошла, полный suite: 1886 тестов зелёные;
-   tool counts: 56/245/248/100 (с target switching).
+   метаданных блоков описаны. `revit_set_view_orientation` расширен точным
+   eye/target/up pose. Сборка прошла, полный suite: 1889 тестов зелёные;
+   tool counts: 56/245/248/100 (с target switching). В Revit на живом CAD
+   ещё не прогонялось: пользовательские модели не менялись.
 5. До установщика ещё остаются P0-задачи из STEAL-LIST-v2: CAD plan/audit с
    версионными правилами и provenance, расширение verify_assert за bbox/count,
-   доставка diff (before/after), правила QA. Реализовывать безопасными
+   доставка diff (before/after, camera eye/target/up уже точные), правила QA. Реализовывать безопасными
    read-only этапами; не выполнять импорт или запись в пользовательские модели.
 6. Установщик для публикации — после предшествующих задач: install.ps1 в репо ОТСУТСТВУЕТ (только
    tests/installer/* + docs/install.md под апстрим Bimwright-пути). Нужен свой
