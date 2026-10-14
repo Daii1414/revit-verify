@@ -110,6 +110,8 @@ namespace RvtMcp.Plugin.Handlers
             {
                 if (n++ > 50000) break;
                 if (e is View) continue; // views/cameras report huge boxes, not model geometry
+                if (e is ImportInstance) continue; // reference underlays (DWG) must not drag framing
+                if (e is RevitLinkInstance) continue; // linked models must not drag framing
                 if (excludeDatums && e.Category != null && excluded.Contains(RevitCompat.GetId(e.Category.Id)))
                     continue;
                 var box = e.get_BoundingBox(view);
