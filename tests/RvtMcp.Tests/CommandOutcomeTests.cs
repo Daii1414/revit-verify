@@ -115,7 +115,7 @@ namespace RvtMcp.Tests
         {
             var source = ReadSource("Handlers", "BatchExecuteHandler.cs");
 
-            Assert.Contains("new { results = outcome.Results, rolledBack }", source);
+            Assert.Contains("new { results = outcome.Results, rolledBack, undo }", source);
         }
 
         [Fact]
