@@ -7,7 +7,7 @@ namespace RvtMcp.Server.Handlers
 {
     public static class CreateBakeIssueDraftHandler
     {
-        private const string IssueBaseUrl = "https://github.com/bimwright/rvt-mcp/issues/new";
+        private const string IssueBaseUrl = "https://github.com/Daii1414/revit-verify/issues/new";
 
         public static string Handle(BakeSuggestionRecord suggestion, string currentRevitVersion = null)
         {

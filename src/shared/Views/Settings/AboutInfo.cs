@@ -25,10 +25,10 @@ namespace RvtMcp.Plugin.Views.Settings
             if (string.IsNullOrWhiteSpace(version))
                 version = assembly.GetName().Version?.ToString() ?? "0.0.0";
 
-            var repository = "https://github.com/bimwright/rvt-mcp";
+            var repository = "https://github.com/Daii1414/revit-verify";
             return new AboutInfo
             {
-                ProductName = "rvt-mcp",
+                ProductName = "RvtVerify",
                 PluginInformationalVersion = version,
                 RevitYear = revitYear ?? "—",
                 LicenseId = "Apache-2.0",
@@ -43,7 +43,7 @@ namespace RvtMcp.Plugin.Views.Settings
         public static string CreateLicenseSourceUrl(string informationalVersion)
         {
             var version = string.IsNullOrWhiteSpace(informationalVersion) ? "0.0.0" : informationalVersion.Trim();
-            return "https://github.com/bimwright/rvt-mcp/blob/" + CreateReference(version) + "/LICENSE";
+            return "https://github.com/Daii1414/revit-verify/blob/" + CreateReference(version) + "/LICENSE";
         }
 
         private static string CreateReference(string version)

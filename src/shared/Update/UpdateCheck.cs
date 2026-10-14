@@ -137,17 +137,21 @@ namespace RvtMcp.Plugin.Update
     /// </summary>
     public static class UpdateChecker
     {
-        public const string LatestReleaseApiUrl = "https://api.github.com/repos/bimwright/rvt-mcp/releases/latest";
-        public const string ReleasesLatestUrl = "https://github.com/bimwright/rvt-mcp/releases/latest";
-        public const string DisableEnvVar = "BIMWRIGHT_DISABLE_UPDATE_CHECK";
+        public const string LatestReleaseApiUrl = "https://api.github.com/repos/Daii1414/revit-verify/releases/latest";
+        public const string ReleasesLatestUrl = "https://github.com/Daii1414/revit-verify/releases/latest";
+        public const string DisableEnvVar = "RVTVERIFY_DISABLE_UPDATE_CHECK";
+        private const string LegacyDisableEnvVar = "BIMWRIGHT_DISABLE_UPDATE_CHECK";
         public static readonly TimeSpan CheckInterval = TimeSpan.FromHours(24);
         public static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(5);
 
         public static bool IsDisabledByEnvironment()
         {
-            var v = Environment.GetEnvironmentVariable(DisableEnvVar);
-            return v == "1" || string.Equals(v, "true", StringComparison.OrdinalIgnoreCase);
+            return IsEnvOff(Environment.GetEnvironmentVariable(DisableEnvVar))
+                || IsEnvOff(Environment.GetEnvironmentVariable(LegacyDisableEnvVar));
         }
+
+        private static bool IsEnvOff(string v) =>
+            v == "1" || string.Equals(v, "true", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>Clean semver of an assembly's InformationalVersion ("0.8.2+sha" → "0.8.2").</summary>
         public static string VersionOf(System.Reflection.Assembly assembly)
@@ -172,7 +176,7 @@ namespace RvtMcp.Plugin.Update
                 var tag = o.Value<string>("tag_name");
                 if (!SemanticVersion.TryParse(tag, out var v) || v.IsPrerelease) return null;
                 var url = o.Value<string>("html_url");
-                if (string.IsNullOrWhiteSpace(url) || !url.StartsWith("https://github.com/bimwright/rvt-mcp/", StringComparison.Ordinal))
+                if (string.IsNullOrWhiteSpace(url) || !url.StartsWith("https://github.com/Daii1414/revit-verify/", StringComparison.Ordinal))
                     url = ReleasesLatestUrl;
                 return Tuple.Create(tag, url);
             }
@@ -248,7 +252,7 @@ namespace RvtMcp.Plugin.Update
             using (var http = new HttpClient { Timeout = RequestTimeout })
             using (var request = new HttpRequestMessage(HttpMethod.Get, LatestReleaseApiUrl))
             {
-                request.Headers.UserAgent.ParseAdd("rvt-mcp-update-check");
+                request.Headers.UserAgent.ParseAdd("rvtverify-update-check");
                 request.Headers.Accept.ParseAdd("application/vnd.github+json");
                 using (var response = await http.SendAsync(request, token).ConfigureAwait(false))
                 {
@@ -267,16 +271,15 @@ namespace RvtMcp.Plugin.Update
         {
             if (info == null) return string.Empty;
             var sb = new StringBuilder();
-            sb.AppendLine("Please help me update rvt-mcp (the Revit MCP server and add-in by bimwright).");
+            sb.AppendLine("Please help me update RvtVerify (the self-verifying Revit MCP tool).");
             sb.AppendLine("Installed version: " + info.CurrentVersion);
             sb.AppendLine("Latest version: " + info.LatestVersion);
             sb.AppendLine("Release page: " + info.ReleaseUrl);
             sb.AppendLine();
             sb.AppendLine("Steps:");
-            sb.AppendLine("1. Open the release page and read the release notes and install instructions (also AGENTS.md in the repository).");
-            sb.AppendLine("2. Download the RvtMcp.Setup-v" + info.LatestVersion + "-win-x64.zip asset and verify it against its .sha256 file.");
-            sb.AppendLine("3. Tell me to close every running Revit before installing, then guide me through running the installer step by step.");
-            sb.AppendLine("4. After installing, help me restart Revit and my MCP client, and confirm the server reports " + info.LatestVersion + ".");
+            sb.AppendLine("1. Pull the latest main and rebuild: dotnet build src/server/RvtMcp.Server.csproj -c Debug and dotnet build src/plugin-r25/RvtMcp.Plugin.R25.csproj -c Debug (the plugin self-deploys to %APPDATA%\\Autodesk\\Revit\\Addins\\2025\\RvtVerify\\).");
+            sb.AppendLine("2. Tell me to save my work and close every running Revit, then relaunch it so the new add-in loads.");
+            sb.AppendLine("3. After relaunch, confirm the new tools respond (e.g. revit_get_current_view_info) and the server reports " + info.LatestVersion + ".");
             sb.Append("Ask me before running any command on my computer.");
             return sb.ToString();
         }
@@ -284,7 +287,7 @@ namespace RvtMcp.Plugin.Update
         /// <summary>One-line notice for MCP clients (instructions / status results).</summary>
         public static string ForAgent(UpdateInfo info) =>
             info == null ? null :
-            "rvt-mcp " + info.LatestVersion + " is available (running " + info.CurrentVersion + "). Tell the user and offer to guide the update: " + info.ReleaseUrl;
+            "RvtVerify " + info.LatestVersion + " is available (running " + info.CurrentVersion + "). Tell the user and offer to guide the update: " + info.ReleaseUrl;
 
         /// <summary>
         /// Prepends <paramref name="notice"/> to the server instructions and keeps the
