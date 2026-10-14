@@ -842,7 +842,7 @@
     },
     {
       "name": "revit_cad_audit",
-      "description_hash": "sha256:f0ab9f821acc1861fd62922c3ee3c300bc519c1c6d2da90feb7080f9ea655edf",
+      "description_hash": "sha256:1d2db6ef460132515974f566b280bb8789de2f0e177eaf73297bfb138f3c5033",
       "inputSchema": {
         "properties": {
           "plan_json": {

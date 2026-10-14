@@ -32,5 +32,9 @@ layers was supported and every straight segment was paired without ambiguity.
 Unsupported entities, unpaired segments and ambiguous pairs are returned
 explicitly. Even a complete analysis is an unverified interpretation: openings,
 joins, heights, materials and curved walls are not inferred. `revit_cad_audit`
-currently audits axes against existing Revit grids; it does not audit walls.
-No CAD plan is automatically applied.
+compares planned axes with Revit grids and straight wall candidates with Revit
+wall location-line endpoints and `Wall.Width`, using the audit tolerance for
+both measurements. The comparison is read-only; it does not account for Revit
+wall location-line offsets, curved walls or openings. Unmatched or unsupported
+Revit walls are reported as findings when wall candidates are audited. No CAD
+plan is automatically applied.

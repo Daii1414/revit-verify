@@ -106,6 +106,7 @@ namespace RvtMcp.Tests
             Assert.False(plan["wall_analysis"].Value<bool>("analysis_complete"));
             Assert.Single(plan["wall_analysis"]["unpaired_segments"]);
             Assert.Single(plan["wall_analysis"]["unsupported_entities"]);
+            Assert.True(CadPlanIntegrity.Validate(plan, out var error), error);
         }
 
         [Fact]

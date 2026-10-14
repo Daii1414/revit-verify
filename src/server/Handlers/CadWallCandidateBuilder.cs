@@ -17,10 +17,14 @@ namespace RvtMcp.Server.Handlers
             var layers = ReadNames(rules["wall_layers"]);
             if (layers.Count == 0) return new JObject
             {
+                ["enabled"] = false,
                 ["analysis_complete"] = true,
+                ["eligible_segment_count"] = 0,
+                ["candidate_count"] = 0,
                 ["wall_candidates"] = new JArray(),
                 ["unpaired_segments"] = new JArray(),
-                ["unsupported_entities"] = new JArray()
+                ["unsupported_entities"] = new JArray(),
+                ["ambiguous_candidate_indices"] = new JArray()
             };
 
             var thickness = ReadRequired(rules, "wall_thickness_mm", 50, 2000);
@@ -116,7 +120,11 @@ namespace RvtMcp.Server.Handlers
             }
             return new JObject
             {
-                ["analysis_complete"] = unsupported.Count == 0 && unpaired.Count == 0 && ambiguous.Count == 0,
+                ["enabled"] = true,
+                ["analysis_complete"] = segments.Count > 0 && candidates.Count > 0
+                    && unsupported.Count == 0 && unpaired.Count == 0 && ambiguous.Count == 0,
+                ["eligible_segment_count"] = segments.Count,
+                ["candidate_count"] = candidates.Count,
                 ["wall_candidates"] = candidates,
                 ["unpaired_segments"] = unpaired,
                 ["unsupported_entities"] = unsupported,

@@ -80,7 +80,7 @@ namespace RvtMcp.Server
             catch (Exception ex) { return JsonConvert.SerializeObject(new { success = false, error = ex.Message }); }
         }
 
-        [McpServerTool(Name = "revit_cad_audit", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare axis candidates in a versioned CAD plan against existing straight Revit grids. Wall candidates are not audited yet. Returns matching and offending Revit element IDs; never changes the model.")]
+        [McpServerTool(Name = "revit_cad_audit", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare versioned CAD axes against Revit grids and straight-wall candidates against Revit wall location lines and widths. Incomplete CAD analysis, unmatched Revit walls, or unsupported wall geometry fail the audit. Returns matching and offending IDs; never changes the model.")]
         public static async Task<string> CadAudit(
             [System.ComponentModel.Description("Complete JSON output from revit_cad_plan; its plan hash is verified before comparison.")] string plan_json,
             [System.ComponentModel.Description("Maximum permitted axis coordinate deviation in millimetres; default 10.")] double tolerance_mm = 10)

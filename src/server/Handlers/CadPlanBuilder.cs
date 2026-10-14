@@ -117,7 +117,7 @@ namespace RvtMcp.Server.Handlers
                 ["coordinate_system"] = "Revit internal project coordinates, millimetres; CAD insertion transform already applied by Revit",
                 ["x_axes"] = xAxes,
                 ["y_axes"] = yAxes,
-                ["wall_candidates"] = wallAnalysis["wall_candidates"],
+                ["wall_candidates"] = wallAnalysis["wall_candidates"].DeepClone(),
                 ["wall_analysis"] = wallAnalysis,
                 ["limitations"] = new JArray(
                     "Candidates are inferred only from straight or tessellated CAD segments on the exact configured layers.",
