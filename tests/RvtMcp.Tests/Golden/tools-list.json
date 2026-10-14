@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 240,
+  "tool_count": 241,
   "tools": [
     {
       "name": "revit_acquire_coordinates_from_link",
@@ -7853,6 +7853,45 @@
       },
       "annotations": {
         "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_transform_elements",
+      "description_hash": "sha256:b7c38793753c74a919e0be5d8b9fa4dfb130aec1361100fd2c1f1531ad83d9d3",
+      "inputSchema": {
+        "properties": {
+          "angle_deg": {
+            "description": "",
+            "type": "Double"
+          },
+          "center_mm_json": {
+            "description": "",
+            "type": "String"
+          },
+          "element_ids": {
+            "description": "",
+            "type": "String"
+          },
+          "op": {
+            "description": "",
+            "type": "String"
+          },
+          "vector_mm_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "op",
+          "element_ids"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": true,
         "idempotentHint": false,
         "openWorldHint": false,
         "readOnlyHint": false

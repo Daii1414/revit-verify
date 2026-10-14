@@ -43,6 +43,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.CreateGroupFromElementsHandler());
             // Phase 4: Modify & Delete
             Register(new Handlers.OperateElementHandler());
+            Register(new Handlers.TransformElementsHandler());
             Register(new Handlers.ColorElementsHandler());
             Register(new Handlers.SetElementParameterValuesHandler());
             Register(new Handlers.SetTypeParameterValuesHandler());

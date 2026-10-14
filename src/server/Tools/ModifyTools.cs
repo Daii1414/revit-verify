@@ -47,6 +47,34 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_transform_elements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Move, copy or rotate elements; restore them with Revit Undo. One operation per call. Params: op ('move'|'copy'|'rotate'), element_ids (JSON int array), vector_mm ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}' for move/copy), center_mm + angle_deg (counterclockwise around vertical, rotate only).")]
+        public static async Task<string> TransformElements(string op, string element_ids, string vector_mm_json = null, string center_mm_json = null, double angle_deg = 0)
+        {
+            var blocked = ServerState.BlockIfReadOnly("transform_elements");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var parsedIds = JArray.Parse(element_ids).ToObject<long[]>();
+                object vectorObj = null;
+                if (!string.IsNullOrWhiteSpace(vector_mm_json))
+                    vectorObj = JObject.Parse(vector_mm_json);
+                object centerObj = null;
+                if (!string.IsNullOrWhiteSpace(center_mm_json))
+                    centerObj = JObject.Parse(center_mm_json);
+                var result = await ToolGateway.SendToRevit("transform_elements", new
+                {
+                    op,
+                    element_ids = parsedIds,
+                    vector_mm = vectorObj,
+                    center_mm = centerObj,
+                    angle_deg
+                });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_color_elements", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Overwrite element graphics; restore them with Revit Undo. Color-code all matching elements by parameter value. maxGroups caps response detail only; mutation summary remains complete.")]
         public static async Task<string> ColorElements(string category, string parameterName, int maxGroups = 100)
         {
