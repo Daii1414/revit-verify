@@ -1,0 +1,22 @@
+# Smithery manifest — exposes RvtVerify to the Smithery.ai MCP directory.
+# Docs: https://smithery.ai/docs/build/project-config/smithery-yaml
+#
+# NOTE on installation model:
+# RvtVerify is not on NuGet yet. Build the server once with:
+#
+#   dotnet build src/server/RvtMcp.Server.csproj -c Release
+#
+# then point Smithery at the built dll (see .mcp.json.example).
+# The Revit plugin deploys via `dotnet build src/plugin-r25/...`
+# (Deploy target copies into %APPDATA%\Autodesk\Revit\Addins\2025\RvtVerify\).
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties: {}
+  commandFunction: |
+    (config) => ({
+      "command": "dotnet",
+      "args": []
+    })

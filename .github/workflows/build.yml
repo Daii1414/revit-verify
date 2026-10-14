@@ -1,0 +1,58 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build-${{ matrix.project }}
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - project: src/server/RvtMcp.Server.csproj
+          - project: src/plugin-r25/RvtMcp.Plugin.R25.csproj
+          - project: src/plugin-r26/RvtMcp.Plugin.R26.csproj
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore ${{ matrix.project }}
+
+      - name: Build
+        run: dotnet build ${{ matrix.project }} -c Release --no-restore /p:RvtVerifySkipDeploy=true
+
+  tests:
+    name: tests-xunit
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore tests/RvtMcp.Tests/RvtMcp.Tests.csproj
+
+      - name: Test
+        run: dotnet test tests/RvtMcp.Tests/RvtMcp.Tests.csproj -c Release --no-restore --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: tests/RvtMcp.Tests/TestResults/*.trx
+          retention-days: 14
