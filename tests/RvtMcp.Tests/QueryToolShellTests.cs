@@ -32,7 +32,8 @@ namespace RvtMcp.Tests
             "revit_list_project_parameters",
             "revit_list_worksets",
             "revit_resolve_targets",
-            "revit_survey_change_impact"
+            "revit_survey_change_impact",
+            "revit_verify_assert"
         };
 
         [Fact]
@@ -67,6 +68,16 @@ namespace RvtMcp.Tests
             Assert.Equal("door", sent.Json().Value<string>("term"));
             Assert.Equal(2, sent.Json()["kinds"].Count());
             Assert.Equal(10, sent.Json().Value<int>("limit"));
+        }
+
+        [Fact]
+        public async Task Verify_assert_sends_assertions()
+        {
+            var assertions = "[{\"kind\":\"count\",\"category\":\"Walls\",\"expect\":8}]";
+            var sent = await Capture.Send(() => QueryTools.VerifyAssert(assertions));
+
+            Assert.Equal("verify_assert", sent.Command);
+            Assert.Equal("count", sent.Json()["assertions"][0].Value<string>("kind"));
         }
 
         [Fact]

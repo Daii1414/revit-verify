@@ -14,7 +14,7 @@
   <a href="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml"><img src="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="license" /></a>
   <a href="#supported-revit-versions"><img src="https://img.shields.io/badge/Revit-2022--2027-186BFF" alt="Revit 2022-2027" /></a>
-  <a href="#tools"><img src="https://img.shields.io/badge/MCP-239%20tools-6C47FF" alt="MCP tools" /></a>
+  <a href="#tools"><img src="https://img.shields.io/badge/MCP-240%20tools-6C47FF" alt="MCP tools" /></a>
   <a href="https://github.com/bimwright/rvt-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/bimwright/rvt-mcp" alt="latest release" /></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-version%20history-informational" alt="changelog" /></a>
 </p>
@@ -89,10 +89,10 @@ Video cộng đồng giới thiệu rvt-mcp. Cách cài trong video có thể c�
 
 | Mode | Tools | Ghi chú |
 |------|------:|---------|
-| Fresh install | **239** | `install.ps1` seeds `"toolsets": ["all"]` trong `rvtmcp.config.json` |
+| Fresh install | **240** | `install.ps1` seeds `"toolsets": ["all"]` trong `rvtmcp.config.json` |
 | Bare `rvt-mcp.exe` | **46** | `query` + `create` + `view` + `meta` |
-| `--toolsets all` | **239** | Full catalog |
-| `all` + adaptive bake | **242** | Thêm 3 tool vòng đời suggestion |
+| `--toolsets all` | **240** | Full catalog |
+| `all` + adaptive bake | **243** | Thêm 3 tool vòng đời suggestion |
 
 Số lượng chưa tính baked tool cá nhân. Installer chỉ seed khi `rvtmcp.config.json` chưa có `toolsets` — list của bạn sống sót qua upgrade; bỏ key (hoặc đặt CSV riêng) thì bare server về mặt 46 tool. Read-only lọc từng tool theo `ReadOnly=true`, nên vẫn giữ công cụ đọc trong nhóm hỗn hợp. Tool có thể ghi file sẽ bị loại, kể cả khi output mặc định là inline.
 
@@ -309,6 +309,7 @@ Annotations mô tả tác động lên document/file của từng tool. Đổi s
       "mcp__rvt-mcp__revit_show_message",
       "mcp__rvt-mcp__revit_suggest_view_name_corrections",
       "mcp__rvt-mcp__revit_survey_change_impact",
+      "mcp__rvt-mcp__revit_verify_assert",
       "mcp__rvt-mcp__revit_workflow_model_audit"
     ]
   }

@@ -100,6 +100,21 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox (union box of ids or category+level filter vs box_mm within tol_mm) and count (instances vs expect). Read-only. Returns per-assertion pass/fail. Params: assertions array (required).")]
+        public static async Task<string> VerifyAssert(string assertions)
+        {
+            var blocked = ServerState.BlockIfReadOnly("verify_assert");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var parsed = JArray.Parse(assertions);
+                var result = await ToolGateway.SendToRevit("verify_assert", new { assertions = parsed });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_analyze_model_statistics", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Count elements grouped by category (Walls, Doors, Pipes, etc.). Call to understand project scope before detailed queries. Iteration is capped at maxElements (default 100000); raise it for full accuracy on very large models at the cost of a longer UI freeze.")]
         public static async Task<string> AnalyzeModelStatistics(int? maxElements = null)
         {
