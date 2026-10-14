@@ -37,6 +37,8 @@ Agent có **bộ tool typed** cho việc Revit thường gặp, escape hatch C# 
 
 ## Cài đặt
 
+**Trạng thái bộ cài RvtVerify:** nhánh này chưa port script cài/gỡ và gói phát hành. Các bước và liên kết bên dưới vẫn dành cho Bimwright `rvt-mcp` upstream; chúng cài sản phẩm đó, không phải RvtVerify. Bộ cài RvtVerify vẫn đang chờ triển khai.
+
 **Để AI agent cài cho client bạn muốn sử dụng.** Dùng agent có thể chạy PowerShell và sửa file trên máy Windows này (Claude Code, Codex, Cursor, …), không phải phiên chat thiếu công cụ thao tác máy. Agent thực hiện cài đặt có thể khác client bạn dùng để làm việc với Revit. Agent làm theo [AGENTS.md](AGENTS.md), xem trước thay đổi và hỏi trước khi áp dụng; bạn vẫn có thể cần thao tác UI hoặc khởi động lại ứng dụng.
 
 Với **Claude Desktop**, dán:
@@ -89,12 +91,12 @@ Video cộng đồng giới thiệu rvt-mcp. Cách cài trong video có thể c�
 
 | Mode | Tools | Ghi chú |
 |------|------:|---------|
-| Fresh install | **246** | `install.ps1` seeds `"toolsets": ["all"]` trong `rvtmcp.config.json` |
+| Bộ cài RvtVerify dự kiến | **246** | Chưa khả dụng; bộ cài của fork vẫn đang chờ triển khai |
 | Bare `rvt-mcp.exe` | **57** | `query` + `create` + `view` + `meta` |
 | `--toolsets all` | **246** | Full catalog |
 | `all` + adaptive bake | **249** | Thêm 3 tool vòng đời suggestion |
 
-Số lượng chưa tính baked tool cá nhân. Installer chỉ seed khi `rvtmcp.config.json` chưa có `toolsets` — list của bạn sống sót qua upgrade; bỏ key (hoặc đặt CSV riêng) thì bare server về mặt 46 tool. Read-only lọc từng tool theo `ReadOnly=true`, nên vẫn giữ công cụ đọc trong nhóm hỗn hợp. Tool có thể ghi file sẽ bị loại, kể cả khi output mặc định là inline.
+Số lượng chưa tính baked tool cá nhân. Sau khi được port, installer RvtVerify dự kiến chỉ seed `all` khi `rvtmcp.config.json` chưa có `toolsets`; bỏ key thì bare server có 57 tool. Read-only lọc từng tool theo `ReadOnly=true`, nên vẫn giữ công cụ đọc trong nhóm hỗn hợp. Tool có thể ghi file sẽ bị loại, kể cả khi output mặc định là inline.
 
 | Toolset | Phạm vi |
 |---------|---------|

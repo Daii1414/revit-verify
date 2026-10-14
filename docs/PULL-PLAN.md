@@ -4,43 +4,56 @@
 Правило: не всё подряд — волны по ценности для verify-цикла.
 Что у нас уже есть — не портируем (помечено HAVE).
 
-## Волна 1 — ядро сверки (самое важное)
+## Волна 1 — ядро сверки (актуальный аудит)
 
-1. `verify_changes` + `model_diff` (snapshot/compare/colorize + diff
-   по элементам) — у нас capture и history раздельно. Собрать в
-   `revit_verify_diff` (до/после одним кадром + список изменений).
-2. assert-контракты (bbox/envelope/count/support + ID виновников,
-   идея rhino `assert_geometry`) — `revit_verify_assert`. Измеримое
-   ядро цикла вместо «вроде ок».
-3. Фоновые jobs (длинные экспорты/clash без стены 60с). Инфра,
-   средний размер.
-4. `selection_exchange` (человек↔агент выборками). Дешёво, полезно.
+1. **Частично есть `revit_verify_assert`**: bbox, точное/диапазонное
+   количество и диагностика отсутствующих ID. Следом: измеряемые solid-контракты,
+   ограничения scope и более точные ID нарушителей. Не называть это
+   watertight/support-проверкой без корректного Revit-измерения.
+2. **Delivery diff пока нет**: локальная история изменений, одиночный
+   `revit_export_element_snapshot`, точная камера и `revit_capture_review_set`
+   существуют раздельно. Нужен baseline/after compare с доказуемой
+   идентичностью модели и честной обработкой неполных снимков.
+3. **Правил QA пока нет**: версионированный контракт pass/fail/score с
+   offending element IDs; начать с read-only проверок и тестируемой схемы.
+4. **CAD-пайплайн частичный**: `revit_cad_extract` читает ограниченную
+   геометрию уже загруженных CAD import/link. Следом — versioned rules,
+   интерпретационный plan с provenance и отдельный audit CAD против модели;
+   автоматическое применение не включать.
+5. **Долгие фоновые jobs отсутствуют**. У истории есть фоновое восстановление
+   очереди, но это не persistent job API для инструментов и не отмена/прогресс.
+6. `selection_exchange` отдельно не найден; перед добавлением сверить с
+   текущими инструментами выборки/сохранённых наборов и ограничениями.
 
-## Волна 2 — сила стройки (у нас дыры, проверено grep)
+## Волна 2 — строительство и модель (актуальный аудит)
 
-5. `transform_elements` (move/copy/rotate/mirror) — НЕТ у нас.
-6. `document_session` (save/save-as/close/new) — у нас только open!
-7. `create_array` (linear/radial) — НЕТ.
-8. `plan_structure` (колонны по пересечениям осей — у церкви есть оси!).
-9. `renumber` дверей/окон (только sheets есть).
-10. `file_info` (шапка RVT без открытия). Дешёво.
+7. **Уже есть** `revit_transform_elements` (move/copy/rotate),
+   `revit_save_document` (Save/SaveAs с ограничениями workshared) и
+   `revit_create_array` (linear/radial). Mirror не входит.
+8. **Частично есть** `revit_undo_batch`: только для журнала batch-created
+   элементов, не универсальный откат.
+9. `plan_structure` (колонны по пересечениям осей) — не найден.
+10. Renumber дверей/окон/комнат — есть renumber sheets, вариант для этих
+    категорий не найден.
+11. `file_info` без открытия — не найден.
 
 ## Волна 3 — DWG-боль (наш кейс с церковью)
 
-11. `cad_extract` + `query_cad` (слои/кривые/текст/блоки структурированно).
-12. `cad_symbols` + `cad_unit_instances` (повторы + трансформа).
-13. `plan_from_cad` (план BIM по версионным правилам).
-14. `audit_cad_model` (чертёж против модели).
-15. `read_schedule` (читает PDF/DWG-карточки!). Для наших DWG-спек.
+12. **Частично есть** `revit_cad_extract`: ограниченные слои/кривые
+    загруженных импортов/ссылок; это не независимый DWG-парсер и может не
+    содержать исходный текст/атрибуты блоков.
+13. `query_cad`, повторы/единицы, `plan_from_cad` с версионированными
+    правилами и provenance, `audit_cad_model` и чтение внешних карточек —
+    не найдены.
 
 ## Волна 4 — QA и приёмка
 
-16. `check_model_health` аналог: composite score (есть у LuDattilo;
-    у Horizun это model_scan + audit). Один скор вместо трёх вызовов.
-17. `audit_model` по требованиям + `code_check` (egress/высота).
-18. `resolve_clash` propose/apply с перепроверкой (наш clash только ищет).
-19. `coordination` ledger (findings + decisions + evidence).
-20. `validate_ids` (IDS-проверка поставок).
+14. **Уже есть** `revit_check_model_health` (score/grade/recommendations) и
+    `revit_model_audit` с предупреждениями, семействами и purge dry-run.
+15. Требования/code-check, persistent findings/coordination ledger и IDS
+    поставок — пробелы; приоритет после ядра verify-цикла.
+16. Clash есть как поиск; propose/apply с повторной readback-проверкой
+    требует отдельного безопасного дизайна.
 
 ## Волна 5 — обмен и учёт (позже)
 
@@ -57,10 +70,12 @@
   не наш этап. Куртины/фазы/группы advanced — по требованию модели.
 - Python-процедуры с шеллом, BCF-топики — покрыто ToolBaker/send_code.
 - In-Revit чат, MSI-установщик их образца — свой путь (dotnet + opencode).
-- `execute_plan` на 100 действий: наш batch (20) расширить лимит — отдельно.
+- `execute_plan` на 100 действий: текущий batch ограничен 20; увеличение
+  лимита отдельно оценить по транзакциям, откату и размеру ответа.
 
 ## Наше преимущество (у них нет — держать)
 
-- `set_view_orientation` + FrameCalculator, `export_element_snapshot`
-  (isolate+section+capture+restore), memory notes, `resolve_targets`,
-  undo-журнал батчей, opencode-агенты и скрипты циклов.
+- `revit_set_view_orientation` + FrameCalculator (включая exact eye/target/up),
+  `revit_export_element_snapshot`, `revit_capture_review_set` (до 8 кадров),
+  локальная memory/history, `revit_resolve_targets`, undo-журнал batch,
+  opencode-агенты и скрипты циклов.

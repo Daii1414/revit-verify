@@ -8,8 +8,8 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 ## P0 — прямо в цель verify-цикла
 
 1. **assert_geometry (bbox/envelope/count/watertight/supported + offending IDs)**
-   От: rhino-mcp (MIT). Частично есть `revit_verify_assert`: bbox/count и
-   диагностика отсутствующих ID. Watertight/support-проверок и автоматического
+   От: rhino-mcp (MIT). Частично есть `revit_verify_assert`: bbox, точное или
+   диапазонное count и диагностика отсутствующих ID. Watertight/support-проверок и автоматического
    сбора ID виновников при создании нет.
 2. **Delivery diffs (snapshot/compare/colorize + quality trend).**
    От: Horizun `horizun_model_diff`, naviscoord (persistent issue IDs).
@@ -30,6 +30,29 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    parser: исходный текст и атрибуты блоков могут отсутствовать. Следом нужны
    правила интерпретации, план с provenance и отдельное подтверждённое применение.
 
+## Дополнительная сверка идей из STEAL-LIST-v2
+
+- **Точная камера и мультикадр — уже есть:** `revit_set_view_orientation`
+  принимает eye/target/up; `revit_capture_review_set` экспортирует до 8 кадров
+  и пытается восстановить каждый вид. Это не гарантирует успешное восстановление;
+  снимки остаются на диске.
+- **`section_preview` отдельного временного разреза нет.** Обычные view/image
+  инструменты не дают такой же одношаговый preview без сохранения вида.
+- **Память есть только локально:** `revit_create_memory_note` /
+  `revit_read_memory_notes`; brief/rules не встраиваются в `.rvt`.
+- **Перепроверка writes не универсальна:** `_changes`/history записывают
+  наблюдавшиеся изменения, а prompt `revit_change` предлагает readback;
+  это не серверная гарантия чтения каждого результата.
+- **История не равна журналу замечаний:** у вызовов есть IDs и element history,
+  но нет постоянных finding IDs со статусом «исчезло ≠ решено».
+- **Фоновые history-recovery workers не являются jobs API:** инструменты не
+  получают persistent job ID, progress и cancel.
+- **Ленивые/facade-схемы не реализованы;** single-registration остаётся на паузе.
+- **Revit schedule-чтение есть, чтение внешних PDF/DWG карточек — нет.**
+- **Тестовые MCP/shell-моки не являются полноценным mock-Revit bridge;** live
+  API-поведение новых CAD/view возможностей требует отдельной безопасной
+  проверки в изолированной модели, а не в пользовательских файлах.
+
 ## P1 — надёжность и контекст
 
 5. **Фоновые jobs с persistent ID** (длинные экспорты/clash).
@@ -39,7 +62,8 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    От: Horizun (`HORIZUN_SCHEMA_MODE=facade`). У нас: toolsets only.
    Куда: учесть в single-registration.
 7. **Мульти-операционные инструменты** вместо взрыва тулзов (481 subops!).
-   От: Horizun. У нас: 241 тулза и растёт. Решение: НЕ копировать слепо —
+   От: Horizun. У нас: 246 обычных MCP-инструментов (249 с adaptive bake),
+   плюс инструментов становится больше. Решение: НЕ копировать слепо —
    взвесить в single-registration (компакт vs гранулярность).
 8. **Рефлексивное чтение** (`get` любого свойства по пути, без компиляции).
    От: Sam-AEC `revit_reflect_get` (идея; GPL — только идея).

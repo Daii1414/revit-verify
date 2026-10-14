@@ -37,6 +37,8 @@ Agent 可以使用覆盖常见 Revit 工作的 **typed 工具面**、应对其�
 
 ## 安装
 
+**RvtVerify 安装器状态：** 此分支尚未移植安装/卸载脚本及发布包。以下步骤和链接仍指向上游 Bimwright `rvt-mcp`，安装的是该产品而非 RvtVerify。RvtVerify 安装器仍待实现。
+
 **让 AI agent 为指定客户端安装。** 使用能在这台 Windows 电脑上运行 PowerShell、编辑本地文件的 agent（Claude Code、Codex、Cursor 等），而非没有本地工具的普通聊天。执行安装的 agent 可以与之后使用 Revit 工具的客户端不同。agent 按照 [AGENTS.md](AGENTS.md) 预览更改并在应用前征求同意；你仍可能需要操作界面或重启应用。
 
 如需安装到 **Claude Desktop**，粘贴：
@@ -88,12 +90,12 @@ powershell -ExecutionPolicy Bypass -File "$dir\install.ps1" -Client claude-deskt
 
 | 模式 | Tools | 说明 |
 |------|------:|------|
-| 全新安装 | **246** | `install.ps1` 在 `rvtmcp.config.json` 中写入 `"toolsets": ["all"]` |
+| 计划中的 RvtVerify 安装器 | **246** | 目前不可用；分支安装器尚待实现 |
 | 裸 `rvt-mcp.exe` | **57** | `query` + `create` + `view` + `meta` |
 | `--toolsets all` | **246** | 完整目录 |
 | `all` + adaptive bake | **249** | 再加 3 个 suggestion 生命周期工具 |
 
-数量不含个人 baked 工具。只有当 `rvtmcp.config.json` 尚未设置 `toolsets` 时安装器才会写入默认值——你的自定义列表在升级时保留；删除该键（或设置自己的 CSV）则裸服务器回到 46 个工具。Read-only 按 `ReadOnly=true` 逐个筛选工具，因此混合 toolset 中的读取工具仍可用。即使默认 output 是 inline，能写文件的工具也会被排除。
+数量不含个人 baked 工具。RvtVerify 安装器移植后，计划仅在 `rvtmcp.config.json` 尚未设置 `toolsets` 时写入 `all`；删除该键后裸服务器提供 57 个工具。Read-only 按 `ReadOnly=true` 逐个筛选工具，因此混合 toolset 中的读取工具仍可用。即使默认 output 是 inline，能写文件的工具也会被排除。
 
 | Toolset | 覆盖 |
 |---------|------|

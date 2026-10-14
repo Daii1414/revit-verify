@@ -37,6 +37,8 @@ Agents get a **typed tool surface** for common Revit work, a C# escape hatch for
 
 ## Install
 
+**RvtVerify installer status:** its install/uninstall scripts and release package have not yet been ported to this fork. The instructions below still point to upstream Bimwright `rvt-mcp`; they install that product, not RvtVerify. Porting the RvtVerify installer remains pending.
+
 **Let an AI agent install it for your target client.** Use an agent that can run PowerShell and edit local files on this Windows machine (Claude Code, Codex, Cursor, …), not a chat session without local tools. The agent installing it can be different from the client where you will use Revit tools. It follows [AGENTS.md](AGENTS.md), previews changes and asks before applying them; you may still need to approve a UI step or restart an app.
 
 For **Claude Desktop**, paste:
@@ -88,12 +90,12 @@ Community videos of rvt-mcp at work. Install steps shown in a video can be older
 
 | Mode | Tools | Notes |
 |------|------:|-------|
-| Fresh install | **246** | `install.ps1` seeds `"toolsets": ["all"]` in `rvtmcp.config.json` |
+| Planned RvtVerify install | **246** | Not available yet; fork installer is pending |
 | Bare `rvt-mcp.exe` | **57** | `query` + `create` + `view` + `meta` |
 | `--toolsets all` | **246** | Full catalog |
 | `all` + adaptive bake | **249** | Adds 3 suggestion-lifecycle tools |
 
-Counts exclude your personal baked tools. The installer writes the seeded default only when `rvtmcp.config.json` doesn't already set `toolsets` — your own list survives upgrades, and removing the key (or setting your own CSV) returns a bare server to the 46-tool surface. Read-only filters individual tools by `ReadOnly=true`, including reads inside mixed toolsets. Tools that can write files are excluded even when their default output is inline.
+Counts exclude your personal baked tools. When ported, the RvtVerify installer is intended to seed `toolsets=all` only when `rvtmcp.config.json` doesn't already set `toolsets`; removing the key returns a bare server to the 57-tool surface. Read-only filters individual tools by `ReadOnly=true`, including reads inside mixed toolsets. Tools that can write files are excluded even when their default output is inline.
 
 | Toolset | What it covers |
 |---------|----------------|
