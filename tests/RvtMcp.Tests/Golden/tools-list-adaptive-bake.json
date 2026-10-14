@@ -2956,12 +2956,20 @@
     },
     {
       "name": "revit_delete_element",
-      "description_hash": "sha256:f8f74c803fb2713c171d09fa89b3e286cef7f45ac2a852a7ccc40490c9be4665",
+      "description_hash": "sha256:952fa14826e99b128ef43efc83d96ffc4d0bc7c05071d10a108639580c9173c1",
       "inputSchema": {
         "properties": {
+          "dry_run": {
+            "description": "",
+            "type": "Boolean"
+          },
           "elementIds": {
             "description": "",
             "type": "String"
+          },
+          "max_count": {
+            "description": "",
+            "type": "Int32"
           }
         },
         "required": [

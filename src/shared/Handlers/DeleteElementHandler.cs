@@ -9,8 +9,8 @@ namespace RvtMcp.Plugin.Handlers
     public class DeleteElementHandler : IRevitCommand
     {
         public string Name => "delete_element";
-        public string Description => "Delete elements by ID";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""elementIds"":{""type"":""array"",""items"":{""type"":""integer""}}},""required"":[""elementIds""]}";
+        public string Description => "Delete elements by ID. Supports dry_run preview and max_count guard.";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""elementIds"":{""type"":""array"",""items"":{""type"":""integer""}},""dry_run"":{""type"":""boolean"",""default"":false,""description"":""Preview only: resolve IDs, delete nothing.""},""max_count"":{""type"":""integer"",""default"":100,""description"":""Refuse when more IDs are given. Set higher explicitly for bulk deletes.""}},""required"":[""elementIds""]}";
 
         public CommandResult Execute(UIApplication app, string paramsJson)
         {
@@ -23,6 +23,33 @@ namespace RvtMcp.Plugin.Handlers
 
             if (elementIds.Length == 0)
                 return CommandResult.Fail("elementIds array is required.");
+
+            var dryRun = request.Value<bool?>("dry_run") ?? false;
+            var maxCount = request.Value<int?>("max_count") ?? 100;
+            if (maxCount <= 0)
+                return CommandResult.Fail("max_count must be positive.");
+            if (elementIds.Length > maxCount)
+                return CommandResult.Fail($"Refusing to delete {elementIds.Length} elements (max_count={maxCount}). Narrow the set or raise max_count explicitly.");
+
+            var resolved = new List<long>();
+            var missing = new List<long>();
+            foreach (var id in elementIds)
+            {
+                if (doc.GetElement(RevitCompat.ToElementId(id)) == null)
+                    missing.Add(id);
+                else
+                    resolved.Add(id);
+            }
+
+            if (dryRun)
+                return CommandResult.Ok(new
+                {
+                    dry_run = true,
+                    would_delete = resolved.Count,
+                    missing = missing.Count,
+                    resolvedIds = resolved,
+                    missingIds = missing
+                });
 
             using (var tx = new Transaction(doc, "MCP: Delete elements"))
             {
