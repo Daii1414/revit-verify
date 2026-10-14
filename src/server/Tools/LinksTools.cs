@@ -80,6 +80,19 @@ namespace RvtMcp.Server
             catch (Exception ex) { return JsonConvert.SerializeObject(new { success = false, error = ex.Message }); }
         }
 
+        [McpServerTool(Name = "revit_cad_audit", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare a versioned CAD axis plan against existing straight Revit grids. Returns matching and offending Revit element IDs; never changes the model.")]
+        public static async Task<string> CadAudit(
+            [System.ComponentModel.Description("Complete JSON output from revit_cad_plan; its plan hash is verified before comparison.")] string plan_json,
+            [System.ComponentModel.Description("Maximum permitted axis coordinate deviation in millimetres; default 10.")] double tolerance_mm = 10)
+        {
+            try
+            {
+                var result = await ToolGateway.SendToRevit("cad_audit", new { plan_json, tolerance_mm });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_import_cad_to_view", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Import or link a CAD drawing (.dwg, .dxf) into a specific view.")]
         public static async Task<string> ImportCadToView(string path, long? viewId = null, bool link = false, string placement = "origin", string unit = "default", bool thisViewOnly = true, bool visibleLayersOnly = true)
         {

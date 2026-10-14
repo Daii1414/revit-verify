@@ -117,19 +117,23 @@ contract-пробы (параметр JSON-текста называть *_json,
    метаданных блоков описаны. `revit_set_view_orientation` расширен точным
    eye/target/up pose. `revit_verify_assert` принимает точное/диапазонное
    ожидание count и bounded positive solid-volume checks (m³) с offender IDs.
-   Сборка прошла, полный suite: 1915 тестов зелёные;
+   `revit_cad_plan` извлекает кандидаты осей по версиям правил и выдаёт hashes/
+   provenance; `revit_cad_audit` сравнивает их с прямыми Revit Grid по подписи,
+   ориентации и допуску координаты, не изменяя модель. Сборка прошла, полный suite:
+   1930 тестов зелёные;
    `revit_capture_review_set` снимает до 8 именованных кадров за вызов после
    предварительной валидации всех элементов и видов. Tool
-   counts: 57/246/249/100 (с target switching). Живой read-only прогон
-   solid-volume пока невозможен: процесс Revit найден, но `revit_list_available_targets`
+   counts: 57/248/251/102 (с target switching). Живой read-only прогон
+   CAD audit/solid-volume пока невозможен: процесс Revit найден, но `revit_list_available_targets`
    вернул 0 целей; пользовательские модели не открывались и не менялись.
    MCP identity исправлена на `rvt-verify` / `RvtVerify` и собственный GitHub URL;
    устаревшая ссылка upstream из локального update-cache теперь безопасно
    заменяется URL релизов RvtVerify.
-5. До установщика ещё остаются P0-задачи из STEAL-LIST-v2: CAD plan/audit с
-   версионными правилами и provenance, watertight/support-контракты для verify_assert,
-   доставка diff (before/after, camera eye/target/up уже точные), правила QA. Реализовывать безопасными
-   read-only этапами; не выполнять импорт или запись в пользовательские модели.
+5. До установщика ещё остаются P0-задачи из STEAL-LIST-v2: CAD audit дальше осей
+   (стены/проёмы/размеры), watertight/support-контракты для verify_assert,
+   доставка diff (before/after, camera eye/target/up уже точные) и правила QA.
+   Реализовывать безопасными read-only этапами; не выполнять импорт или запись
+   в пользовательские модели.
 6. Установщик для публикации — после предшествующих задач: install.ps1 в репо ОТСУТСТВУЕТ (только
    tests/installer/* + docs/install.md под апстрим Bimwright-пути). Нужен свой
    install.ps1 (r25+r26, %LOCALAPPDATA%\RvtVerify, наши URL) + упаковка релиза.

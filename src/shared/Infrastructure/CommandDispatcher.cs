@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using RvtMcp.Plugin.ToolBaker;
 
 namespace RvtMcp.Plugin
@@ -213,6 +213,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.ListLinkedModelsHandler());
             Register(new Handlers.ListLinkedCadHandler());
             Register(new Handlers.CadExtractHandler());
+            Register(new Handlers.CadAuditHandler());
             Register(new Handlers.ImportCadToViewHandler());
             Register(new Handlers.LinkRevitModelHandler());
             Register(new Handlers.UnloadLinkHandler());

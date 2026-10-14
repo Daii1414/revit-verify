@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RvtMcp.Server.Handlers;
+using RvtMcp.Plugin.Handlers;
 using Xunit;
 
 namespace RvtMcp.Tests
@@ -43,6 +44,8 @@ namespace RvtMcp.Tests
             Assert.Equal("church-axes-v1", plan.Value<string>("rules_version"));
             Assert.Equal(64, plan.Value<string>("rules_sha256").Length);
             Assert.Equal(64, plan.Value<string>("extraction_sha256").Length);
+            Assert.Equal(64, plan.Value<string>("plan_sha256").Length);
+            Assert.True(CadPlanIntegrity.Validate(plan, out var integrityError), integrityError);
             Assert.False(plan.Value<bool>("applies_changes"));
             Assert.Equal(new[] { "A", "B" }, plan["x_axes"].Values<string>("label"));
             Assert.Equal(0, plan["x_axes"][0].Value<double>("coordinate_mm"));
@@ -51,6 +54,21 @@ namespace RvtMcp.Tests
             Assert.Equal(501, plan["x_axes"][0]["provenance"][0].Value<long>("instance_id"));
             Assert.Equal(1, plan["x_axes"][0]["provenance"][0].Value<int>("entity_index"));
             Assert.Equal(1, plan["x_axes"][0].Value<int>("segment_count"));
+        }
+
+        [Fact]
+        public void Plan_hash_detects_post_generation_edits()
+        {
+            var extraction = new JObject { ["results"] = new JArray(new JObject
+                { ["truncated"] = false, ["entities"] = new JArray(Line("GRID", 0, 0, 0, 5000)) }) };
+            var rules = new JObject { ["version"] = "v1", ["x_axis_layers"] = new JArray("GRID") };
+            var plan = CadPlanBuilder.Build(extraction.ToString(Formatting.None), rules.ToString(Formatting.None));
+            plan["x_axes"][0]["coordinate_mm"] = 25;
+
+            var valid = CadPlanIntegrity.Validate(plan, out var error);
+
+            Assert.False(valid);
+            Assert.Contains("plan_sha256", error);
         }
 
         [Fact]

@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 247,
+  "tool_count": 248,
   "tools": [
     {
       "name": "revit_acquire_coordinates_from_link",
@@ -803,6 +803,32 @@
         "idempotentHint": false,
         "openWorldHint": false,
         "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_cad_audit",
+      "description_hash": "sha256:28b4e1a5dfceb01f39646150f59ae8997a60e0131cb47fce1e4f3b7cc1d6c8e3",
+      "inputSchema": {
+        "properties": {
+          "plan_json": {
+            "description": "Complete JSON output from revit_cad_plan; its plan hash is verified before comparison.",
+            "type": "String"
+          },
+          "tolerance_mm": {
+            "description": "Maximum permitted axis coordinate deviation in millimetres; default 10.",
+            "type": "Double"
+          }
+        },
+        "required": [
+          "plan_json"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
       }
     },
     {

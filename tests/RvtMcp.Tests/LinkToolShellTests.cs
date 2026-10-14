@@ -15,6 +15,7 @@ namespace RvtMcp.Tests
         private static readonly string[] LinksToolsInClass =
         {
             "revit_acquire_coordinates_from_link",
+            "revit_cad_audit",
             "revit_cad_extract",
             "revit_cad_plan",
             "revit_get_link_coordinate_system",
@@ -88,6 +89,19 @@ namespace RvtMcp.Tests
 
             Assert.False(json.Value<bool>("success"));
             Assert.Contains("results", json.Value<string>("error"));
+        }
+
+        [Fact]
+        public async Task Cad_audit_sends_hashed_plan_and_tolerance()
+        {
+            const string plan = "{\"plan_version\":1,\"plan_sha256\":\"test\"}";
+
+            var sent = await Capture.Send(() => LinksTools.CadAudit(plan, 12.5));
+
+            Assert.Equal("cad_audit", sent.Command);
+            var json = sent.Json();
+            Assert.Equal(plan, json.Value<string>("plan_json"));
+            Assert.Equal(12.5, json.Value<double>("tolerance_mm"));
         }
 
         [Fact]

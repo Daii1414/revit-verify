@@ -103,12 +103,13 @@ namespace RvtMcp.Server.Handlers
 
             var xAxes = Cluster(segments.Where(s => s.Axis == "x"), coordinateTolerance, ReadLabels(rules["x_axis_labels"], "x_axis_labels"));
             var yAxes = Cluster(segments.Where(s => s.Axis == "y"), coordinateTolerance, ReadLabels(rules["y_axis_labels"], "y_axis_labels"));
-            return new JObject
+            var plan = new JObject
             {
                 ["plan_version"] = 1,
                 ["rules_version"] = version,
                 ["rules_sha256"] = Sha256(rulesJson),
                 ["extraction_sha256"] = Sha256(extractionJson),
+                ["angle_tolerance_degrees"] = angleTolerance,
                 ["read_only"] = true,
                 ["applies_changes"] = false,
                 ["coordinate_system"] = "Revit internal project coordinates, millimetres; CAD insertion transform already applied by Revit",
@@ -119,6 +120,8 @@ namespace RvtMcp.Server.Handlers
                     "Labels are assigned by coordinate order from versioned rules; source text and bubble association are not inferred.",
                     "This plan does not create or modify Revit elements.")
             };
+            plan["plan_sha256"] = Sha256(plan.ToString(Formatting.None));
+            return plan;
         }
 
         private static HashSet<string> ReadNames(JToken token, string name)
