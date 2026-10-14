@@ -10,7 +10,7 @@ namespace RvtMcp.Plugin.Handlers
     {
         public string Name => "set_view_orientation";
         public string Description => "Point a 3D view camera: eye placed along direction from target, deterministic framing for screenshot comparison. Restores with Revit Undo.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to model bbox center (datum categories excluded).""},""distance_factor"":{""type"":""number"",""default"":1.5},""exclude_datums"":{""type"":""boolean"",""default"":true}}}";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""view_id"":{""type"":""integer""},""direction"":{""type"":""object"",""properties"":{""x"":{""type"":""number""},""y"":{""type"":""number""},""z"":{""type"":""number""}},""default"":{""x"":1,""y"":-1,""z"":0.7}},""target_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Look-at point in mm. Defaults to model bbox center (datum categories excluded).""},""distance_factor"":{""type"":""number"",""default"":1.5},""exclude_datums"":{""type"":""boolean"",""default"":true},""zoom_to_fit"":{""type"":""boolean"",""default"":true,""description"":""Zoom the open view to fit after orienting (deterministic framing). Skipped silently if the view is not open on screen.""}}}";
 
         private static readonly long[] DatumCategories =
         {
@@ -33,6 +33,7 @@ namespace RvtMcp.Plugin.Handlers
             var targetObj = req["target_mm"] as JObject;
             var distanceFactor = req.Value<double?>("distance_factor") ?? 1.5;
             var excludeDatums = req.Value<bool?>("exclude_datums") ?? true;
+            var zoomToFit = req.Value<bool?>("zoom_to_fit") ?? true;
 
             var view = viewIdParam.HasValue
                 ? doc.GetElement(RevitCompat.ToElementId(viewIdParam.Value)) as View3D
@@ -92,12 +93,16 @@ namespace RvtMcp.Plugin.Handlers
                 {
                     view.SetOrientation(new ViewOrientation3D(eye, up, forward));
                     tx.Commit();
+                    var zoomed = false;
+                    if (zoomToFit)
+                        zoomed = TryZoomToFit(uidoc, view);
                     return CommandResult.Ok(new
                     {
                         view_id = RevitCompat.GetId(view.Id),
                         eye_mm = new { x_mm = eye.X * 304.8, y_mm = eye.Y * 304.8, z_mm = eye.Z * 304.8 },
                         target_mm = new { x_mm = target.X * 304.8, y_mm = target.Y * 304.8, z_mm = target.Z * 304.8 },
-                        size_mm = size * 304.8
+                        size_mm = size * 304.8,
+                        zoomed_to_fit = zoomed
                     });
                 }
                 catch (Exception ex)
@@ -106,6 +111,23 @@ namespace RvtMcp.Plugin.Handlers
                     return CommandResult.Fail($"Failed to set view orientation: {ex.Message}");
                 }
             }
+        }
+
+        private static bool TryZoomToFit(UIDocument uidoc, View view)
+        {
+            try
+            {
+                foreach (var uv in uidoc.GetOpenUIViews())
+                {
+                    if (uv.ViewId.Equals(view.Id))
+                    {
+                        uv.ZoomToFit();
+                        return true;
+                    }
+                }
+            }
+            catch { }
+            return false;
         }
 
         private static BoundingBoxXYZ BuildModelBox(Document doc, View view, bool excludeDatums)
