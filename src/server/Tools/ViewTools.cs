@@ -116,6 +116,18 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_capture_review_set", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Capture 1-8 named review frames in one call. Each frame specifies element_ids, optional view_id, and optional image settings. View restoration is attempted after each capture; exported images remain on disk. Restore any remaining view change with Revit Undo.")]
+        public static async Task<string> CaptureReviewSet(string frames_json)
+        {
+            try
+            {
+                var frames = JArray.Parse(frames_json ?? "[]");
+                var result = await ToolGateway.SendToRevit("capture_review_set", new { frames });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_set_view_crop", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace saved view crop settings; restore them with Revit Undo. Modify view crop: enabled, visible, explicit bounds_json (mm), or fit_element_ids with padding_mm. Params: view_id (optional, default active), enabled, visible, bounds_json, fit_element_ids, padding_mm (default 100).")]
         public static async Task<string> SetViewCrop(
             long? view_id = null, bool? enabled = null, bool? visible = null,

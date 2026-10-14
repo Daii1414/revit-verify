@@ -15,6 +15,7 @@ namespace RvtMcp.Tests
         [InlineData("create_grid", ToolActivityKind.Write)]
         [InlineData("delete_element", ToolActivityKind.Write)]
         [InlineData("export_pdf", ToolActivityKind.Write)]
+        [InlineData("capture_review_set", ToolActivityKind.Write)]
         [InlineData("load_selection", ToolActivityKind.Read)]
         [InlineData("clash_detection", ToolActivityKind.Read)]
         [InlineData("send_code_to_revit", ToolActivityKind.Write)]

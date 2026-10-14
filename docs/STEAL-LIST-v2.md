@@ -16,7 +16,9 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    У нас: history + capture раздельно. Куда: `revit_verify_diff`
    (до/после одним кадром + diff по элементам).
    Точная камера частично закрыта: `revit_set_view_orientation` теперь принимает
-   eye/target/up для повторяемой постановки кадра; мультикадр и diff ещё нужны.
+   eye/target/up для повторяемой постановки кадра. `revit_capture_review_set`
+   снимает до 8 именованных кадров за вызов; before/after diff, colorize и
+   quality trend ещё нужны.
 3. **YAML-правила QA (pass/fail + score + GUIDs).**
    От: alesdev88/Archicad-MCP (MIT). У нас: нет. Куда: `verify_run_rules`
    с YAML-файлами (стены замкнуты? комнаты? размеры?). Сюда же

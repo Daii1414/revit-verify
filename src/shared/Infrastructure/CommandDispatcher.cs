@@ -278,6 +278,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.PurgeUnusedHandler());
             Register(new Handlers.CaptureViewImageHandler());
             Register(new Handlers.ExportElementSnapshotHandler());
+            Register(new Handlers.CaptureReviewSetHandler());
             Register(new Handlers.SetViewOrientationHandler());
             Register(new Handlers.SetViewCropHandler());
             Register(new Handlers.SetViewScaleHandler());

@@ -15,6 +15,7 @@ namespace RvtMcp.Tests
         {
             "revit_activate_view",
             "revit_analyze_sheet_layout",
+            "revit_capture_review_set",
             "revit_capture_view_image",
             "revit_create_view",
             "revit_export_element_snapshot",
@@ -150,6 +151,20 @@ namespace RvtMcp.Tests
             Assert.True(json.Value<bool>("tighten_section"));
             Assert.Equal(800, json.Value<int>("pixel_size"));
             Assert.Equal("jpeg", json.Value<string>("image_format"));
+        }
+
+        [Fact]
+        public async Task Capture_review_set_sends_named_frames()
+        {
+            var frames = "[{\"name\":\"hero\",\"view_id\":7,\"element_ids\":[11,12],\"pixel_size\":1200}]";
+            var sent = await Capture.Send(() => ViewTools.CaptureReviewSet(frames));
+
+            Assert.Equal("capture_review_set", sent.Command);
+            var json = sent.Json();
+            Assert.Equal("hero", json["frames"][0].Value<string>("name"));
+            Assert.Equal(7, json["frames"][0].Value<long>("view_id"));
+            Assert.Equal(2, json["frames"][0]["element_ids"].Count());
+            Assert.Equal(1200, json["frames"][0].Value<int>("pixel_size"));
         }
 
         [Fact]

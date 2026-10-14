@@ -2,8 +2,9 @@
 
 ## Unreleased
 
-- Add read-only `revit_cad_extract` for bounded layer and vector-geometry extraction from CAD imports or links already loaded in Revit. It does not import files or modify the model. Revit's converted geometry is not a lossless DWG/DXF parse; source text and block attributes may be unavailable. Current source counts: default **56**, all **245**, adaptive bake **248**, read-only **100** (including target switching).
+- Add read-only `revit_cad_extract` for bounded layer and vector-geometry extraction from CAD imports or links already loaded in Revit. It does not import files or modify the model. Revit's converted geometry is not a lossless DWG/DXF parse; source text and block attributes may be unavailable.
 - Extend `revit_set_view_orientation` with exact camera `eye_mm_json` + `target_mm_json` pose and optional `up_json` roll vector; direction/distance framing remains supported.
+- Add `revit_capture_review_set` to capture up to eight named review frames in one call, validating the whole request before capture and attempting to restore each view afterward. Current source counts: default **57**, all **246**, adaptive bake **249**, read-only **100** (including target switching).
 
 ## Release history
 
