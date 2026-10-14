@@ -10,8 +10,8 @@ namespace RvtMcp.Plugin.Handlers
     public class VerifyAssertHandler : IRevitCommand
     {
         public string Name => "verify_assert";
-        public string Description => "Check measurable post-conditions against the model: bounding boxes and element counts with tolerances. Read-only. Returns per-assertion pass/fail with offending ids.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""assertions"":{""type"":""array"",""items"":{""type"":""object"",""properties"":{""kind"":{""type"":""string"",""enum"":[""bbox"",""count""]},""ids"":{""type"":""array"",""items"":{""type"":""integer""}},""category"":{""type"":""string""},""level"":{""type"":""string""},""box_mm"":{""type"":""object""},""tol_mm"":{""type"":""number"",""default"":10},""expect"":{""type"":""integer""}}},""description"":""bbox: union box of ids (or category+level filter) must match box_mm within tol_mm per axis. count: instance count must equal expect.""}},""required"":[""assertions""]}";
+        public string Description => "Check measurable post-conditions against the model: bounding boxes and exact or ranged element counts. Read-only. Returns per-assertion pass/fail and missing element IDs.";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""assertions"":{""type"":""array"",""items"":{""type"":""object"",""properties"":{""kind"":{""type"":""string"",""enum"":[""bbox"",""count""]},""ids"":{""type"":""array"",""items"":{""type"":""integer""}},""category"":{""type"":""string""},""level"":{""type"":""string""},""box_mm"":{""type"":""object""},""tol_mm"":{""type"":""number"",""default"":10},""expect"":{""type"":""integer""},""min_expect"":{""type"":""integer""},""max_expect"":{""type"":""integer""}}},""description"":""bbox: union box of ids (or category+level filter) must match box_mm within tol_mm per axis. count: instance count must equal expect or fall within inclusive min_expect/max_expect; use either expect or a range.""}},""required"":[""assertions""]}";
 
         public CommandResult Execute(UIApplication app, string paramsJson)
         {
@@ -92,12 +92,15 @@ namespace RvtMcp.Plugin.Handlers
 
         private static object CheckCount(Document doc, JObject a)
         {
-            if (a["expect"] == null) return new { kind = "count", pass = false, error = "expect is required." };
-            var expect = a.Value<int>("expect");
+            var expect = a.Value<int?>("expect");
+            var minExpect = a.Value<int?>("min_expect");
+            var maxExpect = a.Value<int?>("max_expect");
             var category = a.Value<string>("category");
             var level = a.Value<string>("level");
             var n = FilterElements(doc, category, level).Count;
-            return new { kind = "count", pass = n == expect, actual = n, expect };
+            if (!VerifyCountPolicy.TryEvaluate(n, expect, minExpect, maxExpect, out var pass, out var error))
+                return new { kind = "count", pass = false, actual = n, error };
+            return new { kind = "count", pass, actual = n, expect, min_expect = minExpect, max_expect = maxExpect };
         }
 
         private static List<Element> FilterElements(Document doc, string category, string level)
@@ -119,7 +122,7 @@ namespace RvtMcp.Plugin.Handlers
                     try { cn = e.Category?.Name ?? ""; } catch { }
                     if (cn.IndexOf(category, StringComparison.OrdinalIgnoreCase) < 0) continue;
                 }
-                if (levelId != null && e.LevelId != null && !e.LevelId.Equals(levelId)) continue;
+                if (levelId != null && (e.LevelId == null || !e.LevelId.Equals(levelId))) continue;
                 result.Add(e);
             }
             return result;
