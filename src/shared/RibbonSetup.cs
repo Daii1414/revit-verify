@@ -19,7 +19,7 @@ namespace RvtMcp.Plugin
 
     public static class RibbonSetup
     {
-        private const string PanelName = "RvtMcp";
+        private const string PanelName = "RvtVerify";
         private static readonly HashSet<string> CreatedButtons = new HashSet<string>();
         /// <summary>
         /// Revit routes every item added after <c>AddSlideOut()</c> into the
@@ -33,7 +33,7 @@ namespace RvtMcp.Plugin
             var panel = ResolvePanel(application);
 
             var toggleData = new PushButtonData(
-                "ToggleMcp", L.T("ribbon.toggle.text.stopped"),
+                "RvtVerifyToggleMcp", L.T("ribbon.toggle.text.stopped"),
                 assemblyPath,
                 "RvtMcp.Plugin.Commands.ToggleMcpCommand")
             {
@@ -43,7 +43,7 @@ namespace RvtMcp.Plugin
             };
 
             var historyData = new PushButtonData(
-                "ShowHistory", L.T("ribbon.history.text", ("count", 0)),
+                "RvtVerifyShowHistory", L.T("ribbon.history.text", ("count", 0)),
                 assemblyPath,
                 "RvtMcp.Plugin.Commands.ShowHistoryCommand")
             {
@@ -54,7 +54,7 @@ namespace RvtMcp.Plugin
 
             var toastEnabled = config?.EnableToastOrDefault == true;
             var toastData = new PushButtonData(
-                "ToggleToast", L.T("ribbon.toast.text"),
+                "RvtVerifyToggleToast", L.T("ribbon.toast.text"),
                 assemblyPath,
                 "RvtMcp.Plugin.Commands.ToggleToastCommand")
             {
@@ -103,7 +103,7 @@ namespace RvtMcp.Plugin
                 if (entry.RibbonSlot <= 0 || entry.RibbonSlot > BakedToolRuntimeCache.MaxRibbonSlots)
                     continue;
 
-                var buttonName = "BakedToolSlot" + entry.RibbonSlot.ToString("00");
+                var buttonName = "RvtVerifyBakedToolSlot" + entry.RibbonSlot.ToString("00");
                 if (CreatedButtons.Contains(buttonName))
                     continue;
 
@@ -132,7 +132,7 @@ namespace RvtMcp.Plugin
 
         private static PushButton AddSettingsButton(RibbonPanel panel, string assemblyPath)
         {
-            const string buttonName = "ShowSettings";
+            const string buttonName = "RvtVerifyShowSettings";
             if (CreatedButtons.Contains(buttonName)) return null;
             var data = new PushButtonData(
                 buttonName,
@@ -150,7 +150,7 @@ namespace RvtMcp.Plugin
 
         private static PushButton AddLanguageButton(RibbonPanel panel, string assemblyPath)
         {
-            const string buttonName = "ShowSettingsLanguage";
+            const string buttonName = "RvtVerifyShowSettingsLanguage";
             if (CreatedButtons.Contains(buttonName)) return null;
             var data = new PushButtonData(
                 buttonName,
@@ -183,7 +183,7 @@ namespace RvtMcp.Plugin
 
         private static PushButton AddBakeInboxButton(RibbonPanel panel, string assemblyPath)
         {
-            const string buttonName = "ShowBakeInbox";
+            const string buttonName = "RvtVerifyShowBakeInbox";
             if (CreatedButtons.Contains(buttonName))
                 return null;
 
