@@ -25,7 +25,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    Есть `revit_capture_before_after`: слот before регистрирует кадр и камеру,
    слот after переснимает и отдаёт bounded pixel diff (identical/different/
    unverified с причиной); одинаковые камера и размеры обязательны для
-   verified diff. Подсветка ещё нужна; quality trend закрыт локальным `revit_qa_trend` (record/show, дельта/best/worst, 200 записей).
+   verified diff. Подсветка закрыта `revit_highlight_offenders` (select+zoom+setcolor одним вызовом); quality trend закрыт локальным `revit_qa_trend` (record/show, дельта/best/worst, 200 записей).
    Точная камера частично закрыта: `revit_set_view_orientation` теперь принимает
    eye/target/up для повторяемой постановки кадра. `revit_capture_review_set`
    снимает до 8 именованных кадров за вызов; before/after diff, colorize и

@@ -152,6 +152,49 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_highlight_offenders", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Present QA offender IDs in one call: select and zoom to them, then color them in the view (default red). Feed offending_ids from revit_verify_run_rules or revit_verify_assert. UI-only plus graphics override; restore them with Revit Undo. Params: element_ids (required JSON int array, max 200), view_id (optional), r/g/b 0-255 (default 255,0,0), select/zoom (default true).")]
+        public static async Task<string> HighlightOffenders(string element_ids, long? view_id = null, int r = 255, int g = 0, int b = 0, bool select = true, bool zoom = true)
+        {
+            var blocked = ServerState.BlockIfReadOnly("highlight_offenders");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                if (r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255)
+                    return "Error: r/g/b must each be 0-255.";
+                var parsedIds = JArray.Parse(element_ids).ToObject<long[]>();
+                if (parsedIds == null || parsedIds.Length == 0)
+                    return "Error: element_ids non-empty array is required.";
+                if (parsedIds.Length > 200)
+                    return "Error: element_ids accepts at most 200 IDs.";
+                var shown = await ToolGateway.SendToRevit("show_element_in_view", new
+                {
+                    element_ids = parsedIds,
+                    view_id,
+                    activate_view = true,
+                    select,
+                    zoom
+                });
+                var colored = await ToolGateway.SendToRevit("operate_element", new
+                {
+                    operation = "setcolor",
+                    elementIds = parsedIds,
+                    r = (byte)r,
+                    g = (byte)g,
+                    b = (byte)b
+                });
+                return JsonConvert.SerializeObject(new
+                {
+                    highlighted_ids = parsedIds,
+                    count = parsedIds.Length,
+                    color = new { r, g, b },
+                    view = shown,
+                    graphics = colored
+                }, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_set_view_crop", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace saved view crop settings; restore them with Revit Undo. Modify view crop: enabled, visible, explicit bounds_json (mm), or fit_element_ids with padding_mm. Params: view_id (optional, default active), enabled, visible, bounds_json, fit_element_ids, padding_mm (default 100).")]
         public static async Task<string> SetViewCrop(
             long? view_id = null, bool? enabled = null, bool? visible = null,

@@ -21,7 +21,7 @@ namespace RvtMcp.Tests
             "assign_material_to_element", "assign_revision_to_sheet", "batch_execute",
             "bind_shared_parameter", "change_element_type", "clear_element_overrides", "color_elements",
             "capture_before_after", "capture_review_set", "connect_mep_elements", "delete_element", "delete_saved_selection", "delete_view_template",
-            "dismiss_bake_suggestion", "load_family_from_path", "operate_element", "override_element_graphics",
+            "dismiss_bake_suggestion", "highlight_offenders", "load_family_from_path", "operate_element", "override_element_graphics",
             "publish_coordinates_to_link", "purge_unused", "reload_link", "remove_filter_from_view",
             "remove_parameter_binding", "rename_family_type", "renumber_sheets", "replace_family_type",
             "run_baked_tool", "save_document", "save_selection", "set_category_visibility", "set_element_parameter_values",

@@ -20,6 +20,7 @@ namespace RvtMcp.Tests
             "revit_capture_view_image",
             "revit_create_view",
             "revit_export_element_snapshot",
+            "revit_highlight_offenders",
             "revit_place_view_on_sheet",
             "revit_set_view_crop",
             "revit_set_view_orientation",
@@ -181,6 +182,50 @@ namespace RvtMcp.Tests
             Assert.Equal(2, json["element_ids"].Count());
             Assert.Equal(7, json.Value<long>("view_id"));
             Assert.Equal(1200, json.Value<int>("pixel_size"));
+        }
+
+        [Fact]
+        public async Task Highlight_offenders_shows_then_colors()
+        {
+            var calls = new System.Collections.Generic.List<string>();
+            string output = null;
+            await Capture.WithSendOverride(
+                (command, parameters, timeout) =>
+                {
+                    calls.Add(command);
+                    return System.Threading.Tasks.Task.FromResult(new Newtonsoft.Json.Linq.JObject { ["ok"] = true });
+                },
+                async () => { output = await ViewTools.HighlightOffenders("[11,12]", null, 255, 0, 0, true, true); });
+
+            Assert.Equal(new[] { "show_element_in_view", "operate_element" }, calls.ToArray());
+            var json = Newtonsoft.Json.Linq.JObject.Parse(output);
+            Assert.Equal(2, json.Value<int>("count"));
+            Assert.Equal(255, json["color"].Value<int>("r"));
+            Assert.True(json["view"].Value<bool>("ok"));
+            Assert.True(json["graphics"].Value<bool>("ok"));
+        }
+
+        [Fact]
+        public async Task Highlight_offenders_rejects_bad_input_without_sending()
+        {
+            var calls = 0;
+            string output = null;
+            await Capture.WithSendOverride(
+                (command, parameters, timeout) =>
+                {
+                    calls++;
+                    return System.Threading.Tasks.Task.FromResult(new Newtonsoft.Json.Linq.JObject());
+                },
+                async () =>
+                {
+                    output = await ViewTools.HighlightOffenders("[]");
+                    Assert.StartsWith("Error:", output, System.StringComparison.Ordinal);
+                    output = await ViewTools.HighlightOffenders("[1]", null, 300);
+                    Assert.StartsWith("Error:", output, System.StringComparison.Ordinal);
+                    output = await ViewTools.HighlightOffenders("nope");
+                    Assert.StartsWith("Error:", output, System.StringComparison.Ordinal);
+                });
+            Assert.Equal(0, calls);
         }
 
         [Fact]

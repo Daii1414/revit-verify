@@ -114,7 +114,7 @@ namespace RvtMcp.Tests
                 Assert.False(string.IsNullOrWhiteSpace(result), toolName + " returned nothing.");
                 Assert.True(calls.Count > 0,
                     toolName + " never reached the plug-in with the probe arguments. It returned: " + Shorten(result));
-                Assert.Contains(calls, c => c.Command == wire || (wire == "batch_execute") || (wire == "verify_run_rules" && c.Command == "verify_assert"));
+                Assert.Contains(calls, c => c.Command == wire || (wire == "batch_execute") || (wire == "verify_run_rules" && c.Command == "verify_assert") || (wire == "highlight_offenders" && (c.Command == "show_element_in_view" || c.Command == "operate_element")));
                 if (wire == "verify_run_rules")
                     Assert.Contains("\"rules_total\"", result);
                 else
