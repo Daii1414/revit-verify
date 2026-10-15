@@ -105,6 +105,7 @@ namespace RvtMcp.Server.Handlers
             var xAxes = Cluster(segments.Where(s => s.Axis == "x"), coordinateTolerance, ReadLabels(rules["x_axis_labels"], "x_axis_labels"));
             var yAxes = Cluster(segments.Where(s => s.Axis == "y"), coordinateTolerance, ReadLabels(rules["y_axis_labels"], "y_axis_labels"));
             var wallAnalysis = CadWallCandidateBuilder.Build(results, rules);
+            var openingAnalysis = CadOpeningCandidateBuilder.Build(results, rules);
             var plan = new JObject
             {
                 ["plan_version"] = 1,
@@ -119,10 +120,14 @@ namespace RvtMcp.Server.Handlers
                 ["y_axes"] = yAxes,
                 ["wall_candidates"] = wallAnalysis["wall_candidates"].DeepClone(),
                 ["wall_analysis"] = wallAnalysis,
+                ["door_candidates"] = openingAnalysis["door_candidates"].DeepClone(),
+                ["window_candidates"] = openingAnalysis["window_candidates"].DeepClone(),
+                ["opening_analysis"] = openingAnalysis,
                 ["limitations"] = new JArray(
                     "Candidates are inferred only from straight or tessellated CAD segments on the exact configured layers.",
                     "Labels are assigned by coordinate order from versioned rules; source text and bubble association are not inferred.",
-                    "Wall candidates require two parallel boundary segments and a configured nominal thickness; openings, joins, height, and materials are not inferred.",
+                    "Wall candidates require two parallel boundary segments and a configured nominal thickness; joins, height, and materials are not inferred.",
+                    "Opening candidates come only from door-swing arcs and paired window lines on the configured layers; heights, sills, and panel types are not inferred.",
                     "This plan does not create or modify Revit elements.")
             };
             plan["plan_sha256"] = Sha256(plan.ToString(Formatting.None));

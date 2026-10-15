@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Extend `revit_cad_plan` with door/window opening candidates: door swings from arc center/radius/sweep, windows from paired parallel lines, both with layer/instance/entity provenance; unsupported geometry reported with reasons. No model changes.
 - Add `revit_job` for background long operations (exports, clash): submit/status/cancel/list with persistent IDs, coarse progress and honest detach-on-cancel semantics. Payloads are 4 KiB previews.
 - Add `RvtVerify.Server --doctor`: Revit-free installation check (add-in manifests, plugin DLL presence and same-release version match, release-plugin coexistence, config JSON, data-dir writability) with JSON report and 0/1 exit code.
 - Add `revit_renumber_elements` for sequential door/window marks and room numbers ordered by level then plan position, dry run by default.
