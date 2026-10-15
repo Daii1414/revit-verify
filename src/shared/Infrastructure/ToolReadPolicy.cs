@@ -103,6 +103,7 @@ namespace RvtMcp.Plugin
             "project_point_onto_face",
             "raycast_from_point",
             "read_memory_notes",
+            "reflect_get",
             "resolve_targets",
             "select_elements",
             "show_element_in_view",

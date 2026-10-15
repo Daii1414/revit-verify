@@ -100,6 +100,20 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_reflect_get", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read one property of one element by path without send_code. Path is one of: id, name, category, type, level, host, location, box, param:<Name> (instance first, then type; no nesting). Unset values return null with a note instead of failing. Read-only. Params: element_id (required), path (required).")]
+        public static async Task<string> ReflectGet(long element_id, string path)
+        {
+            var blocked = ServerState.BlockIfReadOnly("reflect_get");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("reflect_get", new { element_id, path });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox, exact/ranged count, per-element solid volume, edge closure (every inspectable solid edge has two adjacent faces and nonzero volume; ids or category/level scope, max 200), and hosting/level support. Read-only; edge closure does not detect self-intersections and is not a complete watertightness proof. Support checks hosting and level references only, not structural capacity. Params: assertions_json (required JSON array).")]
         public static async Task<string> VerifyAssert(string assertions_json)
         {

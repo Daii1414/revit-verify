@@ -19,6 +19,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.GetFamilyTypesHandler());
             Register(new Handlers.AiElementFilterHandler());
             Register(new Handlers.ResolveTargetsHandler());
+            Register(new Handlers.ReflectGetHandler());
             Register(new Handlers.VerifyAssertHandler());
             Register(new Handlers.CaptureModelSnapshotHandler());
             Register(new Handlers.CompareModelSnapshotHandler());

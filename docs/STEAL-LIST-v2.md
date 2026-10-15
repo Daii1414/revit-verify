@@ -88,7 +88,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    взвесить в single-registration (компакт vs гранулярность).
 8. **Рефлексивное чтение** (`get` любого свойства по пути, без компиляции).
    От: Sam-AEC `revit_reflect_get` (идея; GPL — только идея).
-   У нас: только тяжёлый send_code. Куда: `revit_reflect_get(element, path)`.
+   Есть `revit_reflect_get(element, path)` (read-only, строгая грамматика путей, null с note вместо падения).
 9. **Мок-режим сервера** (фейковые ответы без Revit).
    От: Sam-AEC, AB MockBridge. У нас: нет. Куда: тесты/разработка.
 

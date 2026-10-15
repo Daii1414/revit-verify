@@ -35,6 +35,7 @@ namespace RvtMcp.Tests
             "revit_list_project_parameters",
             "revit_list_worksets",
             "revit_qa_trend",
+            "revit_reflect_get",
             "revit_resolve_targets",
             "revit_survey_change_impact",
             "revit_verify_assert",
@@ -73,6 +74,16 @@ namespace RvtMcp.Tests
             Assert.Equal("door", sent.Json().Value<string>("term"));
             Assert.Equal(2, sent.Json()["kinds"].Count());
             Assert.Equal(10, sent.Json().Value<int>("limit"));
+        }
+
+        [Fact]
+        public async Task Reflect_get_sends_id_and_path()
+        {
+            var sent = await Capture.Send(() => QueryTools.ReflectGet(42, "param:Mark"));
+
+            Assert.Equal("reflect_get", sent.Command);
+            Assert.Equal(42, sent.Json().Value<long>("element_id"));
+            Assert.Equal("param:Mark", sent.Json().Value<string>("path"));
         }
 
         [Fact]
