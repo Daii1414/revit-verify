@@ -100,7 +100,7 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox, exact/ranged count, per-element solid volume, and edge closure (every inspectable solid edge has two adjacent faces and nonzero volume; ids or category/level scope, max 200). Read-only; edge closure does not detect self-intersections and is not a complete watertightness proof. Structural support is not checked. Params: assertions_json (required JSON array).")]
+        [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox, exact/ranged count, per-element solid volume, edge closure (every inspectable solid edge has two adjacent faces and nonzero volume; ids or category/level scope, max 200), and hosting/level support. Read-only; edge closure does not detect self-intersections and is not a complete watertightness proof. Support checks hosting and level references only, not structural capacity. Params: assertions_json (required JSON array).")]
         public static async Task<string> VerifyAssert(string assertions_json)
         {
             var blocked = ServerState.BlockIfReadOnly("verify_assert");
@@ -115,7 +115,7 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_verify_run_rules", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Run a YAML QA ruleset: each rule fans out to verify_assert kinds (bbox/count/solid_volume/edge_closure). Returns per-rule pass/fail with offender IDs, a weighted score 0-100, and refuses stale runs when model_key (copied from capture_model_snapshot) mismatches the live model. Read-only. Params: rules_yaml (required schema v1: version/rules[id/description/weight/assertions]), stop_on_first_fail (default false). Max 10 rules, 10 assertions per rule, 64 KiB input.")]
+        [McpServerTool(Name = "revit_verify_run_rules", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Run a YAML QA ruleset: each rule fans out to verify_assert kinds (bbox/count/solid_volume/edge_closure/support). Returns per-rule pass/fail with offender IDs, a weighted score 0-100, and refuses stale runs when model_key (copied from capture_model_snapshot) mismatches the live model. Read-only. Params: rules_yaml (required schema v1: version/rules[id/description/weight/assertions]), stop_on_first_fail (default false). Max 10 rules, 10 assertions per rule, 64 KiB input.")]
         public static async Task<string> VerifyRunRules(string rules_yaml, bool stop_on_first_fail = false)
         {
             var blocked = ServerState.BlockIfReadOnly("verify_run_rules");

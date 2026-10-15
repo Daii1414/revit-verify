@@ -54,6 +54,16 @@ rules:
         }
 
         [Fact]
+        public void Parses_support_kind()
+        {
+            var rules = VerifyRulesYamlParser.Parse(
+                "version: 1\nrules:\n  - id: hosted\n    assertions:\n      - kind: support\n        category: Windows\n");
+
+            Assert.Equal("support", rules.Rules[0].Assertions[0].Value<string>("kind"));
+            Assert.Equal("Windows", rules.Rules[0].Assertions[0].Value<string>("category"));
+        }
+
+        [Fact]
         public void Parses_comments_quotes_markers_and_model_key()
         {
             var rules = VerifyRulesYamlParser.Parse(@"---

@@ -14,8 +14,8 @@ namespace RvtMcp.Plugin.Handlers
         private const double CubicFeetToCubicMeters = 0.028316846592;
 
         public string Name => "verify_assert";
-        public string Description => "Check measurable post-conditions against the model: bounding boxes, exact or ranged counts, per-element solid volume and bounded edge-closure checks. Read-only. Returns pass/fail and offending or missing element IDs.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""assertions"":{""type"":""array"",""maxItems"":20,""items"":{""type"":""object"",""properties"":{""kind"":{""type"":""string"",""enum"":[""bbox"",""count"",""solid_volume"",""edge_closure""]},""ids"":{""type"":""array"",""items"":{""type"":""integer""}},""category"":{""type"":""string""},""level"":{""type"":""string""},""box_mm"":{""type"":""object""},""tol_mm"":{""type"":""number"",""default"":10},""expect"":{""type"":""integer""},""min_expect"":{""type"":""integer""},""max_expect"":{""type"":""integer""},""min_volume_m3"":{""type"":""number""},""max_volume_m3"":{""type"":""number""}}},""description"":""bbox: union box of ids (or category+level filter) must match box_mm within tol_mm per axis. count: exact expect or inclusive min_expect/max_expect. solid_volume: every scoped element's positive Revit solid volume must fall within min_volume_m3/max_volume_m3. edge_closure: verifies each scoped element has nonzero solid volume and every inspectable solid edge has two adjacent faces; use ids or category/level, max 200 elements. edge_closed is a boundary-edge check only: Revit self-intersections are not checked, so it is not a proof of topological watertightness. Structural support is not checked.""}},""required"":[""assertions""]}";
+        public string Description => "Check measurable post-conditions against the model: bounding boxes, exact or ranged counts, per-element solid volume, bounded edge-closure checks, and hosting/level support checks. Read-only. Returns pass/fail and offending or missing element IDs.";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""assertions"":{""type"":""array"",""maxItems"":20,""items"":{""type"":""object"",""properties"":{""kind"":{""type"":""string"",""enum"":[""bbox"",""count"",""solid_volume"",""edge_closure"",""support""]},""ids"":{""type"":""array"",""items"":{""type"":""integer""}},""category"":{""type"":""string""},""level"":{""type"":""string""},""box_mm"":{""type"":""object""},""tol_mm"":{""type"":""number"",""default"":10},""expect"":{""type"":""integer""},""min_expect"":{""type"":""integer""},""max_expect"":{""type"":""integer""},""min_volume_m3"":{""type"":""number""},""max_volume_m3"":{""type"":""number""}}},""description"":""bbox: union box of ids (or category+level filter) must match box_mm within tol_mm per axis. count: exact expect or inclusive min_expect/max_expect. solid_volume: every scoped element's positive Revit solid volume must fall within min_volume_m3/max_volume_m3. edge_closure: verifies each scoped element has nonzero solid volume and every inspectable solid edge has two adjacent faces; use ids or category/level, max 200 elements. support: verifies each scoped element keeps a live host (hostable family instances) and has no dangling level reference; use ids or category/level, max 200 elements. edge_closed is a boundary-edge check only: Revit self-intersections are not checked, so it is not a proof of topological watertightness. Support checks hosting and level references only, not structural capacity.""}},""required"":[""assertions""]}";
 
         public CommandResult Execute(UIApplication app, string paramsJson)
         {
@@ -40,7 +40,8 @@ namespace RvtMcp.Plugin.Handlers
                     else if (kind == "count") results.Add(CheckCount(doc, (JObject)a));
                     else if (kind == "solid_volume") results.Add(CheckSolidVolume(doc, (JObject)a));
                     else if (kind == "edge_closure") results.Add(CheckEdgeClosure(doc, (JObject)a));
-                    else results.Add(new { kind, pass = false, error = "unknown kind (bbox|count|solid_volume|edge_closure)" });
+                    else if (kind == "support") results.Add(CheckSupport(doc, (JObject)a));
+                    else results.Add(new { kind, pass = false, error = "unknown kind (bbox|count|solid_volume|edge_closure|support)" });
                 }
                 catch (Exception ex)
                 {
@@ -362,6 +363,132 @@ namespace RvtMcp.Plugin.Handlers
             internal int UnpairedEdgeCount;
             internal int IndeterminateCount;
             internal double AbsoluteVolumeFt3;
+        }
+
+        private static object CheckSupport(Document doc, JObject a)
+        {
+            var ids = a["ids"] as JArray;
+            var elements = new List<Element>();
+            if (ids != null && ids.Count > 0)
+            {
+                if (ids.Count > MaxSolidVolumeElements)
+                    return new { kind = "support", pass = false, error = "ids contains more than " + MaxSolidVolumeElements + " entries." };
+                var missing = new List<long>();
+                var seen = new HashSet<long>();
+                foreach (var token in ids)
+                {
+                    if (token.Type != JTokenType.Integer)
+                        return new { kind = "support", pass = false, error = "ids must contain only integer element IDs." };
+                    var id = token.Value<long>();
+                    if (!RevitCompat.CanRepresentElementId(id))
+                        return new { kind = "support", pass = false, error = RevitCompat.ElementIdRangeError(id) };
+                    if (!seen.Add(id)) continue;
+                    var element = doc.GetElement(RevitCompat.ToElementId(id));
+                    if (element == null) missing.Add(id);
+                    else elements.Add(element);
+                }
+                if (missing.Count > 0)
+                    return new { kind = "support", pass = false, error = "elements not found", missing };
+            }
+            else
+            {
+                var category = a.Value<string>("category");
+                var level = a.Value<string>("level");
+                if (string.IsNullOrWhiteSpace(category) && string.IsNullOrWhiteSpace(level))
+                    return new { kind = "support", pass = false, error = "Specify ids or a category/level scope." };
+                elements = FilterElements(doc, category, level, MaxSolidVolumeElements + 1);
+            }
+
+            if (elements.Count == 0)
+                return new { kind = "support", pass = false, error = "No elements matched the requested scope." };
+            if (elements.Count > MaxSolidVolumeElements)
+                return new { kind = "support", pass = false, error = "Scope contains more than " + MaxSolidVolumeElements + " elements; narrow it." };
+
+            var results = new List<object>();
+            var offenders = new List<long>();
+            foreach (var element in elements)
+            {
+                var id = RevitCompat.GetId(element.Id);
+                var levelDangling = IsLevelDangling(doc, element, out var levelName);
+                var hostRequired = IsHostRequired(element);
+                long? hostId = null;
+                var hostMissing = hostRequired && !HasLiveHost(doc, element, out hostId);
+                if (!VerifySupportPolicy.TryEvaluate(levelDangling, hostRequired, hostMissing,
+                    out var pass, out var status, out var error))
+                    return new { kind = "support", pass = false, error };
+                if (!pass) offenders.Add(id);
+                results.Add(new
+                {
+                    id,
+                    status,
+                    level = levelName,
+                    host_required = hostRequired,
+                    host_id = hostMissing ? (long?)null : hostId,
+                    level_dangling = levelDangling,
+                    host_missing = hostMissing
+                });
+            }
+            return new
+            {
+                kind = "support",
+                pass = offenders.Count == 0,
+                verification = "host_and_level_reference",
+                supported_count = results.Count - offenders.Count,
+                measured_count = results.Count,
+                elements = results,
+                unsupported_ids = offenders,
+                structural_capacity_checked = false
+            };
+        }
+
+        private static bool IsLevelDangling(Document doc, Element element, out string levelName)
+        {
+            levelName = null;
+            try
+            {
+                var levelId = element.LevelId;
+                if (levelId == null || levelId == ElementId.InvalidElementId) return false;
+                var level = doc.GetElement(levelId) as Level;
+                if (level == null) return true;
+                try { levelName = level.Name; } catch { }
+                return false;
+            }
+            catch { return false; }
+        }
+
+        private static bool IsHostRequired(Element element)
+        {
+            try
+            {
+                if (!(element is FamilyInstance)) return false;
+                var instance = (FamilyInstance)element;
+                try
+                {
+                    // FamilyInstance.Host throws for non-hosted families; a null
+                    // result means hostable but unhosted.
+                    _ = instance.Host;
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+            catch { return false; }
+        }
+
+        private static bool HasLiveHost(Document doc, Element element, out long? hostId)
+        {
+            hostId = null;
+            try
+            {
+                var host = ((FamilyInstance)element).Host;
+                if (host == null) return false;
+                if (doc.GetElement(host.Id) == null) return false;
+                hostId = RevitCompat.GetId(host.Id);
+                return true;
+            }
+            catch { return false; }
         }
 
         private static List<Element> FilterElements(Document doc, string category, string level, int? stopAfter = null)

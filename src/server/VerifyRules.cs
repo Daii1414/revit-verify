@@ -25,7 +25,7 @@ namespace RvtMcp.Server
 
         private static readonly string[] TopKeys = { "version", "model_key", "rules" };
         private static readonly string[] RuleKeys = { "id", "description", "weight", "assertions" };
-        private static readonly string[] AssertKinds = { "bbox", "count", "solid_volume", "edge_closure" };
+        private static readonly string[] AssertKinds = { "bbox", "count", "solid_volume", "edge_closure", "support" };
         private static readonly Regex IdPattern = new Regex("^[a-z0-9_]{1,64}$", RegexOptions.Compiled);
 
         public sealed class RuleSet
@@ -127,7 +127,7 @@ namespace RvtMcp.Server
                 throw new ParseException(node.Line, "assertion is missing required 'kind'.");
             var kind = AsString(kindNode, map.Lines["kind"], "kind");
             if (Array.IndexOf(AssertKinds, kind) < 0)
-                throw new ParseException(map.Lines["kind"], "unknown kind '" + kind + "' (allowed: bbox, count, solid_volume, edge_closure).");
+                throw new ParseException(map.Lines["kind"], "unknown kind '" + kind + "' (allowed: bbox, count, solid_volume, edge_closure, support).");
             if (map.TryGetValue("ids", out var ids))
             {
                 if (!(ids is Seq seq))

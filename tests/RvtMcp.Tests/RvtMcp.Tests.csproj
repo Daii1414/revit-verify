@@ -29,6 +29,7 @@
     <Compile Include="..\..\src\shared\Handlers\OpenModelLocalPolicy.cs" Link="Shared\OpenModelLocalPolicy.cs" />
     <Compile Include="..\..\src\shared\Handlers\VerifyCountPolicy.cs" Link="Shared\VerifyCountPolicy.cs" />
     <Compile Include="..\..\src\shared\Handlers\VerifySolidVolumePolicy.cs" Link="Shared\VerifySolidVolumePolicy.cs" />
+    <Compile Include="..\..\src\shared\Handlers\VerifySupportPolicy.cs" Link="Shared\VerifySupportPolicy.cs" />
     <Compile Include="..\..\src\shared\Handlers\VerifyEdgeClosurePolicy.cs" Link="Shared\VerifyEdgeClosurePolicy.cs" />
     <Compile Include="..\..\src\shared\Handlers\CadAxisAuditPolicy.cs" Link="Shared\CadAxisAuditPolicy.cs" />
     <Compile Include="..\..\src\shared\Handlers\CadArcMetrics.cs" Link="Shared\CadArcMetrics.cs" />

@@ -8335,7 +8335,7 @@
     },
     {
       "name": "revit_verify_assert",
-      "description_hash": "sha256:58dcd2e90abd08409521a6f2d6b29ab2fdfc1b15323d596dddf65819ebda5953",
+      "description_hash": "sha256:6e1e90f09a4da1c21019223b99bc37a8ac5662cbbf0c7a2a5b8a46b0e3cce032",
       "inputSchema": {
         "properties": {
           "assertions_json": {
@@ -8357,7 +8357,7 @@
     },
     {
       "name": "revit_verify_run_rules",
-      "description_hash": "sha256:20a8ce6a4352e3cbe97ea9ac4f2317c2bf48e391ca3a64eb575ca1fceae7d561",
+      "description_hash": "sha256:a0bdb718a16cb64c68cd9ed54f4f60c91fd2487cbe2f05c27982f254161bd425",
       "inputSchema": {
         "properties": {
           "rules_yaml": {
