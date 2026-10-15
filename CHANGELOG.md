@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add `RvtVerify.Server --doctor`: Revit-free installation check (add-in manifests, plugin DLL presence and same-release version match, release-plugin coexistence, config JSON, data-dir writability) with JSON report and 0/1 exit code.
 - Add `revit_renumber_elements` for sequential door/window marks and room numbers ordered by level then plan position, dry run by default.
 - Extend `revit_transform_elements` with `mirror` (axis_mm endpoints projected to horizontal, optional mirror_copy via the native mirror-copies call, mirrored IDs reported).
 - Add read-only `revit_reflect_get` for single-property reads without send_code (id/name/category/type/level/host/location/box/param:<Name>); unset values return null with a note.

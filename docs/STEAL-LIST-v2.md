@@ -110,8 +110,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 
 ## P3 — инфраструктура и честность
 
-17. **Doctor без Revit** (проверка манифеста/сборок по метаданным, AB).
-    У нас: только живые проверки. Куда: `RvtVerify.Server.exe --doctor`.
+17. **Doctor без Revit** — есть `RvtVerify.Server --doctor` (манифесты, DLL и match версий одного релиза, coexistence, конфиг, папка данных; JSON + exit 0/1).
 18. **Self-contained publish + per-user install** (AB). У нас: нужен SDK.
     Куда: backlog публикации.
 19. **AGENTS-инструкции в репо** (cad2data AI_AGENTS_INSTRUCTIONS/OPENCODE.md,

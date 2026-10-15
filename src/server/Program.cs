@@ -41,6 +41,12 @@ namespace RvtMcp.Server
                 return;
             }
 
+            if (args.Any(a => a == "--doctor"))
+            {
+                Environment.ExitCode = RunDoctor();
+                return;
+            }
+
             // A9 3-layer config precedence (JSON < env < CLI). The --target selector and
             // transport mode (--http) stay as separate CLI parses for now; A3 toolsets
             // gating uses RvtMcpConfig.
@@ -219,6 +225,26 @@ namespace RvtMcp.Server
                 services.AddHostedService(_ => new Memory.HistoryRecoveryService(ToolGateway.History));
         }
 
+        static int RunDoctor()
+        {
+            var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var serverVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "";
+            var checks = DoctorReport.Run(appData, localAppData, serverVersion);
+            var report = new Newtonsoft.Json.Linq.JObject
+            {
+                ["ok"] = checks.All(c => c.Ok),
+                ["checks"] = new Newtonsoft.Json.Linq.JArray(checks.Select(c => new Newtonsoft.Json.Linq.JObject
+                {
+                    ["name"] = c.Name,
+                    ["ok"] = c.Ok,
+                    ["detail"] = c.Detail
+                }).ToArray())
+            };
+            Console.WriteLine(report.ToString(Newtonsoft.Json.Formatting.None));
+            return report.Value<bool>("ok") ? 0 : 1;
+        }
+
         private static void PrintHelp()
         {
             var usage = string.Join("\n", new[]
@@ -229,6 +255,7 @@ namespace RvtMcp.Server
                 "",
                 "Transport:",
                 "  --http <port>           Run HTTP SSE on 127.0.0.1:<port> (1-65535). Default = stdio.",
+                "  --doctor                Check manifests, assemblies, coexistence, config and data dir without Revit; exit 0/1.",
                 "",
                 "Routing:",
                 "  --target <selector>     Pin the initial target: auto | a 4-digit calendar",
