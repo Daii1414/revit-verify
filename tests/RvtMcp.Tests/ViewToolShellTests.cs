@@ -173,7 +173,7 @@ namespace RvtMcp.Tests
         public async Task Capture_before_after_sends_slot_and_frame()
         {
             var sent = await Capture.Send(() => ViewTools.CaptureBeforeAfter(
-                "hero", "after", new long[] { 11, 12 }, 7, 500, true, 1200, "png"));
+                "hero", "after", new long[] { 11, 12 }, 7, 500, true, 1200, "png", 24));
 
             Assert.Equal("capture_before_after", sent.Command);
             var json = sent.Json();
@@ -182,6 +182,7 @@ namespace RvtMcp.Tests
             Assert.Equal(2, json["element_ids"].Count());
             Assert.Equal(7, json.Value<long>("view_id"));
             Assert.Equal(1200, json.Value<int>("pixel_size"));
+            Assert.Equal(24, json.Value<int>("max_age_hours"));
         }
 
         [Fact]

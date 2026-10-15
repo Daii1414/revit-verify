@@ -24,7 +24,7 @@ namespace RvtMcp.Plugin.Handlers
 
         public string Name => "capture_before_after";
         public string Description => "Capture one half of a named before/after pair: isolate elements, export the frame, then restore the view. The after slot reuses the registered before image and camera and reports a pixel diff (identical/different/unverified). Restore any remaining view change with Revit Undo.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""name"":{""type"":""string"",""description"":""Pair name, 1-64 characters. The before slot registers it; the after slot looks it up.""},""slot"":{""type"":""string"",""enum"":[""before"",""after""]},""view_id"":{""type"":""integer""},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""}},""padding_mm"":{""type"":""number"",""default"":500},""tighten_section"":{""type"":""boolean"",""default"":true},""pixel_size"":{""type"":""number"",""default"":1200},""image_format"":{""type"":""string"",""enum"":[""png"",""jpeg""],""default"":""png""}},""required"":[""name"",""slot"",""element_ids""]}";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""name"":{""type"":""string"",""description"":""Pair name, 1-64 characters. The before slot registers it; the after slot looks it up.""},""slot"":{""type"":""string"",""enum"":[""before"",""after""]},""view_id"":{""type"":""integer""},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""}},""padding_mm"":{""type"":""number"",""default"":500},""tighten_section"":{""type"":""boolean"",""default"":true},""pixel_size"":{""type"":""number"",""default"":1200},""image_format"":{""type"":""string"",""enum"":[""png"",""jpeg""],""default"":""png""},""max_age_hours"":{""type"":""number"",""default"":0,""description"":""Freshness bound for the baseline in hours: 0 disables the check, otherwise an older baseline yields an unverified diff.""}},""required"":[""name"",""slot"",""element_ids""]}";
 
         public CommandResult Execute(UIApplication app, string paramsJson)
         {
@@ -98,8 +98,19 @@ namespace RvtMcp.Plugin.Handlers
             if (camera != null && baselineCamera != null)
                 cameraMoved = BeforeAfterDiff.CameraDistanceMm(camera, baselineCamera) > BeforeAfterDiff.CameraToleranceMm;
 
-            var diff = DiffImageFiles(baselinePath, imagePath, frame.Format,
-                baseline.Value<string>("image_format"), cameraMoved);
+            var maxAgeHours = req.Value<double?>("max_age_hours") ?? 0;
+            if (double.IsNaN(maxAgeHours) || double.IsInfinity(maxAgeHours) || maxAgeHours < 0)
+                return CommandResult.Fail("max_age_hours must be a finite number >= 0 (0 disables the freshness check).");
+            var baselineAgeHours = BeforeAfterDiff.BaselineAgeHours(baseline.Value<string>("captured_utc"), DateTime.UtcNow);
+
+            JObject diff;
+            if (BeforeAfterDiff.IsStale(baselineAgeHours, maxAgeHours))
+                diff = BeforeAfterDiff.Unverified("the before frame is "
+                    + (baselineAgeHours.HasValue ? Math.Round(baselineAgeHours.Value, 2) + "h old" : "undated")
+                    + ", older than max_age_hours=" + maxAgeHours + "; recapture slot 'before'.");
+            else
+                diff = DiffImageFiles(baselinePath, imagePath, frame.Format,
+                    baseline.Value<string>("image_format"), cameraMoved);
 
             return CommandResult.Ok(new
             {
@@ -114,6 +125,7 @@ namespace RvtMcp.Plugin.Handlers
                 {
                     image_path = baselinePath,
                     captured_utc = baseline.Value<string>("captured_utc"),
+                    age_hours = baselineAgeHours.HasValue ? Math.Round(baselineAgeHours.Value, 2) : (double?)null,
                     pixel_size = baseline.Value<int?>("pixel_size"),
                     image_format = baseline.Value<string>("image_format"),
                 },

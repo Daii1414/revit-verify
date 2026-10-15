@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -36,6 +37,22 @@ namespace RvtMcp.Plugin
                 ["mean_abs_diff"] = Math.Round(mean, 3),
                 ["cross_format"] = crossFormat,
             };
+        }
+
+        public static double? BaselineAgeHours(string capturedUtc, DateTime utcNow)
+        {
+            DateTime captured;
+            if (string.IsNullOrWhiteSpace(capturedUtc)
+                || !DateTime.TryParse(capturedUtc, null, DateTimeStyles.RoundtripKind, out captured))
+                return null;
+            return (utcNow - captured.ToUniversalTime()).TotalHours;
+        }
+
+        public static bool IsStale(double? ageHours, double maxAgeHours)
+        {
+            if (!(maxAgeHours > 0)) return false;
+            if (!ageHours.HasValue) return true;
+            return ageHours.Value > maxAgeHours;
         }
 
         public static JObject Unverified(string reason)

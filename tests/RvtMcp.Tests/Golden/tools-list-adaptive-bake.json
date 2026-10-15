@@ -929,7 +929,7 @@
     },
     {
       "name": "revit_capture_before_after",
-      "description_hash": "sha256:5119d8f9daf7619131d388a430c37cb48630d76f5e777e3b7c52bd2ee884e736",
+      "description_hash": "sha256:300cdad4955df8efcbf9b65a84e7f2bdf08977f949b5ce3dcd41591e58dde09a",
       "inputSchema": {
         "properties": {
           "element_ids": {
@@ -939,6 +939,10 @@
           "image_format": {
             "description": "",
             "type": "String"
+          },
+          "max_age_hours": {
+            "description": "",
+            "type": "Double"
           },
           "name": {
             "description": "",

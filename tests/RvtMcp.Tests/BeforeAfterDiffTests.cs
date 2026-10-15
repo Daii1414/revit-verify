@@ -96,6 +96,19 @@ namespace RvtMcp.Tests
         }
 
         [Fact]
+        public void Baseline_age_and_staleness()
+        {
+            var now = new System.DateTime(2026, 10, 15, 12, 0, 0, System.DateTimeKind.Utc);
+            Assert.Equal(2.5, BeforeAfterDiff.BaselineAgeHours("2026-10-15T09:30:00Z", now));
+            Assert.Null(BeforeAfterDiff.BaselineAgeHours("not-a-date", now));
+            Assert.Null(BeforeAfterDiff.BaselineAgeHours(null, now));
+            Assert.False(BeforeAfterDiff.IsStale(5.0, 0));
+            Assert.False(BeforeAfterDiff.IsStale(1.0, 2.0));
+            Assert.True(BeforeAfterDiff.IsStale(3.0, 2.0));
+            Assert.True(BeforeAfterDiff.IsStale(null, 2.0));
+        }
+
+        [Fact]
         public void Camera_distance_uses_millimetre_tolerance()
         {
             Assert.Equal(0.0, BeforeAfterDiff.CameraDistanceMm(Camera(0), Camera(0)));

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Extend `revit_capture_before_after` with `max_age_hours`: the after slot reports baseline age and yields an unverified diff when the before frame is older than the bound (0 disables the check). Undated baselines are treated as stale.
 - Add `revit_highlight_offenders` for one-call QA presentation: select and zoom to offender IDs, then color them (default red). Feeds on offending_ids from revit_verify_run_rules or revit_verify_assert; restores with Revit Undo.
 - Extend `revit_batch_execute` with opt-in `support_check`: after commit, hosting/level support is evaluated on created element IDs (max 200) and offender IDs are reported inline without a second call. Off by default; rolled-back batches report nothing.
 - Add `revit_qa_trend` for local QA score history (typically `revit_verify_run_rules` scores): record/show operations, per-model filter, summary with delta/best/worst, 200-entry bounded store with automatic pruning. Stored locally, never sent anywhere.
