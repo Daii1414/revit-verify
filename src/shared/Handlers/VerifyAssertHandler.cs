@@ -371,24 +371,18 @@ namespace RvtMcp.Plugin.Handlers
             var elements = new List<Element>();
             if (ids != null && ids.Count > 0)
             {
-                if (ids.Count > MaxSolidVolumeElements)
-                    return new { kind = "support", pass = false, error = "ids contains more than " + MaxSolidVolumeElements + " entries." };
-                var missing = new List<long>();
-                var seen = new HashSet<long>();
+                var idList = new List<long>();
                 foreach (var token in ids)
                 {
                     if (token.Type != JTokenType.Integer)
                         return new { kind = "support", pass = false, error = "ids must contain only integer element IDs." };
-                    var id = token.Value<long>();
-                    if (!RevitCompat.CanRepresentElementId(id))
-                        return new { kind = "support", pass = false, error = RevitCompat.ElementIdRangeError(id) };
-                    if (!seen.Add(id)) continue;
-                    var element = doc.GetElement(RevitCompat.ToElementId(id));
-                    if (element == null) missing.Add(id);
-                    else elements.Add(element);
+                    idList.Add(token.Value<long>());
                 }
-                if (missing.Count > 0)
-                    return new { kind = "support", pass = false, error = "elements not found", missing };
+                elements = ResolveSupportIds(doc, idList, out var error, out var missing);
+                if (error != null)
+                    return missing != null
+                        ? new { kind = "support", pass = false, error, missing }
+                        : new { kind = "support", pass = false, error };
             }
             else
             {
@@ -404,6 +398,57 @@ namespace RvtMcp.Plugin.Handlers
             if (elements.Count > MaxSolidVolumeElements)
                 return new { kind = "support", pass = false, error = "Scope contains more than " + MaxSolidVolumeElements + " elements; narrow it." };
 
+            return EvaluateSupportElements(doc, elements);
+        }
+
+        /// <summary>Support verdict over explicit IDs, shared with batch_execute's
+        /// opt-in post-check so created elements are covered without a second call.</summary>
+        internal static object EvaluateSupportIds(Document doc, List<long> ids)
+        {
+            var elements = ResolveSupportIds(doc, ids, out var error, out var missing);
+            if (error != null)
+                return new { kind = "support", pass = false, error, missing_ids = missing ?? new List<long>() };
+            if (elements.Count == 0)
+                return new { kind = "support", pass = false, error = "None of the given IDs exist.", missing_ids = missing };
+            return EvaluateSupportElements(doc, elements);
+        }
+
+        private static List<Element> ResolveSupportIds(Document doc, IEnumerable<long> ids, out string error, out List<long> missing)
+        {
+            error = null;
+            missing = null;
+            var elements = new List<Element>();
+            var seen = new HashSet<long>();
+            var count = 0;
+            foreach (var id in ids)
+            {
+                count++;
+                if (count > MaxSolidVolumeElements)
+                {
+                    error = "ids contains more than " + MaxSolidVolumeElements + " entries.";
+                    return elements;
+                }
+                if (!RevitCompat.CanRepresentElementId(id))
+                {
+                    error = RevitCompat.ElementIdRangeError(id);
+                    return elements;
+                }
+                if (!seen.Add(id)) continue;
+                var element = doc.GetElement(RevitCompat.ToElementId(id));
+                if (element == null)
+                {
+                    if (missing == null) missing = new List<long>();
+                    missing.Add(id);
+                }
+                else elements.Add(element);
+            }
+            if (missing != null && missing.Count > 0)
+                error = "elements not found";
+            return elements;
+        }
+
+        private static object EvaluateSupportElements(Document doc, List<Element> elements)
+        {
             var results = new List<object>();
             var offenders = new List<long>();
             foreach (var element in elements)

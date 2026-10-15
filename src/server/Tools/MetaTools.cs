@@ -373,8 +373,9 @@ namespace RvtMcp.Server
             "{\"command\":\"create_grid\",\"params\":{\"startX\":0,\"startY\":0,\"endX\":5000,\"endY\":0}}]'. " +
             "On any failure the whole group rolls back unless continueOnError=true. " +
             "Returns: {results: [{index, ok, data|error}], rolledBack}. output=file writes NDJSON to a local same-machine absolute path with bounded preview; remote clients receive preview only." +
+            " support_check=true evaluates hosting/level support on created element IDs after commit (max 200) and appends offender IDs without a second call." +
             " Subcommands may overwrite files or shared parameter data that Revit Undo cannot restore. Back up affected files first.")]
-        public static async Task<string> BatchExecute(string commands, bool continueOnError = false, string output = "inline")
+        public static async Task<string> BatchExecute(string commands, bool continueOnError = false, string output = "inline", bool support_check = false)
         {
             try
             {
@@ -387,7 +388,7 @@ namespace RvtMcp.Server
                         error = "batch_execute supports at most 20 commands (got " + parsed.Count + "). Split the batch."
                     }, Formatting.Indented);
                 }
-                var result = await ToolGateway.SendToRevit("batch_execute", new { commands = parsed, continueOnError, output });
+                var result = await ToolGateway.SendToRevit("batch_execute", new { commands = parsed, continueOnError, output, support_check });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
             catch (Exception ex) { return $"Error: {ex.Message}"; }

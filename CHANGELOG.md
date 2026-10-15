@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Extend `revit_batch_execute` with opt-in `support_check`: after commit, hosting/level support is evaluated on created element IDs (max 200) and offender IDs are reported inline without a second call. Off by default; rolled-back batches report nothing.
 - Add `revit_qa_trend` for local QA score history (typically `revit_verify_run_rules` scores): record/show operations, per-model filter, summary with delta/best/worst, 200-entry bounded store with automatic pruning. Stored locally, never sent anywhere.
 - Extend `revit_verify_assert` and `revit_verify_run_rules` with the `support` assertion kind: per-element hosting/level support checks (live host for hostable family instances, no dangling level references), bounded like the other kinds. This is a hosting/reference heuristic, not structural analysis; structural capacity is still not checked.
 - Add `revit_capture_before_after` for joint before/after delivery frames: slot before registers the frame image plus 3D camera, slot after recaptures and reports a bounded pixel diff (identical/different/unverified with reason) instead of asking a vision model. Same-camera and same-dimensions are enforced for verified diffs; camera moves, resizes and unreadable baselines yield unverified with an explicit reason. Bounded before-after registry (32 pairs, pruned). View is restored after each capture; images stay on disk.

@@ -734,7 +734,7 @@
     },
     {
       "name": "revit_batch_execute",
-      "description_hash": "sha256:404f8b08d6972af1d698f5d52a9148d261dbe1d65b4b03e583bac87f917bd637",
+      "description_hash": "sha256:4f19aa0368320e552abb4bf0b55d0c81319124dadb7c121642077a67c2c9ec9c",
       "inputSchema": {
         "properties": {
           "commands": {
@@ -748,6 +748,10 @@
           "output": {
             "description": "",
             "type": "String"
+          },
+          "support_check": {
+            "description": "",
+            "type": "Boolean"
           }
         },
         "required": [

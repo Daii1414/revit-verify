@@ -27,8 +27,8 @@ namespace RvtMcp.Plugin.Handlers
         }
 
         public string Name => "batch_execute";
-        public string Description => "Run multiple MCP commands in one Revit TransactionGroup (one undo step).";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""commands"":{""type"":""array"",""items"":{""type"":""object""}},""continueOnError"":{""type"":""boolean""},""output"":{""type"":""string"",""enum"": [""inline"", ""file""],""default"":""inline""}},""required"":[""commands""]}";
+        public string Description => "Run multiple MCP commands in one Revit TransactionGroup (one undo step). Opt-in support_check evaluates hosting/level support on created elements and reports offender IDs without a second call.";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""commands"":{""type"":""array"",""items"":{""type"":""object""}},""continueOnError"":{""type"":""boolean""},""support_check"":{""type"":""boolean"",""default"":false,""description"":""Evaluate support on created element IDs after commit (max 200, else skipped with a reason).""},""output"":{""type"":""string"",""enum"": [""inline"", ""file""],""default"":""inline""}},""required"":[""commands""]}";
 
         public CommandResult Execute(UIApplication app, string paramsJson)
         {
@@ -44,6 +44,7 @@ namespace RvtMcp.Plugin.Handlers
                 return CommandResult.Fail(BatchExecutor.TooManyCommandsMessage(commandsArr.Count));
 
             var continueOnError = request.Value<bool?>("continueOnError") ?? false;
+            var supportCheck = request.Value<bool?>("support_check") ?? false;
 
             using (var tg = new TransactionGroup(doc, "MCP: batch_execute"))
             {
@@ -75,23 +76,49 @@ namespace RvtMcp.Plugin.Handlers
                 if (!rolledBack)
                     undo = TryRecordUndo(doc, outcome);
 
-                return CommandResult.Ok(new { results = outcome.Results, rolledBack, undo });
+                object support = null;
+                if (!rolledBack && supportCheck)
+                    support = TrySupportCheck(doc, outcome);
+
+                return CommandResult.Ok(new { results = outcome.Results, rolledBack, undo, support });
             }
+        }
+
+        private static object TrySupportCheck(Document doc, BatchExecutor.Outcome outcome)
+        {
+            try
+            {
+                var created = CollectCreatedIds(outcome);
+                if (created.Count == 0)
+                    return new { checked_ids = 0, skipped = "no created elements to check" };
+                if (created.Count > 200)
+                    return new { checked_ids = 0, skipped = created.Count + " created elements exceed the 200-element bound; narrow the batch" };
+                return VerifyAssertHandler.EvaluateSupportIds(doc, created);
+            }
+            catch (Exception ex)
+            {
+                return new { checked_ids = 0, error = ex.Message };
+            }
+        }
+
+        private static List<long> CollectCreatedIds(BatchExecutor.Outcome outcome)
+        {
+            var created = new List<long>();
+            foreach (var r in outcome.Results)
+            {
+                var dataProp = r?.GetType().GetProperty("data");
+                var okProp = r?.GetType().GetProperty("ok");
+                if (okProp == null || !(okProp.GetValue(r) is bool ok) || !ok) continue;
+                created.AddRange(UndoJournal.ExtractCreatedIds(dataProp?.GetValue(r)));
+            }
+            return created.Distinct().ToList();
         }
 
         private static object TryRecordUndo(Document doc, BatchExecutor.Outcome outcome)
         {
             try
             {
-                var created = new List<long>();
-                foreach (var r in outcome.Results)
-                {
-                    var dataProp = r?.GetType().GetProperty("data");
-                    var okProp = r?.GetType().GetProperty("ok");
-                    if (okProp == null || !(okProp.GetValue(r) is bool ok) || !ok) continue;
-                    created.AddRange(UndoJournal.ExtractCreatedIds(dataProp?.GetValue(r)));
-                }
-                created = created.Distinct().ToList();
+                var created = CollectCreatedIds(outcome);
                 if (created.Count == 0)
                     return new { recorded = false, reason = "no created elements to track" };
                 var batch = UndoJournal.Record(doc.Title, SaveStamp(doc), "batch_execute", created);

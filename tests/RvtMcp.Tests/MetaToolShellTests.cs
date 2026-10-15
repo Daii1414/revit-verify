@@ -137,6 +137,17 @@ namespace RvtMcp.Tests
         }
 
         [Fact]
+        public async Task Batch_execute_forwards_support_check_flag()
+        {
+            var sent = await Capture.Send(() => MetaTools.BatchExecute(
+                "[{\"command\":\"get_current_view_info\"}]",
+                false, "inline", true));
+
+            Assert.Equal("batch_execute", sent.Command);
+            Assert.True(sent.Json().Value<bool>("support_check"));
+        }
+
+        [Fact]
         public async Task Batch_execute_rejects_over_20_commands_without_sending()
         {
             var commands = "[" + string.Join(",", Enumerable.Range(0, 21).Select(i => "{\"command\":\"noop\"}")) + "]";
