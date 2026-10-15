@@ -28,6 +28,7 @@ namespace RvtMcp.Plugin
         public const string EnvEnableAdaptiveBake        = "BIMWRIGHT_ENABLE_ADAPTIVE_BAKE";
         public const string EnvCacheSendCodeBodies       = "BIMWRIGHT_CACHE_SEND_CODE_BODIES";
         public const string EnvEnableToast               = "BIMWRIGHT_ENABLE_TOAST";
+        public const string EnvAutoJoinOverlapDialog     = "BIMWRIGHT_AUTO_JOIN_OVERLAP_DIALOG";
         public const string EnvPersistSendCodeBodies     = "BIMWRIGHT_PERSIST_SEND_CODE_BODIES";
         public const string EnvPersistSendCodeBodiesTtl  = "BIMWRIGHT_PERSIST_SEND_CODE_BODIES_TTL";
         public const string EnvUiLanguage                = "BIMWRIGHT_UI_LANGUAGE";
@@ -47,6 +48,7 @@ namespace RvtMcp.Plugin
         public const bool DefaultEnableAdaptiveBake        = false;
         public const bool DefaultCacheSendCodeBodies       = false;
         public const bool DefaultEnableToast               = true;
+        public const bool DefaultAutoJoinOverlapDialog     = true;
         public const bool DefaultShowBranding              = false;
         public const bool DefaultPersistSendCodeBodies     = false;
         public const int DefaultToastIdleSeconds           = 20;
@@ -108,6 +110,10 @@ namespace RvtMcp.Plugin
 
         [JsonProperty("enableToast")]
         public bool? EnableToast { get; set; }
+
+        /// <summary>Auto-answer the Revit "walls overlap, join them?" dialog so wall automation runs unattended. On by default.</summary>
+        [JsonProperty("autoJoinOverlapDialog")]
+        public bool? AutoJoinOverlapDialog { get; set; }
 
         /// <summary>Show the activity-card wordmark and product prefix. Saved across Revit sessions.</summary>
         [JsonProperty("showBranding")]
@@ -243,6 +249,7 @@ namespace RvtMcp.Plugin
         public bool EnableAdaptiveBakeOrDefault    => EnableAdaptiveBake ?? DefaultEnableAdaptiveBake;
         public bool CacheSendCodeBodiesOrDefault  => CacheSendCodeBodies ?? DefaultCacheSendCodeBodies;
         public bool EnableToastOrDefault          => EnableToast       ?? DefaultEnableToast;
+        public bool AutoJoinOverlapDialogOrDefault => AutoJoinOverlapDialog ?? DefaultAutoJoinOverlapDialog;
         public bool ShowBrandingOrDefault         => ShowBranding      ?? DefaultShowBranding;
         public ToastPositionOptions ToastPositionOrDefault => ReadToastPosition(
             ToastHorizontalAlign, ToastVerticalAlign, ToastDragEnabled, ToastDragOffset);

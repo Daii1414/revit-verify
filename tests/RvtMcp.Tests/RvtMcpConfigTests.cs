@@ -342,5 +342,13 @@ namespace RvtMcp.Tests
                 if (File.Exists(path)) File.Delete(path);
             }
         }
+
+        [Fact]
+        public void AutoJoinOverlapDialog_defaults_to_true()
+        {
+            Assert.True(new RvtMcpConfig().AutoJoinOverlapDialogOrDefault);
+            Assert.True(RvtMcpConfig.DefaultAutoJoinOverlapDialog);
+            Assert.False(new RvtMcpConfig { AutoJoinOverlapDialog = false }.AutoJoinOverlapDialogOrDefault);
+        }
     }
 }

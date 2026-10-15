@@ -45,6 +45,7 @@ namespace RvtMcp.Plugin
         private bool _mainWindowCaptured;
         private System.Windows.Threading.Dispatcher _revitDispatcher;
         private Update.UpdateNoticeCoordinator _updateNotice;
+        private OverlapDialogResponder _overlapResponder;
 
         public Result OnStartup(UIControlledApplication application)
         {
@@ -88,6 +89,11 @@ namespace RvtMcp.Plugin
             var ribbonResult = RibbonSetup.Create(application, Config, BakedToolRuntimeCache);
             DebugLog("OnStartup: RibbonSetup OK");
 
+            _overlapResponder = new OverlapDialogResponder(
+                DebugLog, () => Config?.AutoJoinOverlapDialogOrDefault ?? RvtMcpConfig.DefaultAutoJoinOverlapDialog);
+            _overlapResponder.Attach(application);
+            DebugLog("OnStartup: OverlapDialogResponder OK");
+
             _idlingUpdater = new IdlingUpdater(ribbonResult, ToastNotifier);
             application.Idling += OnIdling;
             DebugLog("OnStartup: END");
@@ -107,6 +113,9 @@ namespace RvtMcp.Plugin
             _bakeInboxWindow?.Close();
             _settingsWindow?.CloseForShutdown();
             _updateNotice?.Shutdown();
+
+            _overlapResponder?.Detach();
+            _overlapResponder = null;
 
             StopTransport();
             _handler?.CancelAll();

@@ -162,7 +162,13 @@ namespace RvtMcp.Plugin
                         bool rolledBack = false;
                         try
                         {
-                            result = command.Execute(app, request.ParamsJson);
+                            // While an MCP command runs, the Revit overlap/join dialog is
+                            // answered automatically (see OverlapDialogResponder).
+                            Func<CommandResult> body = () => command.Execute(app, request.ParamsJson);
+                            result = OverlapDialogResponder.RunEngaged(
+                                body,
+                                () => runtimeConfig.AutoJoinOverlapDialogOrDefault,
+                                App.DebugLog);
                             rolledBack = request.CommandName == "batch_execute"
                                 && result.Data != null && JObject.FromObject(result.Data).Value<bool>("rolledBack");
                         }
