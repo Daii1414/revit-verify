@@ -14,7 +14,7 @@
   <a href="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml"><img src="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="license" /></a>
   <a href="#supported-revit-versions"><img src="https://img.shields.io/badge/Revit-2022--2027-186BFF" alt="Revit 2022-2027" /></a>
-  <a href="#tools"><img src="https://img.shields.io/badge/MCP-258%20tools-6C47FF" alt="MCP tools" /></a>
+  <a href="#tools"><img src="https://img.shields.io/badge/MCP-259%20tools-6C47FF" alt="MCP tools" /></a>
   <a href="https://github.com/bimwright/rvt-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/bimwright/rvt-mcp" alt="latest release" /></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-version%20history-informational" alt="changelog" /></a>
 </p>
@@ -92,8 +92,8 @@ Community videos of rvt-mcp at work. Install steps shown in a video can be older
 |------|------:|-------|
 | Planned RvtVerify install | **250** | Not available yet; fork installer is pending |
 | Bare `rvt-mcp.exe` | **59** | `query` + `create` + `view` + `meta` |
-| `--toolsets all` | **258** | Full catalog |
-| `all` + adaptive bake | **261** | Adds 3 suggestion-lifecycle tools |
+| `--toolsets all` | **259** | Full catalog |
+| `all` + adaptive bake | **262** | Adds 3 suggestion-lifecycle tools |
 
 Counts exclude your personal baked tools. When ported, the RvtVerify installer is intended to seed `toolsets=all` only when `rvtmcp.config.json` doesn't already set `toolsets`; removing the key returns a bare server to the 59-tool surface. Read-only filters individual tools by `ReadOnly=true`, including reads inside mixed toolsets. Tools that can write files are excluded even when their default output is inline.
 
@@ -236,6 +236,7 @@ MCP annotations describe each tool's document/file effects. Transient selection,
       "mcp__rvt-mcp__revit_compute_element_volume",
       "mcp__rvt-mcp__revit_detect_firm_profile",
       "mcp__rvt-mcp__revit_detect_system_elements",
+      "mcp__rvt-mcp__revit_distill_session",
       "mcp__rvt-mcp__revit_find_elements_in_volume",
       "mcp__rvt-mcp__revit_find_mep_disconnects",
       "mcp__rvt-mcp__revit_find_overlapping_elements",

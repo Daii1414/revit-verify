@@ -19,6 +19,7 @@ namespace RvtMcp.Tests
             "revit_analyze_usage_patterns",
             "revit_batch_execute",
             "revit_create_memory_note",
+            "revit_distill_session",
             "revit_get_current_target",
             "revit_job",
             "revit_list_available_targets",

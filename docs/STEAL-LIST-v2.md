@@ -127,7 +127,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
     cad2data конвертеры). Направление: чтение IFC/DWG офлайн для сверки.
 25. **Классификации** (bSDD-mcp словари, Uniclass/Omniclass RAG у DDC).
     Куда: обогащение справочников при verify.
-26. **Сессионный distiller** (WAL → eval-отчёт, rhino). Наш journal мог бы.
+26. **Сессионный distiller** — есть `revit_distill_session` (mcp-calls*.jsonl → eval-отчёт: rates, p50/p95, top errors, sessions/span).
 
 ## Не брать (сознательно)
 

@@ -34,6 +34,7 @@ namespace RvtMcp.Tests
             ["revit_switch_target"] = "MetaToolShellTests",
             ["revit_analyze_usage_patterns"] = "MetaToolShellTests",
             ["revit_cad_apply"] = "CadApplyTests",
+            ["revit_distill_session"] = "SessionDistillerTests",
             ["revit_create_memory_note"] = "MemoryNotesTests",
             ["revit_read_memory_notes"] = "MemoryNotesTests",
             ["revit_qa_trend"] = "QaTrendTests",

@@ -14,7 +14,7 @@
   <a href="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml"><img src="https://github.com/bimwright/rvt-mcp/actions/workflows/build.yml/badge.svg" alt="build" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="license" /></a>
   <a href="#supported-revit-versions"><img src="https://img.shields.io/badge/Revit-2022--2027-186BFF" alt="Revit 2022-2027" /></a>
-  <a href="#tools"><img src="https://img.shields.io/badge/MCP-258%20tools-6C47FF" alt="MCP tools" /></a>
+  <a href="#tools"><img src="https://img.shields.io/badge/MCP-259%20tools-6C47FF" alt="MCP tools" /></a>
   <a href="https://github.com/bimwright/rvt-mcp/releases/latest"><img src="https://img.shields.io/github/v/release/bimwright/rvt-mcp" alt="latest release" /></a>
   <a href="CHANGELOG.md"><img src="https://img.shields.io/badge/changelog-version%20history-informational" alt="changelog" /></a>
 </p>
@@ -93,8 +93,8 @@ rvt-mcp を使ったコミュニティ動画です。動画内のインストー
 |--------|------:|------|
 | RvtVerify 用インストーラー（予定） | **250** | まだ利用できません。フォーク用インストーラーは未対応 |
 | 素の `rvt-mcp.exe` | **59** | `query` + `create` + `view` + `meta` |
-| `--toolsets all` | **258** | フルカタログ |
-| `all` + adaptive bake | **261** | 提案ライフサイクル 3 ツールを追加 |
+| `--toolsets all` | **259** | フルカタログ |
+| `all` + adaptive bake | **262** | 提案ライフサイクル 3 ツールを追加 |
 
 件数に個人 baked ツールは含みません。移植後の RvtVerify インストーラーは、`rvtmcp.config.json` に `toolsets` が未設定の場合に `all` を設定する予定です。キーを削除すると素のサーバーは 57 ツールになります。Read-only は `ReadOnly=true` のツールだけを残すため、混在 toolset 内の読み取りツールも使えます。既定の出力が inline でも、ファイルを書けるツールは除外されます。
 
@@ -237,6 +237,7 @@ Annotations は各ツールのドキュメントとファイルへの影響を�
       "mcp__rvt-mcp__revit_compute_element_volume",
       "mcp__rvt-mcp__revit_detect_firm_profile",
       "mcp__rvt-mcp__revit_detect_system_elements",
+      "mcp__rvt-mcp__revit_distill_session",
       "mcp__rvt-mcp__revit_find_elements_in_volume",
       "mcp__rvt-mcp__revit_find_mep_disconnects",
       "mcp__rvt-mcp__revit_find_overlapping_elements",

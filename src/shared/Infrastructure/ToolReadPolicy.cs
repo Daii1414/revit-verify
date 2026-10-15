@@ -29,6 +29,7 @@ namespace RvtMcp.Plugin
             "compute_element_volume",
             "detect_firm_profile",
             "detect_system_elements",
+            "distill_session",
             "find_elements_in_volume",
             "find_mep_disconnects",
             "find_overlapping_elements",

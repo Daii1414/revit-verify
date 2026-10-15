@@ -568,6 +568,60 @@ namespace RvtMcp.Server
             }
         }
 
+        [McpServerTool(Name = "revit_distill_session", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Distill mcp-calls session logs into an eval report: per-tool counts, success rates, duration p50/p95, top errors, sessions and time span. Read-only; malformed lines are counted and skipped. Params: log_dir (default %LOCALAPPDATA%\\RvtVerify), max_entries 1-20000 (default 5000, newest kept), session_id (optional filter).")]
+        public static async Task<string> DistillSession(string log_dir = null, int max_entries = 5000, string session_id = null)
+        {
+            await Task.Yield();
+            var blocked = ServerState.BlockIfReadOnly("distill_session");
+            if (blocked != null) return blocked;
+            try
+            {
+                if (max_entries < 1 || max_entries > SessionDistiller.MaxEntriesLimit)
+                    return "Error: max_entries must be 1-20000.";
+                var dir = string.IsNullOrWhiteSpace(log_dir)
+                    ? Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        "RvtVerify")
+                    : log_dir;
+                if (!Directory.Exists(dir))
+                    return "Error: log directory not found: " + dir;
+                var filter = (session_id ?? "").Trim();
+                var rows = new System.Collections.Generic.List<SessionDistiller.Row>();
+                long scanned = 0;
+                long malformed = 0;
+                var truncated = false;
+                var filesRead = 0;
+                foreach (var file in SessionDistiller.ListLogFiles(dir))
+                {
+                    System.Collections.Generic.IEnumerable<string> lines;
+                    try { lines = File.ReadLines(file); }
+                    catch (Exception ex) { return "Error: cannot read " + file + ": " + ex.Message; }
+                    try
+                    {
+                        foreach (var line in lines)
+                        {
+                            if (++scanned > SessionDistiller.MaxLinesScanned) { truncated = true; break; }
+                            var row = SessionDistiller.ParseLine(line);
+                            if (row == null) { malformed++; continue; }
+                            if (filter.Length > 0 && !string.Equals(row.SessionId, filter, StringComparison.Ordinal)) continue;
+                            rows.Add(row);
+                        }
+                    }
+                    catch (Exception ex) { return "Error: cannot read " + file + ": " + ex.Message; }
+                    filesRead++;
+                    if (truncated) break;
+                }
+                var report = SessionDistiller.Distill(rows, max_entries);
+                report["log_dir"] = dir;
+                report["files_read"] = filesRead;
+                report["lines_scanned"] = scanned;
+                report["malformed_skipped"] = malformed;
+                report["scan_truncated"] = truncated;
+                return JsonConvert.SerializeObject(report, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         internal static string MemoryRootOverride { get; set; }
 
         private static string MemoryNotesPath()
