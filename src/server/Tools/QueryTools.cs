@@ -115,6 +115,28 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_verify_run_rules", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Run a YAML QA ruleset: each rule fans out to verify_assert kinds (bbox/count/solid_volume/edge_closure). Returns per-rule pass/fail with offender IDs, a weighted score 0-100, and refuses stale runs when model_key (copied from capture_model_snapshot) mismatches the live model. Read-only. Params: rules_yaml (required schema v1: version/rules[id/description/weight/assertions]), stop_on_first_fail (default false). Max 10 rules, 10 assertions per rule, 64 KiB input.")]
+        public static async Task<string> VerifyRunRules(string rules_yaml, bool stop_on_first_fail = false)
+        {
+            var blocked = ServerState.BlockIfReadOnly("verify_run_rules");
+            if (blocked != null) return blocked;
+
+            VerifyRulesYamlParser.RuleSet rules;
+            try
+            {
+                rules = VerifyRulesYamlParser.Parse(rules_yaml);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+
+            try
+            {
+                var result = await VerifyRulesRunner.RunAsync(
+                    rules, stop_on_first_fail, (command, parameters) => ToolGateway.SendToRevit(command, parameters));
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_capture_model_snapshot", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Capture a bounded, hashed snapshot of explicit element IDs or categories in a saved model. Returns privacy-minimized JSON to pass to revit_compare_model_snapshot; no file or model changes. Geometry hashes use approximate Revit tessellation. Provide exactly one of element_ids or category_ids in scope_json.")]
         public static async Task<string> CaptureModelSnapshot(string scope_json)
         {

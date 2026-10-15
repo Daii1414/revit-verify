@@ -26,9 +26,12 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    снимает до 8 именованных кадров за вызов; before/after diff, colorize и
    quality trend ещё нужны.
 3. **YAML-правила QA (pass/fail + score + GUIDs).**
-   От: alesdev88/Archicad-MCP (MIT). У нас: нет. Куда: `verify_run_rules`
-   с YAML-файлами (стены замкнуты? комнаты? размеры?). Сюда же
-   freshness-checks от naviscoord (кадр протух — не верить).
+   От: alesdev88/Archicad-MCP (MIT). Есть `revit_verify_run_rules` (схема v1,
+   строгий парсер без новых зависимостей): правила маппятся на verify_assert,
+   per-rule pass/fail + ID нарушителей, взвешенный score 0–100; пин model_key
+   (из capture_model_snapshot) отказывает протухший прогон. `verify_assert`
+   отдаёт model_key/identity_kind. Открыто: правила, привязанные к снапшотам,
+   и freshness кадров сверх пина ключа.
 4. **DWG→BIM pipeline (extract → plan → apply с provenance + ревизии).**
    От: Horizun `horizun_plan_from_cad` + 13 CAD-инструментов (Apache-2.0).
    Есть read-only `revit_cad_extract` и `revit_cad_plan`: извлекатель

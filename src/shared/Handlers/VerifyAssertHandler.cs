@@ -48,7 +48,20 @@ namespace RvtMcp.Plugin.Handlers
                 }
                 allPass = allPass && (bool)((dynamic)results[results.Count - 1]).pass;
             }
-            return CommandResult.Ok(new { pass = allPass, assertions = results });
+            var identity = ModelIdentity(doc);
+            return CommandResult.Ok(new
+            {
+                pass = allPass,
+                model_key = identity?.Value<string>("key"),
+                identity_kind = identity?.Value<string>("kind"),
+                assertions = results
+            });
+        }
+
+        private static JObject ModelIdentity(Document doc)
+        {
+            try { return McpChangeTracker.Scope.Identity(doc); }
+            catch { return null; }
         }
 
         private static object CheckBox(Document doc, JObject a)

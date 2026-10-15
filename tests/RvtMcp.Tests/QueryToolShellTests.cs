@@ -36,7 +36,8 @@ namespace RvtMcp.Tests
             "revit_list_worksets",
             "revit_resolve_targets",
             "revit_survey_change_impact",
-            "revit_verify_assert"
+            "revit_verify_assert",
+            "revit_verify_run_rules"
         };
 
         [Fact]
@@ -82,6 +83,17 @@ namespace RvtMcp.Tests
             Assert.Equal("verify_assert", sent.Command);
             Assert.Equal("count", sent.Json()["assertions"][0].Value<string>("kind"));
             Assert.Equal("edge_closure", sent.Json()["assertions"][1].Value<string>("kind"));
+        }
+
+        [Fact]
+        public async Task Verify_run_rules_fans_out_to_verify_assert()
+        {
+            var yaml = "version: 1\nrules:\n  - id: probe\n    assertions:\n      - kind: count\n        min_expect: 0\n";
+            var sent = await Capture.Send(() => QueryTools.VerifyRunRules(yaml));
+
+            Assert.Equal("verify_assert", sent.Command);
+            Assert.Equal("count", sent.Json()["assertions"][0].Value<string>("kind"));
+            Assert.Equal(0, sent.Json()["assertions"][0].Value<int>("min_expect"));
         }
 
         [Fact]
