@@ -15,6 +15,7 @@ namespace RvtMcp.Tests
         {
             "revit_activate_view",
             "revit_analyze_sheet_layout",
+            "revit_capture_before_after",
             "revit_capture_review_set",
             "revit_capture_view_image",
             "revit_create_view",
@@ -165,6 +166,21 @@ namespace RvtMcp.Tests
             Assert.Equal(7, json["frames"][0].Value<long>("view_id"));
             Assert.Equal(2, json["frames"][0]["element_ids"].Count());
             Assert.Equal(1200, json["frames"][0].Value<int>("pixel_size"));
+        }
+
+        [Fact]
+        public async Task Capture_before_after_sends_slot_and_frame()
+        {
+            var sent = await Capture.Send(() => ViewTools.CaptureBeforeAfter(
+                "hero", "after", new long[] { 11, 12 }, 7, 500, true, 1200, "png"));
+
+            Assert.Equal("capture_before_after", sent.Command);
+            var json = sent.Json();
+            Assert.Equal("hero", json.Value<string>("name"));
+            Assert.Equal("after", json.Value<string>("slot"));
+            Assert.Equal(2, json["element_ids"].Count());
+            Assert.Equal(7, json.Value<long>("view_id"));
+            Assert.Equal(1200, json.Value<int>("pixel_size"));
         }
 
         [Fact]

@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 254,
+  "tool_count": 255,
   "tools": [
     {
       "name": "revit_accept_bake_suggestion",
@@ -921,6 +921,58 @@
         "idempotentHint": true,
         "openWorldHint": false,
         "readOnlyHint": true
+      }
+    },
+    {
+      "name": "revit_capture_before_after",
+      "description_hash": "sha256:5119d8f9daf7619131d388a430c37cb48630d76f5e777e3b7c52bd2ee884e736",
+      "inputSchema": {
+        "properties": {
+          "element_ids": {
+            "description": "",
+            "type": "Int64[]"
+          },
+          "image_format": {
+            "description": "",
+            "type": "String"
+          },
+          "name": {
+            "description": "",
+            "type": "String"
+          },
+          "padding_mm": {
+            "description": "",
+            "type": "Double"
+          },
+          "pixel_size": {
+            "description": "",
+            "type": "Int32"
+          },
+          "slot": {
+            "description": "",
+            "type": "String"
+          },
+          "tighten_section": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "view_id": {
+            "description": "",
+            "type": "Nullable`1"
+          }
+        },
+        "required": [
+          "name",
+          "slot",
+          "element_ids"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
       }
     },
     {

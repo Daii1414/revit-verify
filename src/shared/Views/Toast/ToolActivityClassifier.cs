@@ -18,7 +18,7 @@ namespace RvtMcp.Plugin.Views.Toast
             "resolve_history_identity",
             "send_code_to_revit",
             "run_baked_tool",
-            "capture_view_image", "capture_review_set", "get_material_takeoff", "compute_room_finishes",
+            "capture_view_image", "capture_review_set", "capture_before_after", "get_material_takeoff", "compute_room_finishes",
             "list_bake_suggestions", "open_model",
             "accept_bake_suggestion", "dismiss_bake_suggestion",
             "undo_batch",

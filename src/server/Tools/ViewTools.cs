@@ -128,6 +128,30 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_capture_before_after", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Capture one half of a named before/after pair for delivery diffs. Slot 'before' registers the frame (image + 3D camera); slot 'after' recaptures and reports a pixel diff (identical/different/unverified) against the registered baseline. Pixel diffs are approximate: lighting, highlights and JPEG artifacts count as changes; use the same pixel_size, format and camera for trustworthy diffs. Restores the view after each capture. Restore any remaining view change with Revit Undo. Params: name (required), slot ('before'|'after', required), element_ids (required, max 200), view_id/padding_mm/tighten_section/pixel_size (64-2048, default 1200)/image_format.")]
+        public static async Task<string> CaptureBeforeAfter(string name, string slot, long[] element_ids, long? view_id = null, double padding_mm = 500, bool tighten_section = true, int pixel_size = 1200, string image_format = "png")
+        {
+            var blocked = ServerState.BlockIfReadOnly("capture_before_after");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("capture_before_after", new
+                {
+                    name,
+                    slot,
+                    element_ids,
+                    view_id,
+                    padding_mm,
+                    tighten_section,
+                    pixel_size,
+                    image_format
+                });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_set_view_crop", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace saved view crop settings; restore them with Revit Undo. Modify view crop: enabled, visible, explicit bounds_json (mm), or fit_element_ids with padding_mm. Params: view_id (optional, default active), enabled, visible, bounds_json, fit_element_ids, padding_mm (default 100).")]
         public static async Task<string> SetViewCrop(
             long? view_id = null, bool? enabled = null, bool? visible = null,
