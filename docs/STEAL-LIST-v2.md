@@ -100,7 +100,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 12. **check_model_health** — уже есть `revit_check_model_health` с оценкой,
     grade и рекомендациями.
 13. **create_array** — уже есть `revit_create_array` (linear/radial).
-14. **renumber** дверей/окон/комнат (только sheets есть).
+14. **renumber** — есть `revit_renumber_elements` (Doors/Windows/Rooms, dry run, max_count).
 15. **horizun_undo** — частично есть `revit_undo_batch` для созданных элементов
     `batch_execute`, с журналом и защитой от изменения модели после батча.
     Универсальный откат любого verified-батча пока не реализован.

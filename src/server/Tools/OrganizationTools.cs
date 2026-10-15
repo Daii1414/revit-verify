@@ -90,6 +90,28 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_renumber_elements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace door/window marks or room numbers; restore them with Revit Undo. Assign sequential numbers ordered by level then plan position (Mark for doors/windows, Number for rooms). Dry run by default. Params: category ('Doors'|'Windows'|'Rooms', required), prefix (default ''), start (default 1), step (default 1), dry_run (default true), max_count (default 200).")]
+        public static async Task<string> RenumberElements(string category, string prefix = "", int start = 1, int step = 1, bool dry_run = true, int max_count = 200)
+        {
+            var blocked = ServerState.BlockIfReadOnly("renumber_elements");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var result = await ToolGateway.SendToRevit("renumber_elements", new
+                {
+                    category,
+                    prefix,
+                    start,
+                    step,
+                    dry_run,
+                    max_count
+                });
+                return JsonConvert.SerializeObject(result, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_save_selection", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create or replace a saved selection; restore document changes with Revit Undo. Save a named selection. IDs are omitted from the response by default; opt in with includeElementIds and maxElementIdResults.")]
         public static async Task<string> SaveSelection(string name, long[] elementIds = null, bool replaceExisting = false, bool useActiveSelectionIfIdsOmitted = true, bool includeElementIds = false, int maxElementIdResults = 100)
         {

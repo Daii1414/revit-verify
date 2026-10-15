@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 258,
+  "tool_count": 259,
   "tools": [
     {
       "name": "revit_accept_bake_suggestion",
@@ -6905,6 +6905,48 @@
         "required": [
           "typeId",
           "newName"
+        ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_renumber_elements",
+      "description_hash": "sha256:bf6c85d12597c8c75b1bbb7ea2462fbb33d450895eeba92a779c29a93e0d98e0",
+      "inputSchema": {
+        "properties": {
+          "category": {
+            "description": "",
+            "type": "String"
+          },
+          "dry_run": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "max_count": {
+            "description": "",
+            "type": "Int32"
+          },
+          "prefix": {
+            "description": "",
+            "type": "String"
+          },
+          "start": {
+            "description": "",
+            "type": "Int32"
+          },
+          "step": {
+            "description": "",
+            "type": "Int32"
+          }
+        },
+        "required": [
+          "category"
         ],
         "type": "object"
       },

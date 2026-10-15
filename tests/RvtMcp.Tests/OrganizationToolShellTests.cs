@@ -21,6 +21,7 @@ namespace RvtMcp.Tests
             "revit_list_saved_selections",
             "revit_list_view_templates",
             "revit_load_selection",
+            "revit_renumber_elements",
             "revit_save_selection",
             "revit_select_elements"
         };
@@ -154,6 +155,21 @@ namespace RvtMcp.Tests
             var json = sent.Json();
             Assert.Equal("S1", json.Value<string>("name"));
             Assert.True(json.Value<bool>("dryRun"));
+        }
+
+        [Fact]
+        public async Task Renumber_elements_sends_scope_and_options()
+        {
+            var sent = await Capture.Send(() => OrganizationTools.RenumberElements("Doors", "D-", 10, 5, true, 200));
+
+            Assert.Equal("renumber_elements", sent.Command);
+            var json = sent.Json();
+            Assert.Equal("Doors", json.Value<string>("category"));
+            Assert.Equal("D-", json.Value<string>("prefix"));
+            Assert.Equal(10, json.Value<int>("start"));
+            Assert.Equal(5, json.Value<int>("step"));
+            Assert.True(json.Value<bool>("dry_run"));
+            Assert.Equal(200, json.Value<int>("max_count"));
         }
 
         [Fact]

@@ -244,6 +244,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.ApplyViewTemplateHandler());
             Register(new Handlers.DuplicateViewTemplateHandler());
             Register(new Handlers.DeleteViewTemplateHandler());
+            Register(new Handlers.RenumberElementsHandler());
             Register(new Handlers.SaveSelectionHandler());
             Register(new Handlers.LoadSelectionHandler());
             Register(new Handlers.ListSavedSelectionsHandler());

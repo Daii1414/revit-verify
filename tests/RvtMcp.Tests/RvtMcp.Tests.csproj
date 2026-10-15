@@ -66,6 +66,7 @@
     <Compile Include="..\..\src\shared\Infrastructure\ReflectPathParser.cs" Link="Shared\ReflectPathParser.cs" />
     <Compile Include="..\..\src\shared\Infrastructure\BeforeAfterDiff.cs" Link="Shared\BeforeAfterDiff.cs" />
     <Compile Include="..\..\src\shared\Infrastructure\HealthScorer.cs" Link="Shared\HealthScorer.cs" />
+    <Compile Include="..\..\src\shared\Infrastructure\RenumberPlanner.cs" Link="Shared\RenumberPlanner.cs" />
     <Compile Include="..\..\src\shared\Infrastructure\CommandOutcome.cs" Link="Shared\CommandOutcome.cs" />
     <Compile Include="..\..\src\shared\ToolBaker\BakedToolRegistry.cs" Link="Shared\BakedToolRegistry.cs" />
     <Compile Include="..\..\src\shared\ToolBaker\BakedToolParameterDefaults.cs" Link="Shared\BakedToolParameterDefaults.cs" />
