@@ -8392,12 +8392,16 @@
     },
     {
       "name": "revit_transform_elements",
-      "description_hash": "sha256:b7c38793753c74a919e0be5d8b9fa4dfb130aec1361100fd2c1f1531ad83d9d3",
+      "description_hash": "sha256:7afaec28235606d3a6f196ed6d6434d422c3bbdfcfbf2fbf679506d321dcc933",
       "inputSchema": {
         "properties": {
           "angle_deg": {
             "description": "",
             "type": "Double"
+          },
+          "axis_mm_json": {
+            "description": "",
+            "type": "String"
           },
           "center_mm_json": {
             "description": "",
@@ -8406,6 +8410,10 @@
           "element_ids": {
             "description": "",
             "type": "String"
+          },
+          "mirror_copy": {
+            "description": "",
+            "type": "Boolean"
           },
           "op": {
             "description": "",

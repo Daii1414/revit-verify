@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Extend `revit_transform_elements` with `mirror` (axis_mm endpoints projected to horizontal, optional mirror_copy via the native mirror-copies call, mirrored IDs reported).
 - Add read-only `revit_reflect_get` for single-property reads without send_code (id/name/category/type/level/host/location/box/param:<Name>); unset values return null with a note.
 - Extend `revit_verify_run_rules` with snapshot rules: a rule may carry `snapshot_json` (from capture_model_snapshot) instead of assertions and fans out to compare_model_snapshot, with findings collected as offender IDs and incomplete comparisons failing the rule. Input cap raised to fit one 4 MiB snapshot.
 - Extend `revit_capture_before_after` with `max_age_hours`: the after slot reports baseline age and yields an unverified diff when the before frame is older than the bound (0 disables the check). Undated baselines are treated as stale.

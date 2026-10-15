@@ -94,8 +94,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 
 ## P2 — дыры в каталоге (проверено grep: у нас НЕТ)
 
-10. **transform_elements** — уже есть `revit_transform_elements` (move/copy/rotate).
-    Mirror в этот инструмент не входит.
+10. **transform_elements** — уже есть `revit_transform_elements` (move/copy/rotate/mirror с mirror_copy).
 11. **save_document / save-as** — уже есть `revit_save_document`; SaveAs для
     workshared-моделей запрещён.
 12. **check_model_health** — уже есть `revit_check_model_health` с оценкой,

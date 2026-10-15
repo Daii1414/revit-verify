@@ -10,8 +10,8 @@ namespace RvtMcp.Plugin.Handlers
     public class TransformElementsHandler : IRevitCommand
     {
         public string Name => "transform_elements";
-        public string Description => "Move, copy or rotate elements. Restores with Revit Undo. One operation per call.";
-        public string ParametersSchema => @"{""type"":""object"",""properties"":{""op"":{""type"":""string"",""enum"":[""move"",""copy"",""rotate""]},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""}},""vector_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Translation for move/copy in mm.""},""center_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Rotation center in mm (rotate only).""},""angle_deg"":{""type"":""number"",""description"":""Counterclockwise degrees around vertical axis through center (rotate only).""}},""required"":[""op"",""element_ids""]}";
+        public string Description => "Move, copy, rotate or mirror elements. Restores with Revit Undo. One operation per call.";
+        public string ParametersSchema => @"{""type"":""object"",""properties"":{""op"":{""type"":""string"",""enum"":[""move"",""copy"",""rotate"",""mirror""]},""element_ids"":{""type"":""array"",""items"":{""type"":""integer""}},""vector_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Translation for move/copy in mm.""},""center_mm"":{""type"":""object"",""properties"":{""x_mm"":{""type"":""number""},""y_mm"":{""type"":""number""},""z_mm"":{""type"":""number""}},""description"":""Rotation center in mm (rotate only).""},""angle_deg"":{""type"":""number"",""description"":""Counterclockwise degrees around vertical axis through center (rotate only).""},""axis_mm"":{""type"":""object"",""properties"":{""a"":{""type"":""object""},""b"":{""type"":""object""}},""description"":""Mirror axis endpoints in mm with x_mm/y_mm/z_mm; projected to horizontal, must differ in plan (mirror only).""},""mirror_copy"":{""type"":""boolean"",""default"":false,""description"":""Mirror a copy and keep the originals (mirror only).""}},""required"":[""op"",""element_ids""]}";
 
         public CommandResult Execute(UIApplication app, string paramsJson)
         {
@@ -20,8 +20,8 @@ namespace RvtMcp.Plugin.Handlers
 
             var req = JObject.Parse(paramsJson ?? "{}");
             var op = (req.Value<string>("op") ?? "").ToLowerInvariant();
-            if (op != "move" && op != "copy" && op != "rotate")
-                return CommandResult.Fail("op must be move, copy or rotate.");
+            if (op != "move" && op != "copy" && op != "rotate" && op != "mirror")
+                return CommandResult.Fail("op must be move, copy, rotate or mirror.");
 
             var idsToken = req["element_ids"] as JArray;
             if (idsToken == null || !idsToken.Any())
@@ -41,6 +41,8 @@ namespace RvtMcp.Plugin.Handlers
             XYZ vector = null;
             XYZ center = null;
             double angleRad = 0;
+            Plane mirrorPlane = null;
+            var mirrorCopy = false;
             if (op == "move" || op == "copy")
             {
                 var v = req["vector_mm"] as JObject;
@@ -51,6 +53,21 @@ namespace RvtMcp.Plugin.Handlers
                     v.Value<double?>("z_mm") ?? 0) / 304.8;
                 if (vector.IsZeroLength())
                     return CommandResult.Fail("vector_mm must be non-zero.");
+            }
+            else if (op == "mirror")
+            {
+                var axis = req["axis_mm"] as JObject;
+                if (axis == null) return CommandResult.Fail("axis_mm with endpoints a/b is required for mirror.");
+                var a = ReadPointMm(axis["a"] as JObject);
+                var b = ReadPointMm(axis["b"] as JObject);
+                if (a == null || b == null)
+                    return CommandResult.Fail("axis_mm needs a/b objects with x_mm/y_mm/z_mm.");
+                var flat = new XYZ(b.X - a.X, b.Y - a.Y, 0);
+                if (flat.GetLength() < 1e-9)
+                    return CommandResult.Fail("axis_mm endpoints must differ in plan.");
+                var normal = new XYZ(flat.Y, -flat.X, 0).Normalize();
+                mirrorPlane = Plane.CreateByNormalAndOrigin(normal, a);
+                mirrorCopy = req.Value<bool?>("mirror_copy") ?? false;
             }
             else
             {
@@ -81,11 +98,18 @@ namespace RvtMcp.Plugin.Handlers
                         var copied = ElementTransformUtils.CopyElements(doc, ids, vector).ToList();
                         detail = new { copied = copied.Count };
                     }
-                    else
+                    else if (op == "rotate")
                     {
                         var axis = Line.CreateBound(center, center + XYZ.BasisZ);
                         ElementTransformUtils.RotateElements(doc, ids, axis, angleRad);
                         detail = new { rotated = ids.Count, angle_deg = req.Value<double?>("angle_deg") };
+                    }
+                    else
+                    {
+                        var mirrored = ElementTransformUtils.MirrorElements(doc, ids, mirrorPlane, mirrorCopy).ToList();
+                        detail = mirrorCopy
+                            ? new { mirrored_copies = mirrored.Count, mirror_copy = true, mirrored_ids = mirrored.Select(RevitCompat.GetId).ToList() }
+                            : (object)new { mirrored = mirrored.Count, mirror_copy = false };
                     }
                     tx.Commit();
                     return CommandResult.Ok(new
@@ -103,5 +127,18 @@ namespace RvtMcp.Plugin.Handlers
                 }
             }
         }
-    }
+    
+        private static XYZ ReadPointMm(JObject point)
+        {
+            if (point == null) return null;
+            try
+            {
+                return new XYZ(
+                    point.Value<double?>("x_mm") ?? 0,
+                    point.Value<double?>("y_mm") ?? 0,
+                    point.Value<double?>("z_mm") ?? 0) / 304.8;
+            }
+            catch { return null; }
+        }
+}
 }

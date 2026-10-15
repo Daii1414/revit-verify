@@ -47,8 +47,8 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_transform_elements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Move, copy or rotate elements; restore them with Revit Undo. One operation per call. Params: op ('move'|'copy'|'rotate'), element_ids (JSON int array), vector_mm ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}' for move/copy), center_mm + angle_deg (counterclockwise around vertical, rotate only).")]
-        public static async Task<string> TransformElements(string op, string element_ids, string vector_mm_json = null, string center_mm_json = null, double angle_deg = 0)
+        [McpServerTool(Name = "revit_transform_elements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Move, copy, rotate or mirror elements; restore them with Revit Undo. One operation per call. Params: op ('move'|'copy'|'rotate'|'mirror'), element_ids (JSON int array), vector_mm ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}' for move/copy), center_mm + angle_deg (counterclockwise around vertical, rotate only), axis_mm_json ('{\"a\":{...},\"b\":{...}}' mirror axis endpoints in mm, projected to horizontal) + mirror_copy (mirror a copy, default false).")]
+        public static async Task<string> TransformElements(string op, string element_ids, string vector_mm_json = null, string center_mm_json = null, double angle_deg = 0, string axis_mm_json = null, bool mirror_copy = false)
         {
             var blocked = ServerState.BlockIfReadOnly("transform_elements");
             if (blocked != null) return blocked;
@@ -62,13 +62,18 @@ namespace RvtMcp.Server
                 object centerObj = null;
                 if (!string.IsNullOrWhiteSpace(center_mm_json))
                     centerObj = JObject.Parse(center_mm_json);
+                object axisObj = null;
+                if (!string.IsNullOrWhiteSpace(axis_mm_json))
+                    axisObj = JObject.Parse(axis_mm_json);
                 var result = await ToolGateway.SendToRevit("transform_elements", new
                 {
                     op,
                     element_ids = parsedIds,
                     vector_mm = vectorObj,
                     center_mm = centerObj,
-                    angle_deg
+                    angle_deg,
+                    axis_mm = axisObj,
+                    mirror_copy
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
