@@ -20,7 +20,7 @@ namespace RvtMcp.Tests
             "apply_schedule_filter_sort", "apply_view_template", "assign_elements_to_workset",
             "assign_material_to_element", "assign_revision_to_sheet", "batch_execute",
             "bind_shared_parameter", "change_element_type", "clear_element_overrides", "color_elements",
-            "capture_before_after", "capture_review_set", "connect_mep_elements", "delete_element", "delete_saved_selection", "delete_view_template",
+            "cad_apply", "capture_before_after", "capture_review_set", "connect_mep_elements", "delete_element", "delete_saved_selection", "delete_view_template",
             "dismiss_bake_suggestion", "highlight_offenders", "load_family_from_path", "operate_element", "override_element_graphics",
             "publish_coordinates_to_link", "purge_unused", "reload_link", "remove_filter_from_view",
             "remove_parameter_binding", "rename_family_type", "renumber_elements", "renumber_sheets", "replace_family_type",

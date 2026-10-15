@@ -15,6 +15,7 @@ namespace RvtMcp.Tests
         private static readonly string[] LinksToolsInClass =
         {
             "revit_acquire_coordinates_from_link",
+            "revit_cad_apply",
             "revit_cad_audit",
             "revit_cad_extract",
             "revit_cad_plan",

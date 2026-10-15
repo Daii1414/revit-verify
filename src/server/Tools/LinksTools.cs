@@ -80,6 +80,167 @@ namespace RvtMcp.Server
             catch (Exception ex) { return JsonConvert.SerializeObject(new { success = false, error = ex.Message }); }
         }
 
+        [McpServerTool(Name = "revit_cad_apply", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Apply verified CAD wall candidates as Revit walls with a local provenance record; restore them with Revit Undo (batch journal). Requires a CadPlanIntegrity-valid revit_cad_plan result, explicit candidate selection (or all unverified), target level and height, dry_run=false AND confirm=true. At most 20 walls per apply (one undo step). Params: plan_json (required), selection_json (optional JSON array of 1-based candidate_index), level (required), height_mm (default 3000), dry_run (default true), confirm (default false), max_count (default 20).")]
+        public static async Task<string> CadApply(string plan_json, string selection_json = null, string level = "", double height_mm = 3000, bool dry_run = true, int max_count = 20, bool confirm = false)
+        {
+            var blocked = ServerState.BlockIfReadOnly("cad_apply");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                JObject plan;
+                try { plan = JObject.Parse(plan_json ?? "{}"); }
+                catch { return "Error: plan_json must be a JSON object from revit_cad_plan."; }
+                if (!RvtMcp.Plugin.Handlers.CadPlanIntegrity.Validate(plan, out var integrityError))
+                    return "Error: " + integrityError;
+                var all = plan["wall_candidates"] as JArray ?? new JArray();
+                var usable = all.OfType<JObject>()
+                    .Where(c => string.Equals(c.Value<string>("status"), "candidate_unverified", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                List<JObject> selected;
+                if (string.IsNullOrWhiteSpace(selection_json))
+                {
+                    selected = usable;
+                }
+                else
+                {
+                    JArray wanted;
+                    try { wanted = JArray.Parse(selection_json); }
+                    catch { return "Error: selection_json must be a JSON array of 1-based candidate_index values."; }
+                    var byIndex = usable.ToDictionary(
+                        c => c.Value<int>("candidate_index"),
+                        c => c);
+                    selected = new List<JObject>();
+                    foreach (var token in wanted)
+                    {
+                        if (token.Type != JTokenType.Integer || !byIndex.TryGetValue(token.Value<int>(), out var candidate))
+                            return "Error: selection_json references unknown or non-applicable candidate: " + token.ToString(Formatting.None) + ".";
+                        selected.Add(candidate);
+                    }
+                }
+                var levelName = (level ?? "").Trim();
+                if (levelName.Length == 0 || levelName.Length > 128)
+                    return "Error: level is required (1-128 characters).";
+                if (!(height_mm > 0) || height_mm > 30000 || double.IsNaN(height_mm) || double.IsInfinity(height_mm))
+                    return "Error: height_mm must be within 1-30000.";
+                if (max_count < 1 || max_count > 20)
+                    return "Error: max_count must be 1-20 (one undo step per apply).";
+                if (selected.Count > max_count)
+                    return "Error: " + selected.Count + " candidates selected (max_count=" + max_count + "). Narrow the selection or split applies.";
+                if (selected.Count == 0)
+                    return "Error: no applicable candidates in scope.";
+
+                var preview = new JArray();
+                foreach (var candidate in selected)
+                {
+                    preview.Add(new JObject
+                    {
+                        ["candidate_index"] = candidate.Value<int>("candidate_index"),
+                        ["start_mm"] = candidate["start_mm"]?.DeepClone(),
+                        ["end_mm"] = candidate["end_mm"]?.DeepClone(),
+                        ["length_mm"] = candidate["length_mm"]?.DeepClone(),
+                        ["thickness_mm"] = candidate["thickness_mm"]?.DeepClone(),
+                    });
+                }
+                if (dry_run)
+                    return JsonConvert.SerializeObject(new
+                    {
+                        dry_run = true,
+                        count = selected.Count,
+                        level = levelName,
+                        height_mm,
+                        candidates = preview,
+                        apply_id = (string)null
+                    }, Formatting.Indented);
+                if (!confirm)
+                    return "Error: pass confirm=true alongside dry_run=false to apply. Preview first with dry_run=true.";
+
+                var commands = new JArray();
+                foreach (var candidate in selected)
+                {
+                    var start = candidate["start_mm"] as JObject;
+                    var end = candidate["end_mm"] as JObject;
+                    if (start == null || end == null)
+                        return "Error: candidate " + candidate.Value<int>("candidate_index") + " has no start_mm/end_mm.";
+                    commands.Add(new JObject
+                    {
+                        ["command"] = "create_line_based_element",
+                        ["params"] = new JObject
+                        {
+                            ["elementType"] = "wall",
+                            ["startX"] = start.Value<double?>("x_mm"),
+                            ["startY"] = start.Value<double?>("y_mm"),
+                            ["endX"] = end.Value<double?>("x_mm"),
+                            ["endY"] = end.Value<double?>("y_mm"),
+                            ["level"] = levelName,
+                            ["height"] = height_mm,
+                        },
+                    });
+                }
+                var batch = await ToolGateway.SendToRevit("batch_execute",
+                    new { commands, continueOnError = false });
+                var results = batch["results"] as JArray ?? new JArray();
+                if (batch.Value<bool?>("rolledBack") == true)
+                    return JsonConvert.SerializeObject(new
+                    {
+                        applied = false,
+                        error = "Batch rolled back; nothing was created.",
+                        batch,
+                    }, Formatting.Indented);
+                var mappings = new JArray();
+                var createdIds = new List<long>();
+                var idx = 0;
+                foreach (var item in results.OfType<JObject>())
+                {
+                    var data = item["data"] as JObject;
+                    var ids = new List<long>();
+                    if (data != null)
+                    {
+                        foreach (var key in new[] { "elementId", "element_id" })
+                        {
+                            var token = data[key];
+                            if (token != null && token.Type == JTokenType.Integer) ids.Add(token.Value<long>());
+                        }
+                        foreach (var key in new[] { "elementIds", "element_ids", "createdIds", "created_ids" })
+                        {
+                            if (data[key] is JArray arr)
+                                ids.AddRange(arr.Where(x => x.Type == JTokenType.Integer).Select(x => x.Value<long>()));
+                        }
+                    }
+                    createdIds.AddRange(ids);
+                    mappings.Add(new JObject
+                    {
+                        ["candidate_index"] = idx < selected.Count ? selected[idx].Value<int>("candidate_index") : (int?)null,
+                        ["ok"] = item.Value<bool?>("ok") ?? false,
+                        ["element_ids"] = new JArray(ids.Distinct().OrderBy(x => x).Select(x => new JValue(x)).ToArray()),
+                    });
+                    idx++;
+                }
+                if (createdIds.Count == 0)
+                    return JsonConvert.SerializeObject(new
+                    {
+                        applied = false,
+                        error = "Batch reported success but yielded no element IDs; nothing was journaled.",
+                        batch,
+                    }, Formatting.Indented);
+                var record = CadApplyStore.Record(
+                    plan.Value<string>("plan_sha256"),
+                    plan.Value<string>("rules_version"),
+                    levelName, height_mm, mappings);
+                return JsonConvert.SerializeObject(new
+                {
+                    applied = true,
+                    apply_id = record.Value<string>("apply_id"),
+                    count = createdIds.Count,
+                    level = levelName,
+                    height_mm,
+                    mappings,
+                    batch,
+                }, Formatting.Indented);
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_cad_audit", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare versioned CAD axes against Revit grids and straight-wall candidates against Revit wall location lines and widths. Incomplete CAD analysis, unmatched Revit walls, or unsupported wall geometry fail the audit. Returns matching and offending IDs; never changes the model.")]
         public static async Task<string> CadAudit(
             [System.ComponentModel.Description("Complete JSON output from revit_cad_plan; its plan hash is verified before comparison.")] string plan_json,
