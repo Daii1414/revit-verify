@@ -35,8 +35,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
    строгий парсер без новых зависимостей): правила маппятся на verify_assert,
    per-rule pass/fail + ID нарушителей, взвешенный score 0–100; пин model_key
    (из capture_model_snapshot) отказывает протухший прогон. `verify_assert`
-   отдаёт model_key/identity_kind. Открыто: правила, привязанные к снапшотам,
-   и freshness кадров сверх пина ключа.
+   отдаёт model_key/identity_kind. Правила, привязанные к снапшотам, закрыты snapshot_json-правилами (fan-out на compare, findings как offenders, incomplete как fail). Открыто: freshness кадров сверх пина ключа.
 4. **DWG→BIM pipeline (extract → plan → apply с provenance + ревизии).**
    От: Horizun `horizun_plan_from_cad` + 13 CAD-инструментов (Apache-2.0).
    Есть read-only `revit_cad_extract` и `revit_cad_plan`: извлекатель

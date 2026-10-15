@@ -53,6 +53,91 @@ rules:
             Assert.Equal(0.5, rules.Rules[1].Assertions[0].Value<double>("min_volume_m3"));
         }
 
+        [Theory]
+        [InlineData("version: 1\nrules:\n  - id: s\n    snapshot_json: '{\"k\":1}'", true)]
+        [InlineData("version: 1\nrules:\n  - id: s\n    snapshot_json: ''", false)]
+        [InlineData("version: 1\nrules:\n  - id: s\n    snapshot_json: '{1}'\n    assertions:\n      - kind: count", false)]
+        public void Parses_snapshot_rules(string yaml, bool valid)
+        {
+            if (valid)
+            {
+                var rules = VerifyRulesYamlParser.Parse(yaml);
+                Assert.Equal("{\"k\":1}", rules.Rules[0].SnapshotJson);
+                Assert.Empty(rules.Rules[0].Assertions);
+            }
+            else
+            {
+                Assert.Throws<VerifyRulesYamlParser.ParseException>(
+                    () => VerifyRulesYamlParser.Parse(yaml));
+            }
+        }
+
+        [Fact]
+        public void Rejects_oversize_snapshot()
+        {
+            var big = new string('x', 4 * 1024 * 1024 + 1);
+            var ex = Assert.Throws<VerifyRulesYamlParser.ParseException>(
+                () => VerifyRulesYamlParser.Parse("version: 1\nrules:\n  - id: s\n    snapshot_json: '" + big + "'"));
+            Assert.Contains("exceeds", ex.Message);
+        }
+
+        [Fact]
+        public async Task Snapshot_rule_collects_findings_as_offenders()
+        {
+            const string yaml = "version: 1\nrules:\n  - id: snap\n    snapshot_json: '{\"k\":1}'\n  - id: plain\n    assertions:\n      - kind: count\n";
+            var commands = new System.Collections.Generic.List<string>();
+            JObject output = null;
+            await Capture.WithSendOverride(
+                (command, parameters, timeout) =>
+                {
+                    commands.Add(command);
+                    if (command == "compare_model_snapshot")
+                        return Task.FromResult(new JObject
+                        {
+                            ["success"] = true,
+                            ["data"] = new JObject
+                            {
+                                ["pass"] = false,
+                                ["comparison_complete"] = true,
+                                ["findings"] = new JArray(
+                                    new JObject { ["status"] = "modified", ["baseline_element_id"] = 5L, ["current_element_id"] = 6L },
+                                    new JObject { ["status"] = "removed", ["baseline_element_id"] = 7L }),
+                            },
+                        });
+                    return Task.FromResult(new JObject
+                    {
+                        ["success"] = true,
+                        ["data"] = new JObject { ["pass"] = true, ["assertions"] = new JArray() },
+                    });
+                },
+                async () => { output = JObject.Parse(await QueryTools.VerifyRunRules(yaml)); });
+
+            Assert.Equal(new[] { "compare_model_snapshot", "verify_assert" }, commands.ToArray());
+            Assert.False(output.Value<bool>("pass"));
+            Assert.Equal(50, output.Value<int>("score"));
+            var rule = output["rules"][0];
+            Assert.Equal("snapshot", rule.Value<string>("mode"));
+            Assert.Equal(new[] { 5L, 6L, 7L }, rule["offending_ids"].Select(x => x.Value<long>()).ToArray());
+            Assert.Equal("assertions", output["rules"][1].Value<string>("mode"));
+        }
+
+        [Fact]
+        public async Task Incomplete_snapshot_comparison_fails_the_rule()
+        {
+            const string yaml = "version: 1\nrules:\n  - id: snap\n    snapshot_json: '{\"k\":1}'";
+            JObject output = null;
+            await Capture.WithSendOverride(
+                (command, parameters, timeout) => Task.FromResult(new JObject
+                {
+                    ["success"] = true,
+                    ["data"] = new JObject { ["pass"] = null, ["comparison_complete"] = false, ["findings"] = new JArray() },
+                }),
+                async () => { output = JObject.Parse(await QueryTools.VerifyRunRules(yaml)); });
+
+            Assert.False(output.Value<bool>("pass"));
+            Assert.Contains("incomplete", output["rules"][0]["errors"][0].Value<string>("error"));
+        }
+
         [Fact]
         public void Parses_support_kind()
         {
@@ -116,8 +201,8 @@ rules:
                 Enumerable.Range(0, 11).Select(i => "  - id: r" + i + "\n    assertions:\n      - kind: count\n"));
             Assert.Contains("at most 10", Assert.Throws<VerifyRulesYamlParser.ParseException>(
                 () => VerifyRulesYamlParser.Parse(many)).Message);
-            Assert.Contains("exceeds 65536", Assert.Throws<VerifyRulesYamlParser.ParseException>(
-                () => VerifyRulesYamlParser.Parse(new string('x', 70000))).Message);
+            Assert.Contains("exceeds", Assert.Throws<VerifyRulesYamlParser.ParseException>(
+                () => VerifyRulesYamlParser.Parse(new string('x', 5000000))).Message);
         }
 
         // ---------- runner through the tool method ----------

@@ -115,7 +115,7 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_verify_run_rules", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Run a YAML QA ruleset: each rule fans out to verify_assert kinds (bbox/count/solid_volume/edge_closure/support). Returns per-rule pass/fail with offender IDs, a weighted score 0-100, and refuses stale runs when model_key (copied from capture_model_snapshot) mismatches the live model. Read-only. Params: rules_yaml (required schema v1: version/rules[id/description/weight/assertions]), stop_on_first_fail (default false). Max 10 rules, 10 assertions per rule, 64 KiB input.")]
+        [McpServerTool(Name = "revit_verify_run_rules", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Run a YAML QA ruleset: each rule fans out to verify_assert kinds (bbox/count/solid_volume/edge_closure/support) or, with snapshot_json, to compare_model_snapshot. Returns per-rule pass/fail with offender IDs, a weighted score 0-100, and refuses stale runs when model_key (copied from capture_model_snapshot) mismatches the live model. Snapshot rules rely on the compare identity gate and report findings as offenders. Read-only. Params: rules_yaml (required schema v1: version/rules[id/description/weight/assertions]), stop_on_first_fail (default false). Max 10 rules, 10 assertions per rule, 64 KiB input.")]
         public static async Task<string> VerifyRunRules(string rules_yaml, bool stop_on_first_fail = false)
         {
             var blocked = ServerState.BlockIfReadOnly("verify_run_rules");

@@ -17,6 +17,8 @@ namespace RvtMcp.Server
     internal static class VerifyRulesYamlParser
     {
         public const int MaxInputChars = 65536;
+        public const int MaxSnapshotChars = 4 * 1024 * 1024;
+        public const int MaxRulesInputChars = 65536 + 4 * 1024 * 1024;
         public const int MaxRules = 10;
         public const int MaxAssertionsPerRule = 10;
         public const int MaxIdLength = 64;
@@ -24,7 +26,7 @@ namespace RvtMcp.Server
         public const int MaxModelKeyLength = 256;
 
         private static readonly string[] TopKeys = { "version", "model_key", "rules" };
-        private static readonly string[] RuleKeys = { "id", "description", "weight", "assertions" };
+        private static readonly string[] RuleKeys = { "id", "description", "weight", "assertions", "snapshot_json" };
         private static readonly string[] AssertKinds = { "bbox", "count", "solid_volume", "edge_closure", "support" };
         private static readonly Regex IdPattern = new Regex("^[a-z0-9_]{1,64}$", RegexOptions.Compiled);
 
@@ -40,6 +42,8 @@ namespace RvtMcp.Server
             public string Description { get; set; } = "";
             public int Weight { get; set; } = 1;
             public List<JObject> Assertions { get; } = new List<JObject>();
+            public string SnapshotJson { get; set; }
+            public bool IsSnapshotRule => SnapshotJson != null;
         }
 
         public sealed class ParseException : Exception
@@ -54,8 +58,8 @@ namespace RvtMcp.Server
         public static RuleSet Parse(string yaml)
         {
             if (yaml == null) throw new ParseException(1, "rules_yaml is required.");
-            if (yaml.Length > MaxInputChars)
-                throw new ParseException(1, "rules_yaml exceeds " + MaxInputChars + " characters.");
+            if (yaml.Length > MaxRulesInputChars)
+                throw new ParseException(1, "rules_yaml exceeds " + MaxRulesInputChars + " characters (64 KiB text plus one 4 MiB snapshot).");
             var doc = new Reader(yaml).ReadDocument();
             if (!(doc is Dict top))
                 throw new ParseException(1, "top level must be a mapping with 'version' and 'rules'.");
@@ -88,7 +92,7 @@ namespace RvtMcp.Server
                 throw new ParseException(node.Line, "each rule must be a mapping with 'id' and 'assertions'.");
             foreach (var key in map.Keys)
                 if (Array.IndexOf(RuleKeys, key) < 0)
-                    throw new ParseException(map.Lines[key], "unknown rule key '" + key + "' (allowed: id, description, weight, assertions).");
+                    throw new ParseException(map.Lines[key], "unknown rule key '" + key + "' (allowed: id, description, weight, assertions, snapshot_json).");
             if (!map.TryGetValue("id", out var idNode))
                 throw new ParseException(node.Line, "rule is missing required 'id'.");
             var id = AsString(idNode, map.Lines["id"], "id");
@@ -110,12 +114,27 @@ namespace RvtMcp.Server
                     throw new ParseException(map.Lines["weight"], "weight must be an integer 1..100.");
                 rule.Weight = (int)w.Value;
             }
-            if (!map.TryGetValue("assertions", out var al) || !(al is Seq asserts) || asserts.Items.Count == 0)
-                throw new ParseException(map.Lines.TryGetValue("assertions", out var al2) ? al2 : node.Line, "'assertions' must be a non-empty list.");
-            if (asserts.Items.Count > MaxAssertionsPerRule)
-                throw new ParseException(asserts.Line, "'assertions' holds " + asserts.Items.Count + " entries; at most " + MaxAssertionsPerRule + " per rule.");
-            foreach (var item in asserts.Items)
-                rule.Assertions.Add(ReadAssertion(item));
+            if (map.TryGetValue("snapshot_json", out var snapshot))
+            {
+                var text = AsString(snapshot, map.Lines["snapshot_json"], "snapshot_json");
+                if (string.IsNullOrWhiteSpace(text))
+                    throw new ParseException(map.Lines["snapshot_json"], "snapshot_json must be the complete JSON returned by capture_model_snapshot.");
+                if (text.Length > MaxSnapshotChars)
+                    throw new ParseException(map.Lines["snapshot_json"], "snapshot_json exceeds " + MaxSnapshotChars + " characters.");
+                rule.SnapshotJson = text;
+            }
+            var hasAssertions = map.TryGetValue("assertions", out var al);
+            if (rule.IsSnapshotRule && hasAssertions)
+                throw new ParseException(map.Lines["snapshot_json"], "a rule takes either 'assertions' or 'snapshot_json', not both.");
+            if (!rule.IsSnapshotRule)
+            {
+                if (!(al is Seq asserts) || asserts.Items.Count == 0)
+                    throw new ParseException(map.Lines.TryGetValue("assertions", out var al2) ? al2 : node.Line, "'assertions' must be a non-empty list, or use 'snapshot_json' for a snapshot rule.");
+                if (asserts.Items.Count > MaxAssertionsPerRule)
+                    throw new ParseException(asserts.Line, "'assertions' holds " + asserts.Items.Count + " entries; at most " + MaxAssertionsPerRule + " per rule.");
+                foreach (var item in asserts.Items)
+                    rule.Assertions.Add(ReadAssertion(item));
+            }
             return rule;
         }
 
@@ -508,23 +527,26 @@ namespace RvtMcp.Server
             foreach (var rule in rules.Rules)
             {
                 totalWeight += rule.Weight;
-                var payload = new JArray();
-                foreach (var assertion in rule.Assertions) payload.Add(assertion.DeepClone());
                 JObject envelope;
                 try
                 {
-                    envelope = await send("verify_assert", new { assertions = payload });
+                    envelope = rule.IsSnapshotRule
+                        ? await send("compare_model_snapshot", new { snapshot_json = rule.SnapshotJson })
+                        : await send("verify_assert", new { assertions = AssertionsPayload(rule) });
                 }
                 catch (Exception ex)
                 {
-                    ruleResults.Add(FailRule(rule, "transport: " + ex.Message));
+                    ruleResults.Add(FailRule(rule, rule.IsSnapshotRule ? "snapshot" : "assertions", "transport: " + ex.Message));
                     if (stopOnFirstFail) { aborted = true; break; }
                     continue;
                 }
 
-                var outcome = EvaluateRule(rule, envelope, rules.ModelKey, ref modelKey, out var stale);
+                string stale = null;
+                var outcome = rule.IsSnapshotRule
+                    ? EvaluateSnapshotRule(rule, envelope)
+                    : EvaluateRule(rule, envelope, rules.ModelKey, ref modelKey, out stale);
                 ruleResults.Add(outcome);
-                if (stale != null) { staleError = stale; aborted = true; break; }
+                if (!rule.IsSnapshotRule && stale != null) { staleError = stale; aborted = true; break; }
                 if (outcome.Value<bool>("pass")) passedWeight += rule.Weight;
                 else if (stopOnFirstFail) { aborted = true; break; }
             }
@@ -553,11 +575,80 @@ namespace RvtMcp.Server
             };
         }
 
-        private static JObject FailRule(VerifyRulesYamlParser.Rule rule, string error)
+        private static JArray AssertionsPayload(VerifyRulesYamlParser.Rule rule)
+        {
+            var payload = new JArray();
+            foreach (var assertion in rule.Assertions) payload.Add(assertion.DeepClone());
+            return payload;
+        }
+
+        private static JObject EvaluateSnapshotRule(VerifyRulesYamlParser.Rule rule, JObject envelope)
+        {
+            var offending = new List<long>();
+            var errors = new List<JObject>();
+            var truncated = false;
+            var echoed = new JArray();
+            if (envelope == null || !Flag(envelope, "success", "Success"))
+            {
+                errors.Add(new JObject { ["error"] = Text(envelope, "error", "Error") ?? "compare_model_snapshot failed without an error message." });
+                return BuildRule(rule, "snapshot", false, echoed, offending, truncated, new List<long>(), errors);
+            }
+            var dataValue = envelope["data"] ?? envelope["Data"];
+            JObject dataObj = null;
+            if (dataValue is JObject direct) dataObj = direct;
+            else if (dataValue != null && dataValue.Type == JTokenType.String)
+            {
+                try { dataObj = JObject.Parse(dataValue.Value<string>()); }
+                catch { dataObj = null; }
+            }
+            if (dataObj == null)
+            {
+                errors.Add(new JObject { ["error"] = "compare_model_snapshot returned no data payload." });
+                return BuildRule(rule, "snapshot", false, echoed, offending, truncated, new List<long>(), errors);
+            }
+            var complete = dataObj.Value<bool?>("comparison_complete") ?? false;
+            var pass = dataObj.Value<bool?>("pass") ?? false;
+            var findings = dataObj["findings"] as JArray;
+            if (findings != null)
+            {
+                foreach (var item in findings)
+                {
+                    if (!(item is JObject finding)) continue;
+                    echoed.Add(new JObject
+                    {
+                        ["status"] = finding.Value<string>("status"),
+                        ["baseline_element_id"] = finding["baseline_element_id"]?.DeepClone(),
+                        ["current_element_id"] = finding["current_element_id"]?.DeepClone(),
+                    });
+                    CollectFindingId(finding, "baseline_element_id", offending, ref truncated);
+                    CollectFindingId(finding, "current_element_id", offending, ref truncated);
+                }
+            }
+            if (!complete || !pass)
+            {
+                if (errors.Count == 0)
+                    errors.Add(new JObject { ["error"] = complete
+                        ? "snapshot comparison found differences; see findings."
+                        : "snapshot comparison is incomplete (explicit scope cannot detect additions, or geometry is unverified); no pass can be given." });
+                return BuildRule(rule, "snapshot", false, echoed, offending, truncated, new List<long>(), errors);
+            }
+            return BuildRule(rule, "snapshot", true, echoed, offending, truncated, new List<long>(), errors);
+        }
+
+        private static void CollectFindingId(JObject finding, string key, List<long> sink, ref bool truncated)
+        {
+            var token = finding[key];
+            if (token == null || token.Type != JTokenType.Integer) return;
+            if (sink.Count >= MaxOffendersPerRule) { truncated = true; return; }
+            sink.Add(token.Value<long>());
+        }
+
+        private static JObject FailRule(VerifyRulesYamlParser.Rule rule, string mode, string error)
         {
             return new JObject
             {
                 ["id"] = rule.Id,
+                ["mode"] = mode,
                 ["description"] = rule.Description,
                 ["weight"] = rule.Weight,
                 ["pass"] = false,
@@ -583,7 +674,7 @@ namespace RvtMcp.Server
             if (envelope == null || !Flag(envelope, "success", "Success"))
             {
                 errors.Add(new JObject { ["error"] = Text(envelope, "error", "Error") ?? "verify_assert failed without an error message." });
-                return BuildRule(rule, false, echoed, offending, truncated, missing, errors);
+                return BuildRule(rule, "assertions", false, echoed, offending, truncated, missing, errors);
             }
 
             var dataValue = envelope["data"] ?? envelope["Data"];
@@ -597,7 +688,7 @@ namespace RvtMcp.Server
             if (dataObj == null)
             {
                 errors.Add(new JObject { ["error"] = "verify_assert returned no data payload." });
-                return BuildRule(rule, false, echoed, offending, truncated, missing, errors);
+                return BuildRule(rule, "assertions", false, echoed, offending, truncated, missing, errors);
             }
 
             var key = dataObj.Value<string>("model_key");
@@ -607,7 +698,7 @@ namespace RvtMcp.Server
                 stale = key == null
                     ? "stale model: response carries no model_key, cannot prove the model matches the pinned key. Recapture and re-pin."
                     : "stale model: model_key mismatch (pinned '" + pinnedKey + "', got '" + key + "'). Recapture and re-pin; do not trust these results.";
-                return BuildRule(rule, false, echoed, offending, truncated, missing, errors);
+                return BuildRule(rule, "assertions", false, echoed, offending, truncated, missing, errors);
             }
 
             var pass = dataObj.Value<bool?>("pass") ?? false;
@@ -639,16 +730,17 @@ namespace RvtMcp.Server
                 var failed = echoed.Count(e => (e as JObject).Value<bool?>("pass") != true);
                 if (failed > 0) errors.Add(new JObject { ["error"] = failed + " assertion(s) failed; see offending_ids." });
             }
-            return BuildRule(rule, pass, echoed, offending, truncated, missing, errors);
+            return BuildRule(rule, "assertions", pass, echoed, offending, truncated, missing, errors);
         }
 
         private static JObject BuildRule(
-            VerifyRulesYamlParser.Rule rule, bool pass, JArray echoed,
+            VerifyRulesYamlParser.Rule rule, string mode, bool pass, JArray echoed,
             List<long> offending, bool truncated, List<long> missing, List<JObject> errors)
         {
             return new JObject
             {
                 ["id"] = rule.Id,
+                ["mode"] = mode,
                 ["description"] = rule.Description,
                 ["weight"] = rule.Weight,
                 ["pass"] = pass,
