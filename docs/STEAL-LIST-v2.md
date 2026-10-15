@@ -116,8 +116,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 19. **AGENTS-инструкции в репо** (cad2data AI_AGENTS_INSTRUCTIONS/OPENCODE.md,
     revit-skills skill-паки, rhino-architect skill). У нас: один skill.
     Куда: `agents/` паки (verify-loop, revit-api, testing).
-20. **Version-drift тест** (4 файла + тег, alesdev88). У нас: только counts.
-    Куда: скопировать приём.
+20. **Version-drift тест** — есть VersionDriftTests (server.json и три csproj держат один триплет; теги — ручная релизная операция, тестом не проверяются).
 21. **Честные лимиты в доках** (UNVERIFIED-метки Sam-AEC, release evidence
     Horizun/naviscoord, crash-предупреждения alesdev88). У нас частично.
     Куда: стиль вести всегда.
