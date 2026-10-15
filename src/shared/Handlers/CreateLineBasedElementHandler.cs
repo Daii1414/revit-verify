@@ -76,6 +76,7 @@ namespace RvtMcp.Plugin.Handlers
                                 if (wallType != null) wall.WallType = wallType;
                             }
                             created = wall;
+                            WallJoiner.TryJoinNearby(doc, wall);
                             break;
 
                         default:
