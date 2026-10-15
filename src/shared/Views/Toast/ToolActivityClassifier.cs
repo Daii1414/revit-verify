@@ -19,6 +19,7 @@ namespace RvtMcp.Plugin.Views.Toast
             "send_code_to_revit",
             "run_baked_tool",
             "capture_view_image", "capture_review_set", "capture_before_after", "get_material_takeoff", "compute_room_finishes",
+            "qa_trend",
             "list_bake_suggestions", "open_model",
             "accept_bake_suggestion", "dismiss_bake_suggestion",
             "undo_batch",

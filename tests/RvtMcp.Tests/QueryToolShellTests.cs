@@ -34,6 +34,7 @@ namespace RvtMcp.Tests
             "revit_list_groups",
             "revit_list_project_parameters",
             "revit_list_worksets",
+            "revit_qa_trend",
             "revit_resolve_targets",
             "revit_survey_change_impact",
             "revit_verify_assert",

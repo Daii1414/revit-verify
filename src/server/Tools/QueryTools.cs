@@ -137,6 +137,120 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_qa_trend", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Record and review local QA score history (typically revit_verify_run_rules scores). Stored locally, never sent anywhere. Params: operation ('record'|'show', default show), score (0-100, record only), model_key/rules_passed/rules_total/note (record metadata, note max 500 chars), model_key filter + limit 1-200 (show). Max 200 entries, oldest pruned automatically.")]
+        public static async Task<string> QaTrend(string operation = "show", int? score = null, string model_key = null, int? rules_passed = null, int? rules_total = null, string note = null, int limit = 20)
+        {
+            await Task.Yield();
+            var blocked = ServerState.BlockIfReadOnly("qa_trend");
+            if (blocked != null) return blocked;
+            try
+            {
+                var op = (operation ?? "").ToLowerInvariant();
+                if (op == "record") return RecordQaEntry(score, model_key, rules_passed, rules_total, note);
+                if (op == "show") return ShowQaTrend(model_key, limit);
+                return "Error: operation must be 'record' or 'show'.";
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
+        internal static string QaTrendRootOverride { get; set; }
+
+        private static string QaTrendPath()
+        {
+            var dir = QaTrendRootOverride
+                ?? Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "RvtVerify", "qa");
+            Directory.CreateDirectory(dir);
+            return Path.Combine(dir, "trend.json");
+        }
+
+        private static JArray LoadQaTrend()
+        {
+            var path = QaTrendPath();
+            if (!File.Exists(path))
+                return new JArray();
+            try
+            {
+                var parsed = JToken.Parse(File.ReadAllText(path, Encoding.UTF8));
+                return parsed as JArray ?? new JArray();
+            }
+            catch
+            {
+                return new JArray();
+            }
+        }
+
+        private static void SaveQaTrend(JArray entries)
+        {
+            var path = QaTrendPath();
+            var tmp = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            File.WriteAllText(tmp, entries.ToString(Formatting.None), Encoding.UTF8);
+            if (File.Exists(path)) File.Replace(tmp, path, null);
+            else File.Move(tmp, path);
+        }
+
+        private static string RecordQaEntry(int? score, string modelKey, int? passed, int? total, string note)
+        {
+            if (!score.HasValue || score.Value < 0 || score.Value > 100)
+                return "Error: score 0-100 is required.";
+            if ((passed ?? 0) < 0 || (total ?? 0) < 0)
+                return "Error: rules_passed/rules_total must be non-negative.";
+            if (passed.HasValue && total.HasValue && passed.Value > total.Value)
+                return "Error: rules_passed cannot exceed rules_total.";
+            var text = (note ?? "").Trim();
+            if (text.Length > 500)
+                return "Error: note exceeds 500 chars.";
+            var entries = LoadQaTrend();
+            entries.Add(new JObject
+            {
+                ["id"] = Guid.NewGuid().ToString("N"),
+                ["score"] = score.Value,
+                ["rules_passed"] = passed,
+                ["rules_total"] = total,
+                ["model_key"] = (modelKey ?? "").Trim(),
+                ["note"] = text,
+                ["created_utc"] = DateTimeOffset.UtcNow.ToString("o")
+            });
+            while (entries.Count > 200) entries.RemoveAt(0);
+            SaveQaTrend(entries);
+            return JsonConvert.SerializeObject(new { recorded = true, score = score.Value, entries = entries.Count }, Formatting.Indented);
+        }
+
+        private static string ShowQaTrend(string modelKey, int limit)
+        {
+            if (limit < 1 || limit > 200)
+                return "Error: limit must be 1-200.";
+            var filter = (modelKey ?? "").Trim();
+            var matches = LoadQaTrend()
+                .OfType<JObject>()
+                .Where(e => filter.Length == 0 || string.Equals(e.Value<string>("model_key") ?? "", filter, StringComparison.Ordinal))
+                .Reverse()
+                .Take(limit)
+                .ToArray();
+            JObject summary = null;
+            if (matches.Length > 0)
+            {
+                var scores = matches.Select(e => e.Value<int>("score")).ToArray();
+                summary = new JObject
+                {
+                    ["count"] = matches.Length,
+                    ["first_score"] = scores.Last(),
+                    ["last_score"] = scores.First(),
+                    ["delta"] = scores.First() - scores.Last(),
+                    ["best"] = scores.Max(),
+                    ["worst"] = scores.Min(),
+                };
+            }
+            return JsonConvert.SerializeObject(new
+            {
+                count = matches.Length,
+                filter = filter,
+                summary,
+                entries = matches
+            }, Formatting.Indented);
+        }
+
         [McpServerTool(Name = "revit_capture_model_snapshot", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Capture a bounded, hashed snapshot of explicit element IDs or categories in a saved model. Returns privacy-minimized JSON to pass to revit_compare_model_snapshot; no file or model changes. Geometry hashes use approximate Revit tessellation. Provide exactly one of element_ids or category_ids in scope_json.")]
         public static async Task<string> CaptureModelSnapshot(string scope_json)
         {
