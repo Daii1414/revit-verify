@@ -20,6 +20,7 @@ namespace RvtMcp.Tests
             "revit_batch_execute",
             "revit_create_memory_note",
             "revit_get_current_target",
+            "revit_job",
             "revit_list_available_targets",
             "revit_list_recent_models",
             "revit_open_model",

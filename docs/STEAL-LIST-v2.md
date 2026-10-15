@@ -76,9 +76,7 @@ v1 (oakplank/dedupe) stays valid; this adds what v1 missed.
 
 ## P1 — надёжность и контекст
 
-5. **Фоновые jobs с persistent ID** (длинные экспорты/clash).
-   От: Horizun (`horizun_submit_job`), rhino (live progress).
-   У нас: стена 60с timeout. Куда: job-обёртка поверх export/clash.
+5. **Фоновые jobs с persistent ID** — есть `revit_job` (submit/status/cancel/list поверх export/clash): грубый прогресс queued/running/complete, отмена до dispatch реальна, после — честный detach (работа Revit продолжается, результат прячется). Пейлоады — превью 4 KiB.
 6. **Ленивые схемы** (abridged tools/list + exact schema on demand, −64KB).
    От: Horizun (`HORIZUN_SCHEMA_MODE=facade`). У нас: toolsets only.
    Куда: учесть в single-registration.

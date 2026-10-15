@@ -394,6 +394,50 @@ namespace RvtMcp.Server
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
+        [McpServerTool(Name = "revit_job", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Run long Revit operations in the background with persistent ID, coarse progress and cancel. Submit exports or clash_detection, then poll status; cancel detaches (Revit work already dispatched keeps running). Params: operation ('list' default | 'submit' | 'status' | 'cancel'), command + params_json + timeout_seconds 1-3600 (submit only), job_id (status/cancel), limit (list). Job payloads are 4 KiB previews; rerun synchronously for full results.")]
+        public static async Task<string> Job(string operation = "list", string command = null, string params_json = null, int timeout_seconds = 600, string job_id = null, int limit = 20)
+        {
+            await Task.Yield();
+            var blocked = ServerState.BlockIfReadOnly("job");
+            if (blocked != null) return blocked;
+
+            try
+            {
+                var op = (operation ?? "").ToLowerInvariant();
+                if (op == "list")
+                    return JsonConvert.SerializeObject(RevitJobStore.List(limit), Formatting.Indented);
+                if (op == "status")
+                {
+                    if (string.IsNullOrWhiteSpace(job_id)) return "Error: job_id is required.";
+                    return JsonConvert.SerializeObject(RevitJobStore.Snapshot(job_id.Trim()), Formatting.Indented);
+                }
+                if (op == "cancel")
+                {
+                    if (string.IsNullOrWhiteSpace(job_id)) return "Error: job_id is required.";
+                    return JsonConvert.SerializeObject(RevitJobStore.Cancel(job_id.Trim()), Formatting.Indented);
+                }
+                if (op == "submit")
+                {
+                    var name = (command ?? "").Trim();
+                    if (!RevitJobStore.JobCommands.Contains(name, StringComparer.OrdinalIgnoreCase))
+                        return "Error: command must be one of: " + string.Join(", ", RevitJobStore.JobCommands) + ".";
+                    if (timeout_seconds < RevitJobStore.MinTimeoutSeconds || timeout_seconds > RevitJobStore.MaxTimeoutSeconds)
+                        return "Error: timeout_seconds must be 1-3600.";
+                    JObject parameters = new JObject();
+                    if (!string.IsNullOrWhiteSpace(params_json))
+                    {
+                        try { parameters = JObject.Parse(params_json); }
+                        catch { return "Error: params_json must be a JSON object."; }
+                    }
+                    var submitted = RevitJobStore.Submit(name, parameters, timeout_seconds,
+                        (cmd, args) => ToolGateway.SendToRevit(cmd, args, timeout_seconds));
+                    return JsonConvert.SerializeObject(submitted, Formatting.Indented);
+                }
+                return "Error: operation must be 'list', 'submit', 'status' or 'cancel'.";
+            }
+            catch (Exception ex) { return $"Error: {ex.Message}"; }
+        }
+
         [McpServerTool(Name = "revit_undo_batch", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("List recorded write batches or undo the newest one (created elements are deleted, cascade-guarded, post-verified). Refuses when the model was saved since the batch. Params: operation ('list' default | 'undo_last'), dry_run (default true). Recorded automatically by batch_execute.")]
         public static async Task<string> UndoBatch(string operation = "list", bool dry_run = true)
         {

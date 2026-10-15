@@ -19,6 +19,7 @@ namespace RvtMcp.Tests
         [InlineData("capture_before_after", ToolActivityKind.Write)]
         [InlineData("qa_trend", ToolActivityKind.Write)]
         [InlineData("highlight_offenders", ToolActivityKind.Write)]
+        [InlineData("job", ToolActivityKind.Write)]
         [InlineData("load_selection", ToolActivityKind.Read)]
         [InlineData("clash_detection", ToolActivityKind.Read)]
         [InlineData("send_code_to_revit", ToolActivityKind.Write)]

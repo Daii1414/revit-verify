@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 256,
+  "tool_count": 257,
   "tools": [
     {
       "name": "revit_acquire_coordinates_from_link",
@@ -5252,6 +5252,46 @@
         "required": [
           "path"
         ],
+        "type": "object"
+      },
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false,
+        "readOnlyHint": false
+      }
+    },
+    {
+      "name": "revit_job",
+      "description_hash": "sha256:8698793ba621239dad712c5cfeedcd13dbef69650aa0d6a586ba2619e26bfe6d",
+      "inputSchema": {
+        "properties": {
+          "command": {
+            "description": "",
+            "type": "String"
+          },
+          "job_id": {
+            "description": "",
+            "type": "String"
+          },
+          "limit": {
+            "description": "",
+            "type": "Int32"
+          },
+          "operation": {
+            "description": "",
+            "type": "String"
+          },
+          "params_json": {
+            "description": "",
+            "type": "String"
+          },
+          "timeout_seconds": {
+            "description": "",
+            "type": "Int32"
+          }
+        },
+        "required": [],
         "type": "object"
       },
       "annotations": {

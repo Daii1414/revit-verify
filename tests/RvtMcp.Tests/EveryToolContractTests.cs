@@ -51,6 +51,7 @@ namespace RvtMcp.Tests
             ["revit_create_mep_fitting:connectors"] = "[{\"elementId\":1,\"connectorIndex\":0},{\"elementId\":2,\"connectorIndex\":0}]",
             ["revit_batch_execute:commands"] = "[{\"command\":\"get_current_view_info\",\"params\":{}}]",
             ["revit_verify_run_rules:rules_yaml"] = "version: 1\nrules:\n  - id: probe\n    assertions:\n      - kind: count\n        min_expect: 0",
+            ["revit_job:operation"] = "list",
             ["revit_create_filled_region:points"] = new object[] { new object[] { 0.0, 0.0 }, new object[] { 1000.0, 0.0 }, new object[] { 1000.0, 1000.0 } },
             ["revit_create_room_separator:points"] = new object[] { new object[] { 0.0, 0.0 }, new object[] { 1000.0, 0.0 } },
             ["revit_create_dimensions:references"] = new object[] { new JObject { ["elementId"] = 1 }, new JObject { ["elementId"] = 2 } },
@@ -112,13 +113,20 @@ namespace RvtMcp.Tests
                 var result = await Invoke(method);
 
                 Assert.False(string.IsNullOrWhiteSpace(result), toolName + " returned nothing.");
-                Assert.True(calls.Count > 0,
-                    toolName + " never reached the plug-in with the probe arguments. It returned: " + Shorten(result));
-                Assert.Contains(calls, c => c.Command == wire || (wire == "batch_execute") || (wire == "verify_run_rules" && c.Command == "verify_assert") || (wire == "highlight_offenders" && (c.Command == "show_element_in_view" || c.Command == "operate_element")));
-                if (wire == "verify_run_rules")
-                    Assert.Contains("\"rules_total\"", result);
+                if (wire == "job")
+                {
+                    Assert.Contains("\"jobs\"", result);
+                }
                 else
-                    Assert.Contains("tool_contract_probe", result);
+                {
+                    Assert.True(calls.Count > 0,
+                        toolName + " never reached the plug-in with the probe arguments. It returned: " + Shorten(result));
+                    Assert.Contains(calls, c => c.Command == wire || (wire == "batch_execute") || (wire == "verify_run_rules" && c.Command == "verify_assert") || (wire == "highlight_offenders" && (c.Command == "show_element_in_view" || c.Command == "operate_element")));
+                    if (wire == "verify_run_rules")
+                        Assert.Contains("\"rules_total\"", result);
+                    else
+                        Assert.Contains("tool_contract_probe", result);
+                }
             }
             finally
             {
