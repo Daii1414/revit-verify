@@ -19,7 +19,7 @@ jobs:
           - project: src/plugin-r25/RvtMcp.Plugin.R25.csproj
           - project: src/plugin-r26/RvtMcp.Plugin.R26.csproj
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
@@ -36,7 +36,7 @@ jobs:
     name: tests-xunit
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
