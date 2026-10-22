@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-label="Архитектура RvtVerify">
+<defs>
+  <style>
+    .bg { fill: #0d1117; }
+    .card { fill: #161b22; stroke: #30363d; stroke-width: 1.5; rx: 10; }
+    .accent { fill: #1f6feb; stroke: #58a6ff; stroke-width: 2; rx: 10; }
+    .accent2 { fill: #238636; stroke: #3fb950; stroke-width: 2; rx: 10; }
+    .accent3 { fill: #9e6a03; stroke: #d29922; stroke-width: 2; rx: 10; }
+    .accent4 { fill: #6e40c9; stroke: #a371f7; stroke-width: 2; rx: 10; }
+    .t { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; fill: #e6edf3; }
+    .ttl { font-size: 17px; font-weight: 600; }
+    .sub { font-size: 13px; fill: #8b949e; }
+    .lbl { font-size: 13px; font-weight: 600; }
+    .mono { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; fill: #7ee787; }
+    .arr { stroke: #8b949e; stroke-width: 2; fill: none; marker-end: url(#a); }
+    .arr2 { stroke: #58a6ff; stroke-width: 2; fill: none; marker-end: url(#a2); }
+    .dash { stroke: #d29922; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#a3); }
+  </style>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b949e"/>
+  </marker>
+  <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
+  </marker>
+  <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#d29922"/>
+  </marker>
+</defs>
+<rect class="bg" width="100%" height="100%"/>
+  <text class="t ttl" x="30" y="42">Как RvtVerify связывает ИИ-ассистента с Revit</text>
+  <text class="t sub" x="30" y="64">Всё работает локально: ни одного байта наружу</text>
+
+  <rect class="accent" x="30" y="110" width="180" height="90"/>
+  <text class="t lbl" x="48" y="142">ИИ-ассистент</text>
+  <text class="t sub" x="48" y="164">Claude Code</text>
+  <text class="t sub" x="48" y="182">OpenCode, Cursor…</text>
+
+  <rect class="accent2" x="300" y="110" width="200" height="90"/>
+  <text class="t lbl" x="318" y="142">RvtVerify.Server</text>
+  <text class="t sub" x="318" y="164">.NET 8, транспорт MCP</text>
+  <text class="t mono" x="318" y="184">stdio</text>
+
+  <rect class="accent4" x="590" y="110" width="180" height="90"/>
+  <text class="t lbl" x="608" y="142">RvtVerify.Plugin</text>
+  <text class="t sub" x="608" y="164">живёт внутри Revit</text>
+  <text class="t mono" x="608" y="184">named pipe</text>
+
+  <rect class="card" x="590" y="240" width="180" height="80"/>
+  <text class="t lbl" x="608" y="270">Модель .rvt</text>
+  <text class="t sub" x="608" y="292">ваши чертежи</text>
+
+  <path class="arr2" d="M 212 145 L 296 145"/>
+  <text class="t sub" x="228" y="138">вызов</text>
+  <path class="arr2" d="M 502 145 L 586 145"/>
+  <text class="t sub" x="508" y="138">команда</text>
+  <path class="arr" d="M 680 202 L 680 236"/>
+  <text class="t sub" x="690" y="224">правки</text>
+
+  <rect class="card" x="30" y="240" width="470" height="80"/>
+  <text class="t lbl" x="48" y="268">Защищённый канал</text>
+  <text class="t sub" x="48" y="290">токен доступа + лимит частоты запросов</text>
+  <text class="t sub" x="48" y="308">длины в миллиметрах на границе</text>
+  <path class="dash" d="M 502 280 L 586 280"/>
+</svg>

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Документация
+    url: https://github.com/Daii1414/revit-verify/blob/main/README.md
+    about: Что это за проект, установка и список инструментов.
+  - name: Проблемы безопасности
+    url: https://github.com/Daii1414/revit-verify/security/advisories/new
+    about: Уязвимости и приватность — сообщайте приватно, не через Issues.

@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Режим только чтение">
+<defs>
+  <style>
+    .bg { fill: #0d1117; }
+    .card { fill: #161b22; stroke: #30363d; stroke-width: 1.5; rx: 10; }
+    .accent { fill: #1f6feb; stroke: #58a6ff; stroke-width: 2; rx: 10; }
+    .accent2 { fill: #238636; stroke: #3fb950; stroke-width: 2; rx: 10; }
+    .accent3 { fill: #9e6a03; stroke: #d29922; stroke-width: 2; rx: 10; }
+    .accent4 { fill: #6e40c9; stroke: #a371f7; stroke-width: 2; rx: 10; }
+    .t { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; fill: #e6edf3; }
+    .ttl { font-size: 17px; font-weight: 600; }
+    .sub { font-size: 13px; fill: #8b949e; }
+    .lbl { font-size: 13px; font-weight: 600; }
+    .mono { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; fill: #7ee787; }
+    .arr { stroke: #8b949e; stroke-width: 2; fill: none; marker-end: url(#a); }
+    .arr2 { stroke: #58a6ff; stroke-width: 2; fill: none; marker-end: url(#a2); }
+    .dash { stroke: #d29922; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#a3); }
+  </style>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b949e"/>
+  </marker>
+  <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
+  </marker>
+  <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#d29922"/>
+  </marker>
+</defs>
+<rect class="bg" width="100%" height="100%"/>
+  <text class="t ttl" x="30" y="42">Три режима работы с моделью</text>
+  <text class="t sub" x="30" y="64">Один и тот же набор инструментов — разная степень свободы</text>
+
+  <rect class="card" x="30" y="110" width="260" height="130"/>
+  <text class="t lbl" x="48" y="140">Базовый</text>
+  <text class="t sub" x="48" y="164">66 инструментов</text>
+  <text class="t sub" x="48" y="184">осмотр + создание</text>
+  <text class="t sub" x="48" y="204">query · create · view · meta</text>
+  <text class="t sub" x="48" y="226">по умолчанию</text>
+
+  <rect class="accent2" x="320" y="110" width="260" height="130"/>
+  <text class="t lbl" x="338" y="140">Только чтение</text>
+  <text class="t sub" x="338" y="164">--read-only</text>
+  <text class="t sub" x="338" y="184">36 на базовых тулсетах</text>
+  <text class="t sub" x="338" y="204">107 с --toolsets all</text>
+  <text class="t sub" x="338" y="226">ничего не меняется</text>
+
+  <rect class="accent4" x="610" y="110" width="260" height="130"/>
+  <text class="t lbl" x="628" y="140">Полный доступ</text>
+  <text class="t sub" x="628" y="164">--toolsets all</text>
+  <text class="t sub" x="628" y="184">259 инструментов</text>
+  <text class="t sub" x="628" y="204">+262 с adaptive bake</text>
+  <text class="t sub" x="628" y="226">правки с подтверждением</text>
+
+  <path class="arr2" d="M 292 175 L 316 175"/>
+  <path class="arr2" d="M 582 175 L 606 175"/>
+  <text class="t sub" x="296" y="168">строже</text>
+  <text class="t sub" x="586" y="168">полнее</text>
+</svg>

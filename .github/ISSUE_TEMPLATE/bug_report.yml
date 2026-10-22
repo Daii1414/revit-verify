@@ -1,0 +1,40 @@
+name: Ошибка
+description: Что-то не работает или работает неправильно
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Что случилось
+      description: Опишите проблему своими словами — что ожидали и что получили.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Как воспроизвести
+      description: Точный вызов инструмента и параметры, если применимо.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Версии
+      description: "Revit: 2025 или 2026; версия плагина; версия сервера"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи
+      description: "Вывод из %LOCALAPPDATA%\RvtVerify\debug.log (содержит токены — вычистите их перед отправкой)"
+    render: shell
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Проверьте перед отправкой
+      options:
+        - label: В логах нет токенов доступа и личных путей
+          required: true
+        - label: Я не публиковал файлы модели (.rvt) и чертежи
+          required: true

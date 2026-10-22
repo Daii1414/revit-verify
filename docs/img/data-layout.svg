@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" role="img" aria-label="Где RvtVerify хранит данные">
+<defs>
+  <style>
+    .bg { fill: #0d1117; }
+    .card { fill: #161b22; stroke: #30363d; stroke-width: 1.5; rx: 10; }
+    .accent { fill: #1f6feb; stroke: #58a6ff; stroke-width: 2; rx: 10; }
+    .accent2 { fill: #238636; stroke: #3fb950; stroke-width: 2; rx: 10; }
+    .accent3 { fill: #9e6a03; stroke: #d29922; stroke-width: 2; rx: 10; }
+    .accent4 { fill: #6e40c9; stroke: #a371f7; stroke-width: 2; rx: 10; }
+    .t { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; fill: #e6edf3; }
+    .ttl { font-size: 17px; font-weight: 600; }
+    .sub { font-size: 13px; fill: #8b949e; }
+    .lbl { font-size: 13px; font-weight: 600; }
+    .mono { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; fill: #7ee787; }
+    .arr { stroke: #8b949e; stroke-width: 2; fill: none; marker-end: url(#a); }
+    .arr2 { stroke: #58a6ff; stroke-width: 2; fill: none; marker-end: url(#a2); }
+    .dash { stroke: #d29922; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#a3); }
+  </style>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b949e"/>
+  </marker>
+  <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
+  </marker>
+  <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#d29922"/>
+  </marker>
+</defs>
+<rect class="bg" width="100%" height="100%"/>
+  <text class="t ttl" x="30" y="42">Где лежат ваши данные</text>
+  <text class="t sub" x="30" y="64">Всё локально, в %LOCALAPPDATA%\RvtVerify — ничего не отправляется наружу</text>
+
+  <rect class="accent" x="30" y="100" width="200" height="60"/>
+  <text class="t lbl" x="46" y="128">%LOCALAPPDATA%\RvtVerify</text>
+  <text class="t sub" x="46" y="148">корень данных</text>
+
+  <rect class="card" x="270" y="90" width="290" height="80"/>
+  <text class="t lbl" x="286" y="116">Настройки и логи</text>
+  <text class="t mono" x="286" y="138">rvtmcp.config.json</text>
+  <text class="t mono" x="286" y="156">debug.log</text>
+
+  <rect class="card" x="270" y="185" width="290" height="60"/>
+  <text class="t lbl" x="286" y="211">Память проекта</text>
+  <text class="t mono" x="286" y="233">memory/ · qa/ · journal/</text>
+
+  <rect class="card" x="600" y="90" width="270" height="80"/>
+  <text class="t lbl" x="616" y="116">Инструменты и задачи</text>
+  <text class="t mono" x="616" y="138">baked/ · jobs/</text>
+  <text class="t mono" x="616" y="156">cad/ · undo/</text>
+
+  <rect class="card" x="600" y="185" width="270" height="60"/>
+  <text class="t lbl" x="616" y="211">Файлы и локализация</text>
+  <text class="t mono" x="616" y="233">captures/ · spill/ · locales/</text>
+
+  <path class="arr" d="M 232 130 L 266 130"/>
+  <path class="arr" d="M 232 130 L 266 210"/>
+  <path class="arr" d="M 232 130 L 596 130"/>
+  <path class="arr" d="M 232 130 L 596 210"/>
+</svg>

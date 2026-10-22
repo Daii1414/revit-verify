@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Конвейер работы с чертежом DWG">
+<defs>
+  <style>
+    .bg { fill: #0d1117; }
+    .card { fill: #161b22; stroke: #30363d; stroke-width: 1.5; rx: 10; }
+    .accent { fill: #1f6feb; stroke: #58a6ff; stroke-width: 2; rx: 10; }
+    .accent2 { fill: #238636; stroke: #3fb950; stroke-width: 2; rx: 10; }
+    .accent3 { fill: #9e6a03; stroke: #d29922; stroke-width: 2; rx: 10; }
+    .accent4 { fill: #6e40c9; stroke: #a371f7; stroke-width: 2; rx: 10; }
+    .t { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; fill: #e6edf3; }
+    .ttl { font-size: 17px; font-weight: 600; }
+    .sub { font-size: 13px; fill: #8b949e; }
+    .lbl { font-size: 13px; font-weight: 600; }
+    .mono { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; fill: #7ee787; }
+    .arr { stroke: #8b949e; stroke-width: 2; fill: none; marker-end: url(#a); }
+    .arr2 { stroke: #58a6ff; stroke-width: 2; fill: none; marker-end: url(#a2); }
+    .dash { stroke: #d29922; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#a3); }
+  </style>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b949e"/>
+  </marker>
+  <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
+  </marker>
+  <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#d29922"/>
+  </marker>
+</defs>
+<rect class="bg" width="100%" height="100%"/>
+  <text class="t ttl" x="30" y="42">Работа с чертежом DWG: четыре шага</text>
+  <text class="t sub" x="30" y="64">Первые три ничего не меняют в модели</text>
+
+  <rect class="card" x="30" y="120" width="150" height="100"/>
+  <text class="t lbl" x="46" y="150">Чертёж</text>
+  <text class="t sub" x="46" y="172">DWG уже</text>
+  <text class="t sub" x="46" y="190">загружен в Revit</text>
+  <text class="t mono" x="46" y="210">import_cad</text>
+
+  <rect class="accent2" x="215" y="120" width="160" height="100"/>
+  <text class="t lbl" x="231" y="150">Извлечение</text>
+  <text class="t mono" x="231" y="174">cad_extract</text>
+  <text class="t sub" x="231" y="196">слои + вектор</text>
+
+  <rect class="accent2" x="410" y="120" width="160" height="100"/>
+  <text class="t lbl" x="426" y="150">План</text>
+  <text class="t mono" x="426" y="174">cad_plan</text>
+  <text class="t sub" x="426" y="196">оси, стены, двери, окна</text>
+
+  <rect class="accent3" x="605" y="120" width="150" height="100"/>
+  <text class="t lbl" x="621" y="150">Сверка</text>
+  <text class="t mono" x="621" y="174">cad_audit</text>
+  <text class="t sub" x="621" y="196">план ↔ модель</text>
+
+  <rect class="accent4" x="790" y="120" width="90" height="100"/>
+  <text class="t lbl" x="804" y="150">Применение</text>
+  <text class="t mono" x="800" y="174">cad_apply</text>
+  <text class="t sub" x="800" y="196">по ≤20</text>
+
+  <path class="arr2" d="M 182 170 L 211 170"/>
+  <path class="arr2" d="M 377 170 L 406 170"/>
+  <path class="arr2" d="M 572 170 L 601 170"/>
+  <path class="arr2" d="M 757 170 L 786 170"/>
+
+  <rect class="card" x="215" y="240" width="540" height="40" rx="8"/>
+  <text class="t sub" x="231" y="258">Каждый шаг — только чтение. Модель меняется лишь в последнем, и только после подтверждения.</text>
+  <text class="t sub" x="231" y="274">У каждой стены в журнале происхождения: слой, экземпляр, идентификатор применения.</text>
+</svg>

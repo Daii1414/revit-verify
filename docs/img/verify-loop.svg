@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 330" width="900" height="330" role="img" aria-label="Цикл проверки результата">
+<defs>
+  <style>
+    .bg { fill: #0d1117; }
+    .card { fill: #161b22; stroke: #30363d; stroke-width: 1.5; rx: 10; }
+    .accent { fill: #1f6feb; stroke: #58a6ff; stroke-width: 2; rx: 10; }
+    .accent2 { fill: #238636; stroke: #3fb950; stroke-width: 2; rx: 10; }
+    .accent3 { fill: #9e6a03; stroke: #d29922; stroke-width: 2; rx: 10; }
+    .accent4 { fill: #6e40c9; stroke: #a371f7; stroke-width: 2; rx: 10; }
+    .t { font-family: -apple-system, 'Segoe UI', Roboto, sans-serif; fill: #e6edf3; }
+    .ttl { font-size: 17px; font-weight: 600; }
+    .sub { font-size: 13px; fill: #8b949e; }
+    .lbl { font-size: 13px; font-weight: 600; }
+    .mono { font-family: 'Cascadia Code', Consolas, monospace; font-size: 12px; fill: #7ee787; }
+    .arr { stroke: #8b949e; stroke-width: 2; fill: none; marker-end: url(#a); }
+    .arr2 { stroke: #58a6ff; stroke-width: 2; fill: none; marker-end: url(#a2); }
+    .dash { stroke: #d29922; stroke-width: 2; fill: none; stroke-dasharray: 6 4; marker-end: url(#a3); }
+  </style>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b949e"/>
+  </marker>
+  <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#58a6ff"/>
+  </marker>
+  <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <path d="M 0 0 L 10 5 L 0 10 z" fill="#d29922"/>
+  </marker>
+</defs>
+<rect class="bg" width="100%" height="100%"/>
+  <text class="t ttl" x="30" y="42">Цикл «сделал — проверил»</text>
+  <text class="t sub" x="30" y="64">Ассистент не верит на слово, а спрашивает модель</text>
+
+  <rect class="accent" x="40" y="120" width="160" height="90"/>
+  <text class="t lbl" x="58" y="152">Задача</text>
+  <text class="t sub" x="58" y="174">«построй стены,</text>
+  <text class="t sub" x="58" y="192">проверь окна»</text>
+
+  <rect class="accent2" x="270" y="120" width="160" height="90"/>
+  <text class="t lbl" x="288" y="152">Действие</text>
+  <text class="t mono" x="288" y="176">revit_create_*</text>
+  <text class="t mono" x="288" y="196">revit_cad_apply</text>
+
+  <rect class="accent3" x="500" y="120" width="160" height="90"/>
+  <text class="t lbl" x="518" y="152">Проверка</text>
+  <text class="t mono" x="518" y="176">verify_assert</text>
+  <text class="t mono" x="518" y="196">run_rules</text>
+
+  <rect class="accent4" x="700" y="120" width="160" height="90"/>
+  <text class="t lbl" x="718" y="152">Вердикт</text>
+  <text class="t sub" x="718" y="174">да/нет + список</text>
+  <text class="t sub" x="718" y="192">нарушителей</text>
+
+  <path class="arr2" d="M 202 165 L 266 165"/>
+  <path class="arr2" d="M 432 165 L 496 165"/>
+  <path class="arr2" d="M 662 165 L 696 165"/>
+  <path class="dash" d="M 780 212 L 780 262 L 120 262 L 120 214"/>
+  <text class="t sub" x="380" y="256">не прошло → чиним и проверяем снова</text>
+
+  <rect class="card" x="270" y="282" width="390" height="34" rx="8"/>
+  <text class="t sub" x="286" y="304">оценка 0–100, история прогонов, слепок модели, «до/после»</text>
+</svg>
