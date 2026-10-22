@@ -1,7 +1,8 @@
 version: 2
 updates:
-  # Only minor and patch updates: a major bump of ModelContextProtocol or
-  # System.Drawing.Common changes the public API and needs a manual migration.
+  # Major bumps of these packages change the public API and need a manual migration,
+  # so dependabot is told to leave them alone. Everything else (patches, minors) is
+  # still proposed automatically.
   - package-ecosystem: nuget
     directory: "/src/server"
     schedule:
@@ -9,8 +10,22 @@ updates:
     open-pull-requests-limit: 5
     labels: ["dependencies"]
     version-update:
-      versioning-strategy: increase-if-necessary
-      allowed-versions: ">=8.0.0,<9.0.0"
+      versioning-strategy: increase
+      ignore:
+        - dependency-name: "ModelContextProtocol"
+          versions: [">=2.0.0"]
+        - dependency-name: "Microsoft.Data.Sqlite"
+          versions: [">=9.0.0"]
+        - dependency-name: "Microsoft.Extensions.Hosting"
+          versions: [">=9.0.0"]
+        - dependency-name: "Microsoft.Extensions.*"
+          versions: [">=9.0.0"]
+        - dependency-name: "System.Drawing.Common"
+          versions: [">=9.0.0"]
+        - dependency-name: "SQLitePCLRaw*"
+          versions: [">=3.0.0"]
+        - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+          versions: [">=5.0.0"]
 
   - package-ecosystem: nuget
     directory: "/src/plugin-r25"
@@ -19,8 +34,20 @@ updates:
     open-pull-requests-limit: 5
     labels: ["dependencies"]
     version-update:
-      versioning-strategy: increase-if-necessary
-      allowed-versions: ">=8.0.0,<9.0.0"
+      versioning-strategy: increase
+      ignore:
+        - dependency-name: "ModelContextProtocol"
+          versions: [">=2.0.0"]
+        - dependency-name: "Microsoft.Data.Sqlite"
+          versions: [">=9.0.0"]
+        - dependency-name: "Microsoft.Extensions.*"
+          versions: [">=9.0.0"]
+        - dependency-name: "System.Drawing.Common"
+          versions: [">=9.0.0"]
+        - dependency-name: "SQLitePCLRaw*"
+          versions: [">=3.0.0"]
+        - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+          versions: [">=5.0.0"]
 
   - package-ecosystem: nuget
     directory: "/src/plugin-r26"
@@ -29,8 +56,20 @@ updates:
     open-pull-requests-limit: 5
     labels: ["dependencies"]
     version-update:
-      versioning-strategy: increase-if-necessary
-      allowed-versions: ">=8.0.0,<9.0.0"
+      versioning-strategy: increase
+      ignore:
+        - dependency-name: "ModelContextProtocol"
+          versions: [">=2.0.0"]
+        - dependency-name: "Microsoft.Data.Sqlite"
+          versions: [">=9.0.0"]
+        - dependency-name: "Microsoft.Extensions.*"
+          versions: [">=9.0.0"]
+        - dependency-name: "System.Drawing.Common"
+          versions: [">=9.0.0"]
+        - dependency-name: "SQLitePCLRaw*"
+          versions: [">=3.0.0"]
+        - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+          versions: [">=5.0.0"]
 
   - package-ecosystem: nuget
     directory: "/tests/RvtMcp.Tests"
@@ -39,8 +78,14 @@ updates:
     open-pull-requests-limit: 5
     labels: ["dependencies"]
     version-update:
-      versioning-strategy: increase-if-necessary
-      allowed-versions: ">=8.0.0,<9.0.0"
+      versioning-strategy: increase
+      ignore:
+        - dependency-name: "Microsoft.NET.Test.Sdk"
+          versions: [">=18.0.0"]
+        - dependency-name: "Microsoft.CodeAnalysis.CSharp"
+          versions: [">=5.0.0"]
+        - dependency-name: "Newtonsoft.Json"
+          versions: [">=14.0.0"]
 
   - package-ecosystem: github-actions
     directory: "/"
