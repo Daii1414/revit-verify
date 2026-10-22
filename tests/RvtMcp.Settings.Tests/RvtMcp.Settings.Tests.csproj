@@ -24,6 +24,6 @@
     <Compile Include="../../src/shared/Localization/LocaleResolver.cs" Link="Localization\LocaleResolver.cs" />
     <Compile Include="../../src/shared/Localization/ToolSummaryCatalog.cs" Link="Localization\ToolSummaryCatalog.cs" />
     <EmbeddedResource Include="../../LICENSE" LogicalName="RvtMcp.LICENSE" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 </Project>

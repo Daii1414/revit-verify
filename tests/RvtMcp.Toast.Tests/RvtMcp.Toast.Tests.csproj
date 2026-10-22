@@ -33,6 +33,6 @@
     <EmbeddedResource Include="../../src/shared/Localization/Catalog/strings.*.json" WithCulture="false">
       <LogicalName>RvtMcp.Localization.%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 </Project>
