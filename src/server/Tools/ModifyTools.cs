@@ -44,7 +44,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("operate_element", new { operation, elementIds = parsedIds, r, g, b });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_transform_elements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Move, copy, rotate or mirror elements; restore them with Revit Undo. One operation per call. Params: op ('move'|'copy'|'rotate'|'mirror'), element_ids (JSON int array), vector_mm ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}' for move/copy), center_mm + angle_deg (counterclockwise around vertical, rotate only), axis_mm_json ('{\"a\":{...},\"b\":{...}}' mirror axis endpoints in mm, projected to horizontal) + mirror_copy (mirror a copy, default false).")]
@@ -77,7 +77,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_color_elements", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Overwrite element graphics; restore them with Revit Undo. Color-code all matching elements by parameter value. maxGroups caps response detail only; mutation summary remains complete.")]
@@ -88,7 +88,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("color_elements", new { category, parameterName, max_groups = maxGroups });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_element_parameter_values", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace instance parameter values; restore them with Revit Undo. Set an instance parameter on multiple elements. valueType can be auto/string/integer/double/elementId; length-like doubles use mm input.")]
@@ -99,7 +99,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("set_element_parameter_values", new { elementIds, parameterName, value, valueType });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_type_parameter_values", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace type parameter values; restore them with Revit Undo. Set a type parameter on explicit type ids or on the types resolved from element ids.")]
@@ -110,7 +110,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("set_type_parameter_values", new { parameterName, value, typeIds, elementIds, valueType });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_change_element_type", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace element types; restore them with Revit Undo. Change one or more elements to a target ElementType id after validating type compatibility.")]
@@ -121,7 +121,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("change_element_type", new { elementIds, typeId });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_assign_elements_to_workset", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace element workset assignments; restore them with Revit Undo. Assign elements to a user workset by worksetId or worksetName in a workshared document.")]
@@ -132,7 +132,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("assign_elements_to_workset", new { elementIds, worksetId, worksetName });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

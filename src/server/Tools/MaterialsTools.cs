@@ -50,7 +50,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_material_properties", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Get detailed properties of a material by ID or name")]
@@ -67,7 +67,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_material", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a new material with optional graphics parameters")]
@@ -87,7 +87,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_duplicate_material", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Duplicate an existing material with a new name")]
@@ -103,7 +103,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_material_appearance", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace material graphics; restore them with Revit Undo. Set shading, transparency, and pattern assets for a material")]
@@ -129,7 +129,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_material_identity", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace material identity values; restore them with Revit Undo. Set identity parameters for a material")]
@@ -152,7 +152,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_material_structural_asset", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace material structural properties; restore them with Revit Undo. Set or create a structural physical property asset for a material")]
@@ -173,7 +173,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_material_thermal_asset", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace material thermal properties; restore them with Revit Undo. Set or create a thermal property asset for a material")]
@@ -194,7 +194,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_assign_material_to_element", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace element or type material assignments; restore them with Revit Undo. Assign a material to one or more elements, optionally specifying parameter name or compound layer index")]
@@ -214,7 +214,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_material_takeoff", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Calculate material takeoff. output=file writes SQLite to a local same-machine absolute path with schema and bounded preview; remote clients receive preview only.")]
@@ -232,7 +232,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

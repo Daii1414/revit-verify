@@ -46,7 +46,7 @@ namespace RvtMcp.Server
                 db.Migrate();
                 return ListBakeSuggestionsHandler.Handle(db, ToolGateway.UsageLogger, state, startIndex, limit);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_accept_bake_suggestion", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description(
@@ -67,7 +67,7 @@ namespace RvtMcp.Server
                     params_schema,
                     pluginApply: request => ToolGateway.SendToRevit("apply_bake", request));
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_dismiss_bake_suggestion", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description(
@@ -88,7 +88,7 @@ namespace RvtMcp.Server
                     currentRevitVersion: revitVersion,
                     auditLog: new ToolBakerAuditLog(paths.AuditJsonl));
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

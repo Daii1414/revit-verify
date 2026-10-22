@@ -46,7 +46,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_recent_models");
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_open_model", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description(
@@ -83,7 +83,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("open_model", parameters, timeout_seconds);
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_save_document", ReadOnly = false, Destructive = true, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Save the active document in place (default) or as a copy under path (SaveAs). Saving writes the file and cannot be undone with Revit Undo. SaveAs on workshared models is refused: save the local file instead. Params: path (optional SaveAs target), compact (SaveAs only), overwrite (SaveAs target exists).")]
@@ -97,7 +97,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("save_document", new { path, compact, overwrite });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_show_message", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Show a Revit TaskDialog. Message echo is off by default; opt in with echoMessage and cap it with maxEchoChars.")]
@@ -109,7 +109,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("show_message", parameters);
                 return JsonConvert.SerializeObject(result);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         /// <summary>§6.9 binding block shared by get_current_target and switch_target.</summary>
@@ -226,7 +226,7 @@ namespace RvtMcp.Server
                     update_available = UpdateStatus.ForStatusResult()
                 }, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_current_target", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description(
@@ -252,7 +252,7 @@ namespace RvtMcp.Server
                     : JValue.CreateNull();
                 return JsonConvert.SerializeObject(block, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_switch_target", ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description(
@@ -361,7 +361,7 @@ namespace RvtMcp.Server
                     }, Formatting.Indented);
                 }
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_batch_execute", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description(
@@ -391,7 +391,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("batch_execute", new { commands = parsed, continueOnError, output, support_check });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_job", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Run long Revit operations in the background with persistent ID, coarse progress and cancel. Submit exports or clash_detection, then poll status; cancel detaches (Revit work already dispatched keeps running). Params: operation ('list' default | 'submit' | 'status' | 'cancel'), command + params_json + timeout_seconds 1-3600 (submit only), job_id (status/cancel), limit (list). Job payloads are 4 KiB previews; rerun synchronously for full results.")]
@@ -435,7 +435,7 @@ namespace RvtMcp.Server
                 }
                 return "Error: operation must be 'list', 'submit', 'status' or 'cancel'.";
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_undo_batch", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("List recorded write batches or undo the newest one (created elements are deleted, cascade-guarded, post-verified). Refuses when the model was saved since the batch. Params: operation ('list' default | 'undo_last'), dry_run (default true). Recorded automatically by batch_execute.")]
@@ -449,7 +449,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("undo_batch", new { operation, dry_run });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_project_info", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace project information fields; restore them with Revit Undo. Set typed fields on doc.ProjectInformation. Params: name, number, client_name, address, status, issue_date (all optional, at least one required). Returns changed_fields and skipped reasons for read-only/missing parameters.")]
@@ -474,7 +474,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_purge_unused", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Delete unused family symbols; restore them with Revit Undo. Conservative purge of unused loadable family symbols. MVP supports targets=['families'] only. Skips in-place families and symbols with any placed instance. dry_run defaults to true.")]
@@ -497,7 +497,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_analyze_usage_patterns", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description(
@@ -562,10 +562,7 @@ namespace RvtMcp.Server
 
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex)
-            {
-                return $"Error: {ex.Message}";
-            }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_distill_session", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Distill mcp-calls session logs into an eval report: per-tool counts, success rates, duration p50/p95, top errors, sessions and time span. Read-only; malformed lines are counted and skipped. Params: log_dir (default %LOCALAPPDATA%\\RvtVerify), max_entries 1-20000 (default 5000, newest kept), session_id (optional filter).")]
@@ -619,7 +616,7 @@ namespace RvtMcp.Server
                 report["scan_truncated"] = truncated;
                 return JsonConvert.SerializeObject(report, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         internal static string MemoryRootOverride { get; set; }
@@ -682,10 +679,7 @@ namespace RvtMcp.Server
                     File.Move(tmp, path);
                 return JsonConvert.SerializeObject(new { saved = true, count = notes.Count }, Formatting.Indented);
             }
-            catch (Exception ex)
-            {
-                return $"Error: {ex.Message}";
-            }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_read_memory_notes", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read saved project conventions for this and future passes. Params: model (optional filter tag). Local file only.")]
@@ -701,10 +695,7 @@ namespace RvtMcp.Server
                     notes = new JArray(notes.Where(n => string.Equals(n.Value<string>("model"), model, StringComparison.OrdinalIgnoreCase)));
                 return JsonConvert.SerializeObject(new { count = notes.Count, notes }, Formatting.Indented);
             }
-            catch (Exception ex)
-            {
-                return $"Error: {ex.Message}";
-            }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

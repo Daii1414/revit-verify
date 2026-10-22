@@ -44,7 +44,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_baked_tools", new { name_filter = nameFilter, start_index = startIndex, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_run_baked_tool", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description(
@@ -65,8 +65,8 @@ namespace RvtMcp.Server
             catch (Exception ex)
             {
                 var revitVersion = ToolGateway.CurrentRevitVersion ?? revitVersionBeforeConnect;
-                RecordBakedToolRun(name, revitVersion, success: false, error: ex.Message);
-                return $"Error: {ex.Message}";
+                RecordBakedToolRun(name, revitVersion, success: false, error: ToolErrors.Sanitize(ex.Message));
+                return ToolErrors.Format(ex);
             }
         }
 

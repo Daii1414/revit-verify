@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_line_based_element", new { elementType, startX, startY, endX, endY, level, typeId, height });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_point_based_element", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a OneLevelBased or OneLevelBasedHosted family (door, window, furniture). typeId from get_available_family_types; x/y/z are model coordinates in mm; level is a name. Hosted families require host_id of the intended local host; no host is inferred. Non-hosted families ignore host_id with a warning. Work-plane/face and other placement types are unsupported. Validates actual host and position within 1 mm before commit; returns placement_type, actual host_id and location_mm.")]
@@ -54,7 +54,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_point_based_element", new { typeId, x, y, z, level, host_id });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_surface_based_element", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a surface-based element (floor, ceiling). Params: elementType, points (JSON array of {x,y} in mm, min 3), level (name), typeId (optional). Example points: [{\"x\":0,\"y\":0},{\"x\":6000,\"y\":0},{\"x\":6000,\"y\":4000},{\"x\":0,\"y\":4000}].")]
@@ -66,7 +66,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_surface_based_element", new { elementType, points = parsedPoints, level, typeId });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_level", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a level at specified elevation. Params: elevation (mm), name (optional).")]
@@ -77,7 +77,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_level", new { elevation, name });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_grid", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a grid line. Params: startX/Y, endX/Y (mm), name (optional).")]
@@ -88,7 +88,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_grid", new { startX, startY, endX, endY, name });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_room", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create and place a room. Params: x/y (mm), level (name), name (optional), number (optional).")]
@@ -99,7 +99,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_room", new { x, y, level, name, number });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_group_from_elements", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a Revit group from two or more element ids. Optional name renames the generated group type.")]
@@ -110,7 +110,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_group_from_elements", new { elementIds, name });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_array", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Copy elements into a linear or radial array; restore them with Revit Undo. One array per call. Params: element_ids (JSON int array), kind ('linear'|'radial'), count (1-100 copies, sources excluded), step_mm_json ('{\"x_mm\":0,\"y_mm\":0,\"z_mm\":0}' per-copy offset, linear only), center_mm_json + angle_deg (per-copy rotation around vertical, radial only), group_result (default true), max_count (default 500 new elements).")]
@@ -141,7 +141,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

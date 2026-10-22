@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_rooms", new { level_name = levelName, phase_name = phaseName, status, include_parameters = includeParameters, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_room_boundaries", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Report room boundary segments (points in mm) and their bounding elements.")]
@@ -54,7 +54,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_room_boundaries", new { room_id = roomId, boundary_location = boundaryLocation, include_boundary_elements = includeBoundaryElements });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_room_openings", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Retrieve doors and windows belonging to a room boundary.")]
@@ -65,7 +65,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_room_openings", new { room_id = roomId, include_doors = includeDoors, include_windows = includeWindows });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_room_separator", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create room separator lines from an array of {x,y,z} points (mm).")]
@@ -77,7 +77,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_room_separator", new { points = parsedPoints, view_id = viewId, level_name = levelName, close_loop = closeLoop });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_area", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create an area element at specified coordinates (mm) in an area plan.")]
@@ -88,7 +88,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_area", new { x, y, area_plan_view_id = areaPlanViewId, area_plan_view_name = areaPlanViewName, area_scheme_name = areaSchemeName, level_name = levelName, create_area_plan_if_missing = createAreaPlanIfMissing, name, number });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_space", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create an MEP space element at specified coordinates (mm) on a target level.")]
@@ -99,7 +99,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_space", new { x, y, level_name = levelName, phase_name = phaseName, name, number });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_areas", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List area elements in the model with optional scheme/level filters.")]
@@ -110,7 +110,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_areas", new { area_scheme_name = areaSchemeName, level_name = levelName, status, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_compute_room_finishes", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Calculate room finishes and boundary materials. output=file writes relational SQLite to a local same-machine absolute path with schema and bounded preview; remote clients receive preview only.")]
@@ -121,7 +121,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("compute_room_finishes", new { room_ids = roomIds, level_name = levelName, include_empty = includeEmpty, limit, output });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_auto_create_rooms_from_walls", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Automatically generate room elements in all enclosed boundary circuits found on the target level.")]
@@ -132,7 +132,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("auto_create_rooms_from_walls", new { level_name = levelName, phase_name = phaseName, name_prefix = namePrefix, number_prefix = numberPrefix, start_number = startNumber, dry_run = dryRun, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_tag_all_areas", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Place area tags for a bounded batch of untagged areas. limit hard max 5000; response is a compact mutation summary.")]
@@ -143,7 +143,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("tag_all_areas", new { area_plan_view_id = areaPlanViewId, area_plan_view_name = areaPlanViewName, skip_existing = skipExisting, tag_type_id = tagTypeId, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_shared_parameters", new { sharedParameterFilePath, groupName, includeBindings, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_shared_parameter", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a shared parameter definition in the shared parameter file.")]
@@ -54,7 +54,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_shared_parameter", new { name, dataTypeId, groupName, guid, sharedParameterFilePath, createFileIfMissing, description, visible, userModifiable, hideWhenNoValue });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_bind_shared_parameter", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Add or replace parameter bindings; restore document changes with Revit Undo. Bind a shared parameter from the shared parameter file to categories in the project.")]
@@ -65,7 +65,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("bind_shared_parameter", new { guid, categories, bindingKind, parameterGroupId, sharedParameterFilePath, allowRebind });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_project_parameter", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a pure project parameter. Note: The public Revit API does not support non-shared project parameter creation; this command will fail explicitly stating it is unsupported.")]
@@ -76,7 +76,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_project_parameter", new { name, dataTypeId, categories, bindingKind, parameterGroupId });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_project_parameter_bindings", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List all project parameter bindings in the document, including name, GUID (if shared), categories, and binding type.")]
@@ -87,7 +87,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_project_parameter_bindings", new { includeCategories, includeShared, includeProject, nameFilter, guid, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_remove_parameter_binding", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Remove parameter bindings or categories; restore them with Revit Undo. Remove a parameter binding or specific categories from a binding in the document.")]
@@ -98,7 +98,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("remove_parameter_binding", new { name, guid, categories, removeAllCategories, dryRun });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_export_shared_parameter_file", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Export a shared parameter file as structured DTO data. output=file writes JSON to a local same-machine absolute path with schema and bounded preview; remote clients receive preview only.")]
@@ -109,7 +109,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("export_shared_parameter_file", new { sharedParameterFilePath, output });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_parameter_value_by_guid", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace parameter values by GUID; restore them with Revit Undo. Set the value of a parameter by its shared GUID on one or more elements.")]
@@ -120,7 +120,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("set_parameter_value_by_guid", new { elementIds, guid, value, valueType, unit, target, allOrNothing });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("send_code_to_revit", new { code });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

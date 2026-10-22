@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_clash_review", new { category_a, category_b, view_id, max_pairs, create_review_view, color_hits, create_markers, dry_run, continue_on_error });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_workflow_model_audit", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Run a read-only composite model audit covering warnings, families, views, schedules, and MEP connectivity signals.")]
@@ -54,7 +54,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_model_audit", new { include_warnings, include_families, include_views, include_schedules, include_mep, limit_per_section });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_workflow_room_documentation", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Generate room documentation records, optional callouts, room tags, finish schedule, and sheet placement.")]
@@ -65,7 +65,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_room_documentation", new { room_ids, level_name, create_callouts, create_finish_schedule, tag_rooms, sheet_id, dry_run, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_workflow_sheet_set", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create sheets and replace sheet data; restore model changes with Revit Undo. Create a coordinated sheet set, place views and schedules, and set sheet parameters with dry-run and rollback reporting.")]
@@ -76,7 +76,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_sheet_set", new { sheets, renumber_strategy, dry_run, continue_on_error });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_workflow_data_roundtrip", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Export/import category parameter data with validation. output=file writes the response report as NDJSON to a local same-machine absolute path with bounded preview; remote clients receive preview only." +
@@ -88,7 +88,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_data_roundtrip", new { category, export_path, import_path, mode, dry_run, key_field, parameter_names, output });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_workflow_view_cleanup", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Delete eligible views or schedules; restore them with Revit Undo. Analyze unused views, empty schedules, and naming outliers, with guarded optional deletion of safe candidates.")]
@@ -99,7 +99,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_view_cleanup", new { include_unused_views, include_empty_schedules, include_naming_outliers, delete_empty_views, dry_run, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_workflow_naming_normalization", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Rename existing model elements; restore their names with Revit Undo. Analyze and optionally rename views, sheets, levels, and grids using deterministic normalization or a token pattern.")]
@@ -110,7 +110,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_naming_normalization", new { target, profile, pattern, ids, dry_run, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_workflow_takeoff_report", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Generate a takeoff report and optionally overwrite a JSON/CSV file via output_path; Revit Undo cannot restore files, so back up the destination. Generate category, quantity, material, and optional cost takeoff reports. output=file writes relational SQLite to a local same-machine absolute path with schema and bounded preview; remote clients receive preview only.")]
@@ -121,7 +121,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("workflow_takeoff_report", new { categories, include_materials, include_quantities, include_cost, output_path, limit_per_category, output });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_view", new { viewType, level, name });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_place_view_on_sheet", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Place a view on a sheet. Auto-creates sheet if sheetId omitted. Params: viewId (required), sheetId (optional), sheetNumber (optional), sheetName (optional).")]
@@ -54,7 +54,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("place_view_on_sheet", new { viewId, sheetId, sheetNumber, sheetName });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_analyze_sheet_layout", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Analyze title block and a bounded viewport page in mm. Use startViewport + maxViewports (hard max 500).")]
@@ -65,7 +65,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("analyze_sheet_layout", new { sheetNumber, sheetId, start_viewport = startViewport, max_viewports = maxViewports });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_capture_view_image", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Export a view to a raster image. output_path is optional; if provided it must be absolute and inside %TEMP% or %LOCALAPPDATA%\\RvtVerify\\captures\\. Params: view_id (optional, default active), output_path (optional, defaults under captures), pixel_size (default 1600), image_format ('png'|'jpeg', default 'png')." +
@@ -88,7 +88,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_export_element_snapshot", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Isolate elements, optionally tighten the 3D section box, export a raster image, then restore the view; restore it with Revit Undo. Params: element_ids (required), view_id (optional, default active), padding_mm (default 500), tighten_section (default true, 3D only), pixel_size (default 1600), image_format ('png'|'jpeg', default 'png'). View is always restored, including on export failure.")]
@@ -113,7 +113,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_capture_review_set", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Capture 1-8 named review frames in one call. Each frame specifies element_ids, optional view_id, and optional image settings. View restoration is attempted after each capture; exported images remain on disk. Restore any remaining view change with Revit Undo.")]
@@ -125,7 +125,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("capture_review_set", new { frames });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_capture_before_after", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Capture one half of a named before/after pair for delivery diffs. Slot 'before' registers the frame (image + 3D camera); slot 'after' recaptures and reports a pixel diff (identical/different/unverified) against the registered baseline. Pixel diffs are approximate: lighting, highlights and JPEG artifacts count as changes; use the same pixel_size, format and camera for trustworthy diffs. Restores the view after each capture. Restore any remaining view change with Revit Undo. Params: name (required), slot ('before'|'after', required), element_ids (required, max 200), view_id/padding_mm/tighten_section/pixel_size (64-2048, default 1200)/image_format/max_age_hours (baseline freshness bound in hours, default 0 = off).")]
@@ -150,7 +150,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_highlight_offenders", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Present QA offender IDs in one call: select and zoom to them, then color them in the view (default red). Feed offending_ids from revit_verify_run_rules or revit_verify_assert. UI-only plus graphics override; restore them with Revit Undo. Params: element_ids (required JSON int array, max 200), view_id (optional), r/g/b 0-255 (default 255,0,0), select/zoom (default true).")]
@@ -193,7 +193,7 @@ namespace RvtMcp.Server
                     graphics = colored
                 }, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_view_crop", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace saved view crop settings; restore them with Revit Undo. Modify view crop: enabled, visible, explicit bounds_json (mm), or fit_element_ids with padding_mm. Params: view_id (optional, default active), enabled, visible, bounds_json, fit_element_ids, padding_mm (default 100).")]
@@ -221,7 +221,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_view_scale", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace a saved view scale; restore it with Revit Undo. Set the graphical scale denominator of a view (e.g., 50 for 1:50). Params: view_id (optional, default active), scale (required, positive integer).")]
@@ -235,7 +235,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("set_view_scale", new { view_id, scale });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_set_view_orientation", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Set a repeatable 3D camera. For exact pose, pass eye_mm_json and target_mm_json, plus optional up_json; otherwise direction_json, target_mm_json, element_ids and distance_mm control framing. View changes can be restored with Revit Undo.")]
@@ -281,7 +281,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_activate_view", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Set the active view in Revit UI. UI-only operation. Params: view_id OR view_name (required).")]
@@ -295,7 +295,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("activate_view", new { view_id, view_name });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_show_element_in_view", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Activate view, select elements, zoom to elements. UI-only. Params: element_ids (required), view_id (optional), activate_view (default true), select (default true), zoom (default true).")]
@@ -318,7 +318,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

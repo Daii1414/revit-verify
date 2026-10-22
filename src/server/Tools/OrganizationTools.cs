@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_view_templates", new { viewType, viewId, includeSettings, includeUsage, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_view_template_from_view", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a new view template from an existing view.")]
@@ -54,7 +54,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_view_template_from_view", new { templateName, sourceViewId, controlledSettingIds, nonControlledSettingIds, failIfNameExists });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_apply_view_template", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace view settings or template assignments; restore them with Revit Undo. Apply or assign a view template to one or more views.")]
@@ -65,7 +65,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("apply_view_template", new { templateId, viewIds, mode, replaceExisting });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_duplicate_view_template", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Duplicate an existing view template.")]
@@ -76,7 +76,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("duplicate_view_template", new { templateId, newName });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_delete_view_template", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Delete a view template and optionally detach dependent views; restore them with Revit Undo. Delete a view template. maxUsedByViews caps dependent-view/deleted-id response previews.")]
@@ -87,7 +87,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("delete_view_template", new { templateId, dryRun, clearFromViews, max_used_by_views = maxUsedByViews });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_renumber_elements", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace door/window marks or room numbers; restore them with Revit Undo. Assign sequential numbers ordered by level then plan position (Mark for doors/windows, Number for rooms). Dry run by default. Params: category ('Doors'|'Windows'|'Rooms', required), prefix (default ''), start (default 1), step (default 1), dry_run (default true), max_count (default 200).")]
@@ -109,7 +109,7 @@ namespace RvtMcp.Server
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_save_selection", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create or replace a saved selection; restore document changes with Revit Undo. Save a named selection. IDs are omitted from the response by default; opt in with includeElementIds and maxElementIdResults.")]
@@ -120,7 +120,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("save_selection", new { name, elementIds, replaceExisting, useActiveSelectionIfIdsOmitted, include_element_ids = includeElementIds, max_element_id_results = maxElementIdResults });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_load_selection", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Load a bounded page from a saved selection filter. Use startIndex + maxResults (hard max 1000).")]
@@ -131,7 +131,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("load_selection", new { name, selectionId, includeElementSummary, start_index = startIndex, max_results = maxResults });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_saved_selections", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List all saved selection filters in the document.")]
@@ -142,7 +142,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_saved_selections", new { nameFilter, includeElementIds, includeElementSummary, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_delete_saved_selection", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Delete a saved selection filter; restore it with Revit Undo. Delete a saved selection filter by name or ID.")]
@@ -153,7 +153,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("delete_saved_selection", new { name, selectionId, dryRun });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_select_elements", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Update active selection in the Revit UI. Runs pure UI selection mutation (must NOT run in transaction).")]
@@ -164,7 +164,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("select_elements", new { elementIds, savedSelectionName, savedSelectionId, zoomToSelection });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

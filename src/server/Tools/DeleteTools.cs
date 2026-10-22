@@ -44,7 +44,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("delete_element", new { elementIds = parsedIds, dry_run, max_count });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

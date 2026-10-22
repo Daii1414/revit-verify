@@ -43,7 +43,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("tag_all_walls");
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_tag_all_rooms", ReadOnly = false, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Tag all rooms in current view at location point. Skips already-tagged rooms. Returns count of new tags.")]
@@ -54,7 +54,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("tag_all_rooms");
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_tag_elements", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Tag one or more elements in a view.")]
@@ -65,7 +65,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("tag_elements", new { element_ids = elementIds, view_id = viewId, tag_type_id = tagTypeId, orientation, leader, offset_x = offsetX, offset_y = offsetY });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_tag_all_by_category", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Tag all elements of a specific category in a view.")]
@@ -76,7 +76,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("tag_all_by_category", new { category, view_id = viewId, tag_type_id = tagTypeId, skip_existing = skipExisting, leader, dry_run = dryRun, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_text_note", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a text note element in a view.")]
@@ -87,7 +87,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_text_note", new { text, x, y, view_id = viewId, text_type_id = textTypeId, width, rotation_deg = rotationDeg });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_dimensions", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a dimension element in a view. references: array of Revit element-reference objects.")]
@@ -100,7 +100,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_dimensions", new { references = parsedReferences, view_id = viewId, dimension_type_id = dimensionTypeId, line = parsedLine });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_filled_region", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a filled region element in a view. points: array of {x,y,z} point objects (mm).")]
@@ -112,7 +112,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_filled_region", new { points = parsedPoints, view_id = viewId, filled_region_type_id = filledRegionTypeId });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_detail_line", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a detail line element in a view.")]
@@ -123,7 +123,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_detail_line", new { start_x = startX, start_y = startY, end_x = endX, end_y = endY, view_id = viewId, line_style_id = lineStyleId });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_create_callout_view", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Create a callout view in a parent view.")]
@@ -134,7 +134,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("create_callout_view", new { parent_view_id = parentViewId, min_x = minX, min_y = minY, max_x = maxX, max_y = maxY, view_family_type_id = viewFamilyTypeId, name });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_keynotes", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List all keynotes loaded in the model with prefix and search filters.")]
@@ -145,7 +145,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_keynotes", new { key_prefix = keyPrefix, search, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_apply_keynote_to_element", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Replace keynote values; restore them with Revit Undo. Apply keynote parameter values to one or more elements.")]
@@ -156,7 +156,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("apply_keynote_to_element", new { element_ids = elementIds, keynote, dry_run = dryRun });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_find_untagged_elements", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Find visible elements of a specific category in a view that do not have tags.")]
@@ -167,7 +167,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("find_untagged_elements", new { category, view_id = viewId, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_find_undimensioned_elements", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Find visible elements of a specific category in a view that do not have dimensions.")]
@@ -178,7 +178,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("find_undimensioned_elements", new { category, view_id = viewId, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_wipe_empty_tags", ReadOnly = false, Destructive = true, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Delete empty tags; restore them with Revit Undo. Find and delete empty tags in a view.")]
@@ -189,7 +189,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("wipe_empty_tags", new { view_id = viewId, dry_run = dryRun, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }

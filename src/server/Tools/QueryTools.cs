@@ -50,7 +50,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_current_view_info");
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_selected_elements", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Get currently selected Revit elements with paging. Use startIndex + maxResults (default 200, hard max 1000).")]
@@ -61,7 +61,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_selected_elements", new { start_index = startIndex, max_results = maxResults });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_available_family_types", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List loadable family types. Returns {familyName, typeName, typeId} grouped by category. Optional: filter by category (e.g. 'Walls', 'Doors', 'Pipes' or 'OST_Walls' - works in any Revit language). Feed typeId into create_point_based_element.")]
@@ -72,7 +72,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_available_family_types", new { category });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_ai_element_filter", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Filter elements by category + parameter. Numeric values in mm (auto-converted). category accepts the Revit display name ('Pipes'), 'OST_Pipes' or 'Pipes' - works in any Revit language. Operators: equals/contains/startswith/greaterthan/lessthan. select=true highlights results. Example: category='Pipes', parameterName='Diameter', parameterValue='200', operator='greaterthan', select=true.")]
@@ -83,7 +83,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("ai_element_filter", new { category, parameterName, parameterValue, @operator, limit, select });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_resolve_targets", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Resolve fuzzy user terms to exact Revit names (levels, categories, families, types) with ids. Call before creating or filtering when the exact name is unknown. Params: term (required substring), kinds subset of level/category/family/type (default all), limit (default 20).")]
@@ -97,7 +97,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("resolve_targets", new { term, kinds, limit });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_reflect_get", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read one property of one element by path without send_code. Path is one of: id, name, category, type, level, host, location, box, param:<Name> (instance first, then type; no nesting). Unset values return null with a note instead of failing. Read-only. Params: element_id (required), path (required).")]
@@ -111,7 +111,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("reflect_get", new { element_id, path });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_verify_assert", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Check measurable post-conditions: bbox, exact/ranged count, per-element solid volume, edge closure (every inspectable solid edge has two adjacent faces and nonzero volume; ids or category/level scope, max 200), and hosting/level support. Read-only; edge closure does not detect self-intersections and is not a complete watertightness proof. Support checks hosting and level references only, not structural capacity. Params: assertions_json (required JSON array).")]
@@ -126,7 +126,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("verify_assert", new { assertions = parsed });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_verify_run_rules", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Run a YAML QA ruleset: each rule fans out to verify_assert kinds (bbox/count/solid_volume/edge_closure/support) or, with snapshot_json, to compare_model_snapshot. Returns per-rule pass/fail with offender IDs, a weighted score 0-100, and refuses stale runs when model_key (copied from capture_model_snapshot) mismatches the live model. Snapshot rules rely on the compare identity gate and report findings as offenders. Read-only. Params: rules_yaml (required schema v1: version/rules[id/description/weight/assertions]), stop_on_first_fail (default false). Max 10 rules, 10 assertions per rule, 64 KiB input.")]
@@ -140,7 +140,7 @@ namespace RvtMcp.Server
             {
                 rules = VerifyRulesYamlParser.Parse(rules_yaml);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
 
             try
             {
@@ -148,7 +148,7 @@ namespace RvtMcp.Server
                     rules, stop_on_first_fail, (command, parameters) => ToolGateway.SendToRevit(command, parameters));
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_qa_trend", ReadOnly = false, Destructive = false, Idempotent = false, OpenWorld = false), System.ComponentModel.Description("Record and review local QA score history (typically revit_verify_run_rules scores). Stored locally, never sent anywhere. Params: operation ('record'|'show', default show), score (0-100, record only), model_key/rules_passed/rules_total/note (record metadata, note max 500 chars), model_key filter + limit 1-200 (show). Max 200 entries, oldest pruned automatically.")]
@@ -164,7 +164,7 @@ namespace RvtMcp.Server
                 if (op == "show") return ShowQaTrend(model_key, limit);
                 return "Error: operation must be 'record' or 'show'.";
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         internal static string QaTrendRootOverride { get; set; }
@@ -274,7 +274,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("capture_model_snapshot", parsed);
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_compare_model_snapshot", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Compare a snapshot JSON returned by revit_capture_model_snapshot against the active model. Reports added/removed/modified/unchanged/unverified elements; incomplete evidence never passes. Read-only. Params: snapshot_json.")]
@@ -285,7 +285,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("compare_model_snapshot", new { snapshot_json });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_check_model_health", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Single-call model health: warnings by severity, element/CAD/link/in-place counts, 0-100 score with grade (A-F) and recommendations. Read-only. One call instead of warnings + statistics separately. Params: maxElements (default 100000), max_warning_types (default 25).")]
@@ -299,7 +299,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("check_model_health", new { maxElements, max_warning_types });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_analyze_model_statistics", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Count elements grouped by category (Walls, Doors, Pipes, etc.). Call to understand project scope before detailed queries. Iteration is capped at maxElements (default 100000); raise it for full accuracy on very large models at the cost of a longer UI freeze.")]
@@ -310,7 +310,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("analyze_model_statistics", new { maxElements });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_material_quantities", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Sum material quantities (area m², volume m³) by category. Narrow with materialNameFilter and page with startIndex + maxResults (hard max 1000).")]
@@ -321,7 +321,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_material_quantities", new { category, material_name_filter = materialNameFilter, start_index = startIndex, max_results = maxResults });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_element_details", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read detailed metadata for one or more elements. Returns identity, category, type, level, workset, phase, owner view, design option, group/assembly ids, location, and bounding box in mm.")]
@@ -332,7 +332,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_element_details", new { elementIds });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_element_parameters", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read instance parameters for one or more elements. Returns storage type, read-only state, display value, raw value, and data/spec ids.")]
@@ -343,7 +343,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_element_parameters", new { elementIds, includeReadOnly });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_type_parameters", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read type parameters from explicit type ids or from the types of provided element ids.")]
@@ -354,7 +354,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_type_parameters", new { elementIds, typeIds });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_project_parameters", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List project/shared parameter bindings, including instance/type binding kind and bound categories.")]
@@ -365,7 +365,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_project_parameters", new { includeCategories });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_element_relationships", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read host, group, assembly, owner view, design option, family nesting, and dependent-element relationships for elements.")]
@@ -376,7 +376,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_element_relationships", new { elementIds, includeDependents });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_survey_change_impact", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false)]
@@ -412,7 +412,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("survey_change_impact", request);
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_groups", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List model/detail/attached groups with type, owner view, parent, and optional member ids.")]
@@ -423,7 +423,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_groups", new { groupKind, includeMembers });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_group_members", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read a group instance and a page of member elements. Use startIndex + maxResults (hard max 1000).")]
@@ -434,7 +434,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_group_members", new { groupId, start_index = startIndex, max_results = maxResults });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_assemblies", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List a page of assembly instances. maxMembersPerAssembly caps optional member-id previews.")]
@@ -445,7 +445,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_assemblies", new { includeMembers, start_index = startIndex, max_results = maxResults, max_members_per_assembly = maxMembersPerAssembly });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_get_assembly_members", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("Read an assembly instance and a page of members. Use startIndex + maxResults (hard max 1000).")]
@@ -456,7 +456,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("get_assembly_members", new { assemblyId, start_index = startIndex, max_results = maxResults });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
 
         [McpServerTool(Name = "revit_list_worksets", ReadOnly = true, Destructive = false, Idempotent = true, OpenWorld = false), System.ComponentModel.Description("List document worksets and active workset. Optionally includes per-workset element counts.")]
@@ -467,7 +467,7 @@ namespace RvtMcp.Server
                 var result = await ToolGateway.SendToRevit("list_worksets", new { includeElementCounts });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }
-            catch (Exception ex) { return $"Error: {ex.Message}"; }
+            catch (Exception ex) { return ToolErrors.Format(ex); }
         }
     }
 }
