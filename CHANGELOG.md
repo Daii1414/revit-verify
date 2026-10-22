@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Server-side error sanitization: a tool failure no longer leaks an absolute path to the client. The server now applies the same path mask the plugin side already used, through one helper that also replaces 258 duplicated `catch` blocks. Five new tests cover the masking.
 - Locale-independent category resolution: a new shared `CategoryResolver` accepts the Revit display name ("Стены", "壁"), the built-in enum name ("OST_Walls") and the OST_-stripped name ("Walls"), so filters and schedules work in any Revit language. Thirteen handlers that matched only the localized name now use it; the takeoff report defaults to built-in names.
 - Transport hardening: an exception thrown while dispatching a request no longer kills the connection and leaves the caller waiting for the full timeout — the client gets a real error. `ExternalEvent.Raise` results are now checked; a request Revit refuses is answered immediately instead of hanging.
 - Config writes are resilient: the atomic replace is retried on a transient Windows lock (antivirus, file indexer, a second Revit) and falls back to a direct copy, so a settings change is no longer lost. Fixes a flaky test that failed under parallel load.
