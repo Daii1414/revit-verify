@@ -35,8 +35,8 @@ namespace RvtMcp.Plugin.Views.Settings
                 LicenseSourceUrl = CreateLicenseSourceUrl(version),
                 RepositoryUrl = repository,
                 IssuesUrl = repository + "/issues",
-                Author = "Khoa Le",
-                Copyright = "Copyright 2026 Khoa Le",
+                Author = "Daii1414",
+                Copyright = "Copyright 2026 Daii1414, based on rvt-mcp by Khoa Le (Apache-2.0)",
             };
         }
 

@@ -135,7 +135,7 @@
     },
     {
       "name": "revit_ai_element_filter",
-      "description_hash": "sha256:f94f7ccce36f8263303f2fdf81c64c26471f78587572e7d25f60ba4c92c5715f",
+      "description_hash": "sha256:201c90fc9786255c4da0f131a4db0eead51f2a2eda9b4ac3e529e3ae8a8874cc",
       "inputSchema": {
         "properties": {
           "category": {
@@ -4324,7 +4324,7 @@
     },
     {
       "name": "revit_get_available_family_types",
-      "description_hash": "sha256:7d0ab84af905a6af87653134cd861d5b23624b8ef266099231a13dc2ccdd2769",
+      "description_hash": "sha256:88da9964f2989c1a44eb72361136d7e2eaac59239e8df59bdec5100ab287a56a",
       "inputSchema": {
         "properties": {
           "category": {

@@ -257,7 +257,17 @@ namespace RvtMcp.Plugin
                     requestTimestamps.Enqueue(now);
 
                     LastCommandTime = DateTime.Now;
+                    try
+                {
                     _onRequest(line, tcs);
+                }
+                catch (Exception requestEx)
+                {
+                    // A throwing callback must not kill the connection or leave the
+                    // caller waiting for the full timeout: answer with a real error.
+                    Log("Request dispatch failed: " + requestEx.Message);
+                    try { tcs.TrySetResult("{\"success\":false,\"error\":\"Request failed: " + requestEx.Message.Replace("\"", "'") + "\"}"); } catch { }
+                }
 
                     var response = RequestWait.WaitOrTimeout(tcs, id,
                         timeoutSeconds.HasValue ? TimeSpan.FromSeconds(timeoutSeconds.Value) : (TimeSpan?)null);

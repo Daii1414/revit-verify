@@ -21,7 +21,7 @@ Accepted values: `auto`, or one of the 15 shipped codes — `en`, `zh-CN`,
 `auto`. A missing key inside a locale falls back to the English string; a
 missing catalog falls back to English entirely.
 
-Pick a language via the **Language** button in the ribbon slide-out (RvtMcp
+Pick a language via the **Language** button in the ribbon slide-out (RvtVerify
 panel → expand the slide-out) — it opens **Settings → General → Language**.
 The language combo always shows the *effective* language, including when the
 env var is overriding. Selection persists across restarts unless
@@ -134,7 +134,7 @@ Run once per release on at least the oldest and newest shells (Revit 2022 /
 
 - [ ] Ribbon: toggle button text + tooltips, History button + count, Toast
       button tooltip, Bake Inbox, Settings + Language buttons.
-- [ ] Toast: run `revit_get_rooms` on an empty and a populated model →
+- [ ] Toast: run `revit_list_rooms` on an empty and a populated model →
       localized empty-state and "label: count" lines; run `revit_capture_…` →
       localized filename line.
 - [ ] History: open → column headers, toolbar, filters, detail pane, section

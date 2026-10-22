@@ -58,7 +58,7 @@ Report these stages separately:
 
 1. **Installed:** the installer completed and verified server/add-in files.
 2. **Claude Desktop connected:** after a full quit/relaunch, the selected config/extension route connects and `tools/list` includes `revit_get_current_view_info`. Revit need not be running for tool discovery. An agent in another client cannot prove Desktop's connection by testing its own tools.
-3. **Revit handshake verified:** open a model in Revit, start MCP from **Add-Ins → RvtMcp**, and call `revit_get_current_view_info` with no args in Desktop. Confirm it identifies the actual open model/view.
+3. **Revit handshake verified:** open a model in Revit, start MCP from **Add-Ins → `RvtVerify`**, and call `revit_get_current_view_info` with no args in Desktop. Confirm it identifies the actual open model/view.
 
 If a user UI action, restart or model is still needed, report that stage as **pending**, not a completed end-to-end install. If the installer agent cannot access Desktop tools, give the user a prompt to call `revit_get_current_view_info` after restart and report the result. Troubleshoot the failing stage; do not uninstall valid files or purge personal data merely because Revit is closed or the client has not reloaded.
 

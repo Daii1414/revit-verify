@@ -31,21 +31,10 @@ namespace RvtMcp.Plugin.Handlers
             if (string.IsNullOrEmpty(categoryName))
                 return CommandResult.Fail("category is required.");
 
-            // Find matching BuiltInCategory
-            BuiltInCategory? bic = null;
-            foreach (BuiltInCategory cat in Enum.GetValues(typeof(BuiltInCategory)))
-            {
-                try
-                {
-                    var c = Category.GetCategory(doc, cat);
-                    if (c != null && c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        bic = cat;
-                        break;
-                    }
-                }
-                catch { }
-            }
+            // Find matching BuiltInCategory. CategoryResolver accepts the localized
+            // display name ("Стены", "壁"), the enum name ("OST_Walls") and the
+            // OST_-stripped name ("Walls"), so the call works in any Revit language.
+            BuiltInCategory? bic = CategoryResolver.ResolveBuiltIn(doc, categoryName);
 
             if (bic == null)
                 return CommandResult.Fail($"Category '{categoryName}' not found.");

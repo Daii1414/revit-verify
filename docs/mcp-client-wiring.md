@@ -44,7 +44,7 @@ The `current` path never changes across upgrades — wire once, upgrade freely.
 9. **Verify the target connection**: its `tools/list` includes
    `revit_get_current_view_info`. Revit is not required for tool discovery.
 10. **Verify the Revit handshake**: open a model in Revit, start MCP from
-    **Add-Ins → RvtMcp**, then call `revit_get_current_view_info` in the target.
+    **Add-Ins → `RvtVerify`**, then call `revit_get_current_view_info` in the target.
 
 Edge-case rules, all clients:
 
@@ -243,7 +243,7 @@ MCP config lives in leveldb; do not edit files. Either:
    read-only choices instead of requiring a fixed count.
    `revit_get_current_view_info` should be present; Revit need not be running yet.
 3. With Revit 2022–2027 open, a model loaded and MCP started from
-   **Add-Ins → RvtMcp**, call `revit_get_current_view_info` in the target and
+   **Add-Ins → `RvtVerify`**, call `revit_get_current_view_info` in the target and
    confirm the successful response identifies that model/view.
 
 Report installation, target connection and Revit handshake separately. When tools

@@ -85,23 +85,8 @@ namespace RvtMcp.Plugin.Handlers
             if (format != "json" && format != "csv")
                 return CommandResult.Fail("format must be 'json' or 'csv' (got '" + format + "').");
 
-            // Resolve category via BuiltInCategory enum (case-insensitive name match).
-            BuiltInCategory? matchedBic = null;
-            foreach (BuiltInCategory bic in Enum.GetValues(typeof(BuiltInCategory)))
-            {
-                try
-                {
-                    var c = Category.GetCategory(doc, bic);
-                    if (c != null && c.Name != null &&
-                        c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        matchedBic = bic;
-                        break;
-                    }
-                }
-                catch { }
-            }
-
+            // Resolve the category locale-independently (display name, OST_Walls or Walls).
+            BuiltInCategory? matchedBic = CategoryResolver.ResolveBuiltIn(doc, categoryName);
             if (matchedBic == null)
                 return CommandResult.Fail("Category '" + categoryName + "' not found.");
 

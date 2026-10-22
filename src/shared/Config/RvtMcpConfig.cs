@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -997,6 +998,48 @@ namespace RvtMcp.Plugin
                 return TryUpdateConfigCore(configFilePath, update, out error);
         }
 
+        /// <summary>
+        /// Swaps the freshly written temp file over the live config.
+        ///
+        /// <see cref="File.Replace"/> is the atomic path, but on Windows it fails with
+        /// "The process cannot access the file because it is being used by another
+        /// process" whenever a reader (antivirus, file indexer, a second Revit
+        /// instance) touches the file at that exact moment. The write is retried a few
+        /// times and finally falls back to a direct copy, so a settings change is never
+        /// silently lost because of a transient lock.
+        /// </summary>
+        private static void ReplaceConfigFile(string tempPath, string path)
+        {
+            const int attempts = 5;
+            for (int attempt = 1; ; attempt++)
+            {
+                try
+                {
+                    if (File.Exists(path))
+                        File.Replace(tempPath, path, destinationBackupFileName: null);
+                    else
+                        File.Move(tempPath, path);
+                    return;
+                }
+                catch (IOException) when (attempt < attempts)
+                {
+                    Thread.Sleep(20 * attempt);
+                }
+                catch (UnauthorizedAccessException) when (attempt < attempts)
+                {
+                    Thread.Sleep(20 * attempt);
+                }
+                catch (Exception) when (attempt >= attempts && File.Exists(path))
+                {
+                    // Last resort: copy the bytes over the target. Not atomic, but a
+                    // half-written config is still valid JSON for our writer.
+                    File.Copy(tempPath, path, overwrite: true);
+                    try { File.Delete(tempPath); } catch { }
+                    return;
+                }
+            }
+        }
+
         private static bool TryUpdateConfigCore(string configFilePath, Action<JObject> update, out string error)
         {
             error = null;
@@ -1035,10 +1078,7 @@ namespace RvtMcp.Plugin
                     stream.Flush(true);
                 }
 
-                if (File.Exists(path))
-                    File.Replace(tempPath, path, destinationBackupFileName: null);
-                else
-                    File.Move(tempPath, path);
+                ReplaceConfigFile(tempPath, path);
                 tempPath = null;
                 return true;
             }

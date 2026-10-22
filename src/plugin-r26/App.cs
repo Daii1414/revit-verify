@@ -159,7 +159,20 @@ namespace RvtMcp.Plugin
                 };
 
                 _handler.Enqueue(pending);
-                _externalEvent.Raise();
+                try
+                {
+                    var raised = _externalEvent.Raise();
+                    if (raised != Autodesk.Revit.UI.ExternalEventRequest.Accepted &&
+                        raised != Autodesk.Revit.UI.ExternalEventRequest.Pending)
+                    {
+                        _handler.Remove(pending);
+                        tcs.TrySetResult("{\"success\":false,\"error\":\"Revit did not accept the request (" + raised + "). Another command may be in progress, or Revit is closing.\"}");
+                    }
+                }
+                catch (Exception raiseEx)
+                {
+                    tcs.TrySetResult("{\"success\":false,\"error\":\"Could not hand the request to Revit: " + raiseEx.Message + "\"}");
+                }
             });
             Transport = pipe;
             IsTransportRunning = true;

@@ -1,8 +1,8 @@
-﻿# Firm Profiles
+# Firm Profiles
 
 Profile JSON files loaded by `detect_firm_profile` and `suggest_view_name_corrections` when called with `profile=<id>`.
 
-**Empty in v0.2.1.** Seed profiles land in v0.3+ once we have real user feedback on which conventions matter.
+**No profiles ship with the build.** The folder is yours: drop a profile JSON there and the tools pick it up.
 
 ## Discovery
 

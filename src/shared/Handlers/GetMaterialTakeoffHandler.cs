@@ -55,7 +55,7 @@ namespace RvtMcp.Plugin.Handlers
             if (!string.IsNullOrEmpty(categoryFilter))
             {
                 elementsList = elementsList
-                    .Where(el => el.Category != null && el.Category.Name.Equals(categoryFilter, StringComparison.OrdinalIgnoreCase))
+                    .Where(el => CategoryResolver.Matches(el.Category, categoryFilter))
                     .ToList();
             }
 

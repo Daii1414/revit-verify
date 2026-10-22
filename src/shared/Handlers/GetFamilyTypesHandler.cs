@@ -26,7 +26,7 @@ namespace RvtMcp.Plugin.Handlers
             var familyTypes = collector
                 .Cast<FamilySymbol>()
                 .Where(fs => string.IsNullOrEmpty(categoryFilter)
-                             || (fs.Category != null && fs.Category.Name.ToLower().Contains(categoryFilter.ToLower())))
+                             || (CategoryResolver.Matches(fs.Category, categoryFilter)))
                 .GroupBy(fs => fs.Category?.Name ?? "Uncategorized")
                 .Select(g => new
                 {

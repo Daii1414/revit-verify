@@ -191,15 +191,8 @@ namespace RvtMcp.Plugin.Handlers
             {
                 if (string.IsNullOrWhiteSpace(name)) continue;
 
-                Category found = null;
-                foreach (Category cat in allCategories)
-                {
-                    if (cat.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        found = cat;
-                        break;
-                    }
-                }
+                // Locale-independent: display name ("Стены"), "OST_Walls" or "Walls".
+            Category found = CategoryResolver.Resolve(doc, name);
 
                 if (found == null)
                 {

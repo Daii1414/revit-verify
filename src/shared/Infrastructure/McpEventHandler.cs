@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,6 +39,25 @@ namespace RvtMcp.Plugin
             {
                 var config = RvtMcpConfig.Load(args: null);
                 SendCodeJournal.RunMaintenance(config);
+            }
+            catch { }
+        }
+
+        /// <summary>
+        /// Removes a request that was rejected before Revit accepted it, so it does not
+        /// linger in the queue and get executed later without a live caller.
+        /// </summary>
+        public void Remove(PendingRequest request)
+        {
+            if (request == null) return;
+            try
+            {
+                var remaining = new List<PendingRequest>();
+                while (_queue.TryDequeue(out var queued))
+                {
+                    if (!ReferenceEquals(queued, request)) remaining.Add(queued);
+                }
+                foreach (var item in remaining) _queue.Enqueue(item);
             }
             catch { }
         }
@@ -344,8 +364,16 @@ namespace RvtMcp.Plugin
 
             if (!_queue.IsEmpty)
             {
-                try { App.Instance?.ExternalEvent?.Raise(); }
-                catch { }
+                try
+                {
+                    var raised = App.Instance?.ExternalEvent?.Raise();
+                    if (raised != Autodesk.Revit.UI.ExternalEventRequest.Accepted &&
+                        raised != Autodesk.Revit.UI.ExternalEventRequest.Pending)
+                    {
+                        App.DebugLog("ExternalEvent.Raise returned " + raised + "; queued requests stay pending until the next raise.");
+                    }
+                }
+                catch (Exception ex) { App.DebugLog("ExternalEvent.Raise failed: " + ex.Message); }
             }
         }
 

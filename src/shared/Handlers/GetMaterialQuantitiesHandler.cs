@@ -27,21 +27,8 @@ namespace RvtMcp.Plugin.Handlers
             if (string.IsNullOrEmpty(categoryName))
                 return CommandResult.Fail("category is required (e.g. 'Walls', 'Floors', 'Roofs').");
 
-            // Find BuiltInCategory
-            BuiltInCategory? bic = null;
-            foreach (BuiltInCategory cat in Enum.GetValues(typeof(BuiltInCategory)))
-            {
-                try
-                {
-                    var c = Category.GetCategory(doc, cat);
-                    if (c != null && c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        bic = cat;
-                        break;
-                    }
-                }
-                catch { }
-            }
+            // Find the built-in category (locale-independent: display name, OST_Walls, Walls).
+            BuiltInCategory? bic = CategoryResolver.ResolveBuiltIn(doc, categoryName);
 
             if (bic == null)
                 return CommandResult.Fail($"Category '{categoryName}' not found.");

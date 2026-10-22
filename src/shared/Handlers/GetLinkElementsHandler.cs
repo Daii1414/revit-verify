@@ -112,7 +112,7 @@ namespace RvtMcp.Plugin.Handlers
             if (!string.IsNullOrEmpty(category) && !matchedBic.HasValue)
             {
                 elements = elements
-                    .Where(el => el.Category != null && el.Category.Name.Equals(category, StringComparison.OrdinalIgnoreCase))
+                    .Where(el => CategoryResolver.Matches(el.Category, category))
                     .ToList();
 
                 if (elements.Count == 0)

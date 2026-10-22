@@ -79,8 +79,7 @@ namespace RvtMcp.Plugin.Handlers
             {
                 categoryNames = new[]
                 {
-                    "Walls", "Floors", "Roofs", "Ceilings", "Doors", "Windows",
-                    "Structural Framing", "Structural Columns", "Ducts", "Pipes"
+                    "OST_Walls", "OST_Floors", "OST_Roofs", "OST_Ceilings", "OST_Doors", "OST_Windows", "OST_StructuralFraming", "OST_StructuralColumns", "OST_Ducts", "OST_Pipes"
                 };
             }
 

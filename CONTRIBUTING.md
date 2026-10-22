@@ -73,7 +73,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the conceptual model. Quick reference
 | Path | What lives here |
 |------|-----------------|
 | `src/server/` | MCP server, tool registration, stdio/HttpSse entry points |
-| `src/shared/Handlers/` | One file per Revit command handler; 46 tools on bare CLI, 233 with all toolsets, 236 with all + adaptive bake |
+| `src/shared/Handlers/` | One file per Revit command handler; 66 tools on the bare CLI, 259 with all toolsets, 262 with all + adaptive bake |
 | `src/shared/Infrastructure/` | `CommandDispatcher`, `McpEventHandler`, `SchemaValidator`, `BatchExecutor` |
 | `src/shared/Transport/` | `ITransportServer`, TCP + Named Pipe implementations |
 | `src/shared/Security/` | `AuthToken`, `ErrorSanitizer`, `SecretMasker` |

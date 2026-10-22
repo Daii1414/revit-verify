@@ -69,7 +69,8 @@ namespace RvtMcp.Plugin.Handlers
 
             var resolvedViewId = RevitCompat.GetId(view.Id);
 
-            // Build a case-insensitive lookup of all document categories.
+            // Build a case-insensitive lookup of all document categories. The built-in
+            // name is registered as well, so "Walls" resolves in a localized Revit.
             var categoryLookup = new Dictionary<string, Category>(StringComparer.OrdinalIgnoreCase);
             foreach (Category cat in doc.Settings.Categories)
             {
@@ -77,6 +78,16 @@ namespace RvtMcp.Plugin.Handlers
                     continue;
                 if (!categoryLookup.ContainsKey(cat.Name))
                     categoryLookup[cat.Name] = cat;
+                try
+                {
+                    var builtIn = ((BuiltInCategory)cat.Id.Value).ToString();
+                    if (!categoryLookup.ContainsKey(builtIn))
+                        categoryLookup[builtIn] = cat;
+                    var stripped = builtIn.Replace("OST_", "");
+                    if (!categoryLookup.ContainsKey(stripped))
+                        categoryLookup[stripped] = cat;
+                }
+                catch { }
             }
 
             var succeeded = new List<string>();

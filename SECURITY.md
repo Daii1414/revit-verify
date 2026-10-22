@@ -6,12 +6,12 @@ Security updates are provided for the latest minor release series only.
 
 | Version | Supported |
 |---------|-----------|
-| 0.6.x   | ✓         |
-| < 0.6   | ✗         |
+| 0.1.x   | ✓         |
+| < 0.1   | ✗         |
 
 ## Threat Model
 
-bimwright runs on `127.0.0.1` only. The attack surface is:
+RvtVerify runs on `127.0.0.1` only. The attack surface is:
 
 - Local processes that can read the discovery files (`%LOCALAPPDATA%\RvtVerify\revit-2022.json`..`revit-2027.json`)
 - Local processes that can connect to the TCP port or Named Pipe
@@ -49,7 +49,7 @@ bimwright runs on `127.0.0.1` only. The attack surface is:
 - Any non-localhost plugin bind requires explicit `BIMWRIGHT_ALLOW_LAN_BIND=1` opt-in.
 
 ### Dynamic code paths (`send_code_to_revit`, ToolBaker)
-- `send_code_to_revit` is on the default `meta` surface (still hidden by `--read-only` or `--disable-toolbaker`) and executes through the same local authenticated MCP channel as the rest of the Revit tools.
+- `send_code_to_revit` is on the default `meta` surface (still hidden by `--read-only` or `--disable-send-code`) and executes through the same local authenticated MCP channel as the rest of the Revit tools.
 - Adaptive bake is separate: it only enables suggestion/logging tools and is not required for `send_code_to_revit`.
 - Use `--read-only` or `--disable-toolbaker` when a host profile should not expose dynamic-code execution.
 - ToolBaker bakes require user approval per tool + operate under the host Revit process trust boundary. Production hardening, including signed-bake verification, remains tracked as v1.0 hardening work.

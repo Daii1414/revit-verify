@@ -122,7 +122,7 @@ Three `meta` tools use opaque model keys; none accepts a model path:
   Supplying an existing key also works without a Revit connection.
   Confirmed related histories are queried together; each call retains its owning
   `modelKey`, which must be used for reason assignment. Set `listModels=true` to
-  list local keys/titles, including pre-catalog history; use `nextAfterModelKey`
+  list local keys/titles, including pre-catalog history; pass the response field `nextAfterModelKey`
   as the next request's `afterModelKey`. Do not combine list mode with call filters.
   `reasonStatus` distinguishes `unassigned`, `unknown` and `recorded`. Each returned
   call shows at most 200 elements; filter by a specific ID to query others in the DB.

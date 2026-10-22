@@ -21,7 +21,7 @@ namespace RvtMcp.Plugin.Handlers
   }
 }";
 
-        private const double SquareFeetToSquareMeters = 0.09290304;
+        private const double SquareFeetToSquareMeters = 0.092903043596;
 
         public CommandResult Execute(UIApplication app, string paramsJson)
         {
