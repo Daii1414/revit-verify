@@ -36,13 +36,21 @@ namespace RvtMcp.Tests
         [InlineData("plugin-r26")]
         public void Every_plugin_shell_has_settings_and_language_icon_members(string pluginFolder)
         {
-            var source = File.ReadAllText(Path.Combine(GetRepoRoot(), "src", pluginFolder, "IconGenerator.cs"));
+            // The icon generator lives in src/shared and is compiled into every shell
+            // through the shared glob, so one copy serves both plugin years.
+            var source = File.ReadAllText(Path.Combine(GetRepoRoot(), "src", "shared", "IconGenerator.cs"));
             Assert.Contains("Settings32", source);
             Assert.Contains("Settings16", source);
             Assert.Contains("Language32", source);
             Assert.Contains("Language16", source);
             Assert.Contains("CreateSettingsIcon", source);
             Assert.Contains("CreateLanguageIcon", source);
+
+            // The shell must actually pull the shared sources in, otherwise the icons
+            // would be missing from the built plugin.
+            var project = File.ReadAllText(
+                Path.Combine(GetRepoRoot(), "src", pluginFolder, pluginFolder.Replace("plugin-", "RvtMcp.Plugin.") + ".csproj"));
+            Assert.Contains("..\\shared\\**\\*.cs", project);
         }
 
         private static string GetRepoRoot([CallerFilePath] string testFile = "")
