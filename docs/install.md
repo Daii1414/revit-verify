@@ -4,9 +4,9 @@ The quick path is in the [README](../README.md#install). This page has the detai
 
 ## What the installer does
 
-Client machines should use the setup ZIP from [GitHub Releases](https://github.com/bimwright/rvt-mcp/releases/latest). It bundles a self-contained MCP server and Revit 2022–2027 plugins — no .NET SDK, NuGet global tool, or source clone. AI agents follow [AGENTS.md](../AGENTS.md).
+Client machines should use the setup ZIP from [GitHub Releases](https://github.com/Daii1414/revit-verify/releases/latest). It bundles a self-contained MCP server and Revit 2022–2027 plugins — no .NET SDK, NuGet global tool, or source clone. AI agents follow [AGENTS.md](../AGENTS.md).
 
-The installer detects Revit 2022–2027 (a year counts when its `Revit.exe` exists), installs the matching add-ins and the server at the fixed path `%LOCALAPPDATA%\Bimwright\rvt-mcp\server\current\rvt-mcp.exe`, checks that the server starts and verifies the add-ins against the package. It also seeds `%LOCALAPPDATA%\Bimwright\rvt-mcp\rvtmcp.config.json` with `"toolsets": ["all"]` when the file doesn't already set `toolsets` — so a fresh install exposes the full tool surface, while your own `toolsets` choice survives upgrades (a bare `rvt-mcp.exe` without the file still defaults to `query,create,view,meta`).
+The installer detects Revit 2022–2027 (a year counts when its `Revit.exe` exists), installs the matching add-ins and the server at the fixed path `%LOCALAPPDATA%\RvtVerify\server\current\rvt-mcp.exe`, checks that the server starts and verifies the add-ins against the package. It also seeds `%LOCALAPPDATA%\RvtVerify\rvtmcp.config.json` with `"toolsets": ["all"]` when the file doesn't already set `toolsets` — so a fresh install exposes the full tool surface, while your own `toolsets` choice survives upgrades (a bare `rvt-mcp.exe` without the file still defaults to `query,create,view,meta`).
 
 Without `-Client`, it wires every MCP client it detects. **For agent-assisted installs, explicitly select only the user's requested target(s):** `claude` means Claude Code, **`claude-desktop` means Claude Desktop**. The installer agent may run in a different client and need not configure itself. `-Client none` leaves client configs untouched, `-WhatIf` previews, and `-Uninstall -Client <names>` removes just the selected client's `rvt-mcp` entry. It applies [mcp-client-wiring.md](mcp-client-wiring.md): `.bak` backup before each edit, minimal text edits that keep JSONC comments, repointing old versioned paths, and reporting (never replacing) custom launchers and legacy `bimwright-rvt*` entries.
 
@@ -36,7 +36,7 @@ Choose one published release and use its Setup ZIP and `rvt-mcp-desktop-<version
    Use one registration for this gateway and connect/reconnect before verification.
 3. The launcher checks the executable SHA-256 against the server in the matching
    Setup ZIP. Its default path is
-   `%LOCALAPPDATA%\Bimwright\rvt-mcp\server\current\rvt-mcp.exe`.
+   `%LOCALAPPDATA%\RvtVerify\server\current\rvt-mcp.exe`.
    An override must point to those same executable bytes. Missing or mismatched
    files stop with `rvt_mcp_setup_status`; there is no PATH/global-tool fallback.
    This verifies the server file, not the add-in already loaded by Revit: update
@@ -64,7 +64,7 @@ If a user UI action, restart or model is still needed, report that stage as **pe
 
 ## Upgrade
 
-Older installers used `%LOCALAPPDATA%\RvtMcp\`. The new installer moves that whole folder to `%LOCALAPPDATA%\Bimwright\rvt-mcp\`, flattens `rvt\server\` to `server\`, and preserves settings, ToolBaker data and other personal files. Close Revit and MCP clients using rvt-mcp before this migration. Known client commands are repointed only after the installed server and all selected add-ins pass verification; a caught failure restores the old folder and leaves those commands unchanged. If both product folders already exist, the installer stops without merging them. Use the server and add-ins from the same setup ZIP.
+Older installers used `%LOCALAPPDATA%\RvtMcp\`. The new installer moves that whole folder to `%LOCALAPPDATA%\RvtVerify\`, flattens `rvt\server\` to `server\`, and preserves settings, ToolBaker data and other personal files. Close Revit and MCP clients using rvt-mcp before this migration. Known client commands are repointed only after the installed server and all selected add-ins pass verification; a caught failure restores the old folder and leaves those commands unchanged. If both product folders already exist, the installer stops without merging them. Use the server and add-ins from the same setup ZIP.
 
 Development runtimes also migrate legacy user data before loading configuration, so
 starting a newer server/add-in without the installer does not silently select an empty
@@ -85,7 +85,7 @@ and MCPB from the same release and follow this sequence:
 
 1. Close all Revit windows and fully quit clients using the gateway, including
    Claude Desktop in the tray. Extract the new Setup ZIP into a separate folder.
-2. Back up `%LOCALAPPDATA%\Bimwright\rvt-mcp\` while the gateway is stopped. If
+2. Back up `%LOCALAPPDATA%\RvtVerify\` while the gateway is stopped. If
    `%LOCALAPPDATA%\RvtMcp\` still exists, back it up too. If both roots contain
    data, preserve both and resolve the [migration conflict](#upgrade-troubleshooting)
    before retrying installation. Do not use `-Purge` during an upgrade.
@@ -123,17 +123,17 @@ Upgrading from v0.6.2 or earlier: those installers put the server in a versioned
 
 ### Troubleshooting upgrades from v0.8.1 or v0.6.x to v1.0.0
 
-These versions used `%LOCALAPPDATA%\RvtMcp\`; v1.0.0 moves the profile to `%LOCALAPPDATA%\Bimwright\rvt-mcp\`. Installation reports include migration conflicts and locked-folder failures. The guidance below explains recovery; it does not mean the released installer has been patched.
+These versions used `%LOCALAPPDATA%\RvtMcp\`; v1.0.0 moves the profile to `%LOCALAPPDATA%\RvtVerify\`. Installation reports include migration conflicts and locked-folder failures. The guidance below explains recovery; it does not mean the released installer has been patched.
 
 | Symptom | What to check and how to recover |
 |---|---|
 | Installer stops with `Both … exist` | Both legacy and current profile folders exist; the installer refuses to merge them. Back up both while Revit and gateway clients are closed. Inspect which holds the settings and ToolBaker data to retain. With the user's approval, rename the other folder to an unused backup name rather than deleting it, then preview/retry installation. If both contain data to keep, stop and resolve the conflict from backups before retrying; do not discard one blindly. |
 | Installer stops with `Could not move …` | An old gateway/client may still lock the legacy folder; permissions may also block the move. Fully quit clients using the gateway, close Revit, and check the error's recovery report and any retained `.rvtmcp-rollback-*` backups. Resolve the lock/permission issue, then preview/retry. Do not purge user data or auto-kill processes. |
 | Runtime reports `MIGRATION_REQUIRED` | Legacy/current files conflict or migration is incomplete. Keep source folders and backups, inspect the reported conflict and reconcile the data to retain before retrying. Do not erase the current profile to force fallback settings. |
-| Client still points at `%LOCALAPPDATA%\RvtMcp\...` or a versioned server folder | Check the active client's command against the install summary's `Server :` path (`%LOCALAPPDATA%\Bimwright\rvt-mcp\server\current\rvt-mcp.exe`). Repoint only that entry, preserve args/env, and restart the target. Custom launchers require approval before changing. See [per-client wiring](mcp-client-wiring.md). |
+| Client still points at `%LOCALAPPDATA%\RvtMcp\...` or a versioned server folder | Check the active client's command against the install summary's `Server :` path (`%LOCALAPPDATA%\RvtVerify\server\current\rvt-mcp.exe`). Repoint only that entry, preserve args/env, and restart the target. Custom launchers require approval before changing. See [per-client wiring](mcp-client-wiring.md). |
 | Desktop connects twice, or MCPB exposes `rvt_mcp_setup_status` after upgrade | Use [one Desktop registration route](#claude-desktop-choose-one-registration-route). For MCPB, update Setup and extension from the same release; an older extension can reject the new executable's hash. `-Client none` does not remove an old manual entry. |
 
-After recovery, repeat the [three verification stages](#verify-and-hand-off). A closed Revit session or a pending Desktop restart is not a reason to uninstall or purge an otherwise valid installation. If recovery remains blocked, report the old/new versions, target client/install type and exact error at <https://github.com/bimwright/rvt-mcp/issues>; do not attach personal profile data or authentication tokens.
+After recovery, repeat the [three verification stages](#verify-and-hand-off). A closed Revit session or a pending Desktop restart is not a reason to uninstall or purge an otherwise valid installation. If recovery remains blocked, report the old/new versions, target client/install type and exact error at <https://github.com/Daii1414/revit-verify/issues>; do not attach personal profile data or authentication tokens.
 
 ## Uninstall
 
@@ -149,12 +149,12 @@ powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-all.ps1 -WhatIf
 powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-all.ps1 -Yes
 ```
 
-Removes the add-ins for every Revit year 2022–2027 (including Bimwright-era copies), the self-contained server, both legacy `revit-YYYY.json` and per-instance `revit-YYYY-PID.json` discovery files, and the spill cache. Both descriptor formats are removed regardless of the installed version, under the current `%LOCALAPPDATA%\Bimwright\rvt-mcp\` root and any leftover legacy `%LOCALAPPDATA%\RvtMcp\` root. MCP client configs are not touched — use `install.ps1 -Uninstall -Client <names>` to strip just the `rvt-mcp` entry, or remove it from your clients yourself. A server copy that a running MCP client still uses is kept; close the client and run again. Everything else under `%LOCALAPPDATA%\Bimwright\rvt-mcp` (settings, translations, ToolBaker data, firm profiles, shared parameters, logs, captures) is kept. `-Purge` deletes the whole folder; `-Purge -KeepLogs` keeps logs.
+Removes the add-ins for every Revit year 2022–2027 (including Bimwright-era copies), the self-contained server, both legacy `revit-YYYY.json` and per-instance `revit-YYYY-PID.json` discovery files, and the spill cache. Both descriptor formats are removed regardless of the installed version, under the current `%LOCALAPPDATA%\RvtVerify\` root and any leftover legacy `%LOCALAPPDATA%\RvtMcp\` root. MCP client configs are not touched — use `install.ps1 -Uninstall -Client <names>` to strip just the `rvt-mcp` entry, or remove it from your clients yourself. A server copy that a running MCP client still uses is kept; close the client and run again. Everything else under `%LOCALAPPDATA%\RvtVerify` (settings, translations, ToolBaker data, firm profiles, shared parameters, logs, captures) is kept. `-Purge` deletes the whole folder; `-Purge -KeepLogs` keeps logs.
 
 ## Developer install
 
 ```powershell
-git clone https://github.com/bimwright/rvt-mcp.git
+git clone https://github.com/Daii1414/revit-verify.git
 cd rvt-mcp
 dotnet build src/RvtMcp.sln -c Debug
 ```
@@ -177,6 +177,6 @@ This installs the latest server; it must match your add-in, so add `--version <x
 v0.4+ renamed packages and folders to `RvtMcp.*` (repo name and brand stay bimwright).
 
 1. Close every Revit.
-2. `pwsh scripts/uninstall-old.ps1` — drops old `%APPDATA%\…\Bimwright\` plugins and old server root; keeps user bake/journal data and migrates it to `%LOCALAPPDATA%\Bimwright\rvt-mcp\` on first new launch.
+2. `pwsh scripts/uninstall-old.ps1` — drops old `%APPDATA%\…\Bimwright\` plugins and old server root; keeps user bake/journal data and migrates it to `%LOCALAPPDATA%\RvtVerify\` on first new launch.
 3. Install the current GitHub Release ZIP (see the [README](../README.md#install)). Do not install v0.5.0 or earlier packages. Uninstall the old global tool if present: `dotnet tool uninstall -g Bimwright.Rvt.Server`.
 4. Point MCP clients at entry name **`rvt-mcp`** (`install.ps1 -Client` wires it). The installer removes Bimwright-era add-ins automatically; `-Client` reports leftover `bimwright-rvt-r22`… client entries, but removing them stays your call.

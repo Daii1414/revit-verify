@@ -89,4 +89,4 @@ Live probes on Revit 2022 build 22.0.2.392 created a valid straight stair throug
 
 Follow-up probes verified `committed_with_warnings` with the tread warning preserved in `Messages`. Both a deliberately thrown geometry-path exception and `Commit(null)` left the scope active before cleanup; the `finally` block cancelled it, and a subsequent stairs scope could start. This validates those cleanup paths, not recovery from an arbitrary native crash.
 
-Source: [GitHub issue #14](https://github.com/bimwright/rvt-mcp/issues/14); [Autodesk failure-processing results](https://help.autodesk.com/cloudhelp/2026/ENU/Revit-API-MainReference/files/html/f147e6e6-4b2e-d61c-df9b-8b8e5ebe3fcb.htm). Local Revit 2022 API XML and live reflection were used to verify the 2022 namespace and signatures.
+Source: [GitHub issue #14](https://github.com/Daii1414/revit-verify/issues); [Autodesk failure-processing results](https://help.autodesk.com/cloudhelp/2026/ENU/Revit-API-MainReference/files/html/f147e6e6-4b2e-d61c-df9b-8b8e5ebe3fcb.htm). Local Revit 2022 API XML and live reflection were used to verify the 2022 namespace and signatures.

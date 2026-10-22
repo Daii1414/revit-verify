@@ -21,7 +21,7 @@ choosing one route. See [Desktop routes](install.md#claude-desktop-choose-one-re
 |---|---|
 | Entry name | `rvt-mcp` — exactly one entry per client |
 | Transport | stdio |
-| Command | `%LOCALAPPDATA%\Bimwright\rvt-mcp\server\current\rvt-mcp.exe` (absolute) |
+| Command | `%LOCALAPPDATA%\RvtVerify\server\current\rvt-mcp.exe` (absolute) |
 | Args | none required (`--toolsets all`, `--read-only` optional) |
 
 The `current` path never changes across upgrades — wire once, upgrade freely.

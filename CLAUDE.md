@@ -11,10 +11,10 @@ MCP client (Claude Code / Cursor / Cline / …) → stdio → C# MCP Server (.NE
 ```
 
 Two processes:
-- **RvtMcp.Server.exe** — MCP Server, runs as separate process, stdio transport (ModelContextProtocol NuGet)
-- **RvtMcp.Plugin.dll** — Revit addin, loads inside Revit.exe, TCP listener (Revit 2022–2024) or Named Pipe (Revit 2025–2027) + ExternalEvent marshalling. Each Revit version gets its own shell DLL compiled from the same `src/shared/` source glob.
+- **RvtVerify.Server.exe** — MCP Server, runs as separate process, stdio transport (ModelContextProtocol NuGet)
+- **RvtVerify.Plugin.dll** — Revit addin, loads inside Revit.exe, Named Pipe listener (Revit 2025–2026) + ExternalEvent marshalling. Each supported Revit version gets its own shell DLL compiled from the same `src/shared/` source glob.
 
-Communication: newline-delimited JSON (NDJSON). Discovery files written per Revit instance in `%LOCALAPPDATA%\Bimwright\rvt-mcp\`:
+Communication: newline-delimited JSON (NDJSON). Discovery files written per Revit instance in `%LOCALAPPDATA%\RvtVerify\`:
 - `revit-<year>-<pid>.json` — per-instance descriptor (schema 3) for every instance, plus the legacy `revit-<year>.json` for older servers
 - `revit-2022.json` / `revit-2023.json` / `revit-2024.json` — legacy per-year files: TCP transport (port OS-assigned) + auth token + PID
 - `revit-2025.json` / `revit-2026.json` / `revit-2027.json` — legacy per-year files: Named Pipe transport + auth token + PID
@@ -43,7 +43,7 @@ Discovery file format (`schema_version=3`):
 
 ```
 src/
-├── RvtMcp.sln         # Solution (Server + 6 plugin shells)
+├── RvtVerify.sln      # Solution (Server + 2 plugin shells + tests)
 │
 ├── server/                   # MCP Server (Console App, .NET 8)
 │   ├── RvtMcp.Server.csproj
@@ -60,28 +60,24 @@ src/
 │   ├── ToolBaker/            # Self-evolution engine (list_baked_tools, run_baked_tool, adaptive suggestions)
 │   └── Views/                # HistoryWindow
 │
-├── plugin-r22/               # Revit 2022 shell (.NET 4.8, TCP)
-├── plugin-r23/               # Revit 2023 shell (.NET 4.8, TCP)
-├── plugin-r24/               # Revit 2024 shell (.NET 4.8, TCP)
 ├── plugin-r25/               # Revit 2025 shell (.NET 8, Named Pipe)
 ├── plugin-r26/               # Revit 2026 shell (.NET 8, Named Pipe)
-└── plugin-r27/               # Revit 2027 shell (.NET 10, Named Pipe)
 ```
 
 ## Build & Deploy
 
 ```bash
-# Build everything (Server + all 6 plugin shells).
+# Build everything (Server + both plugin shells).
 # Revit MUST be closed first — the build auto-deploys plugin DLLs into
 # %APPDATA%\Autodesk\Revit\Addins\20XX\RvtMcp\ which Revit would otherwise lock.
-dotnet build src/RvtMcp.sln -c Debug
+dotnet build RvtVerify.sln -c Debug
 
-# If RvtMcp.Server.exe is locked by an active MCP client session,
+# If RvtVerify.Server.exe is locked by an active MCP client session,
 # disconnect the client first — do NOT taskkill it blindly.
 ```
 
 Each shell auto-deploys to `%APPDATA%\Autodesk\Revit\Addins\<year>\RvtMcp\` for its target year, plus a matching `RvtMcp.R<nn>.addin` manifest at the parent level.
-MCP Server runs from `src/server/bin/Debug/net8.0/RvtMcp.Server.exe`.
+MCP Server runs from `src/server/bin/Debug/net8.0/RvtVerify.Server.exe`.
 
 ## Key Patterns
 
@@ -101,13 +97,13 @@ MCP Server runs from `src/server/bin/Debug/net8.0/RvtMcp.Server.exe`.
 - Unit conversion: Revit internal (feet) → mm using SpecTypeId/ForgeTypeId
 
 ### MCP Tools
-- 259 Revit tools with `--toolsets all` (262 with adaptive bake). The bare binary defaults to **59** tools (`query,create,view,meta`); `install.ps1` seeds `rvtmcp.config.json` with `toolsets=all` so installed machines get the full surface. ALL MCP-facing names prefixed `revit_` (e.g. `revit_create_grid`). Server↔plugin wire command names stay unprefixed and unchanged.
+- 259 Revit tools with `--toolsets all` (262 with adaptive bake). The bare binary defaults to **66** tools (`query,create,view,meta`); `install.ps1` seeds `rvtmcp.config.json` with `toolsets=all` so installed machines get the full surface. ALL MCP-facing names prefixed `revit_` (e.g. `revit_create_grid`). Server↔plugin wire command names stay unprefixed and unchanged.
 - Tools live in `[McpServerToolType, Toolset("<name>")]` classes grouped by domain (query, create, modify, delete, view, export, annotation, mep, schedule, sheets, materials, geometry, rooms, links, structural, lint, toolbaker, meta). Each tool = `[McpServerTool]` static method with param docs + examples.
 - Progressive disclosure (A3): default toolsets are `query,create,view,meta`. `--toolsets all` (or an explicit CSV) and `--read-only` gate the rest. `structural` is write-capable and **off** unless requested. `--read-only` filters individual tools by their document/file effects, including read tools within otherwise write-capable toolsets, and removes arbitrary code and baked-tool execution.
 - Tool Search (v0.5): server `instructions` field populated at startup (keyword-dense) so MCP clients can discover the surface — it was previously empty, so search returned nothing.
 - `revit_batch_execute` (A6): TransactionGroup-wrapped multi-command call, max 20 sub-commands. `SendToRevit()` helper: transport send + TCS await + 60s timeout (TCS completed on timeout so the UI thread skips the stale request).
 
-## Revit 2022 Specifics
+## Revit 2022 Specifics (not built in this fork)
 
 - .NET Framework 4.8
 - ElementId: use `.IntegerValue` (int 32-bit)

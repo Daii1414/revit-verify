@@ -17,7 +17,7 @@ The Revit API itself is pulled from [Nice3point.Revit.Api.*](https://www.nuget.o
 ### Clone + build
 
 ```bash
-git clone https://github.com/bimwright/rvt-mcp.git
+git clone https://github.com/Daii1414/revit-verify.git
 cd rvt-mcp
 dotnet build src/RvtMcp.sln -c Debug
 ```
@@ -121,7 +121,7 @@ Open a GitHub issue with:
 - Revit version + year.
 - rvt-mcp server version (MCP `initialize` → `serverInfo.version`) and plugin DLL file/assembly version; identify the selected release. The command is `rvt-mcp`, not `bimwright`.
 - Reproduction steps — ideally the exact MCP tool call and params.
-- Logs from `%LOCALAPPDATA%\Bimwright\rvt-mcp\` — but **check for paths you don't want to share** (the sanitizer masks absolute paths in errors sent to the model, but local log files are unredacted).
+- Logs from `%LOCALAPPDATA%\RvtVerify\` — but **check for paths you don't want to share** (the sanitizer masks absolute paths in errors sent to the model, but local log files are unredacted).
 
 ## Testing & drift detection
 

@@ -111,8 +111,8 @@ RvtVerify.Server --doctor
 |-------|-------------:|------------|
 | Базовый запуск | **66** | Только осмотр и создание (`query`, `create`, `view`, `meta`) |
 | Все возможности (`--toolsets all`) | **259** | Полный набор |
-| Все + автоподбор (adaptive bake) | **262** | Добавляет 3 инструмента «предложи повторяющееся» |
-| Режим «только чтение» (`--read-only`) | **107** | Ничего не меняет в проекте — можно спокойно пробовать |
+| Все + автоподбор (`--enable-adaptive-bake`) | **262** | Добавляет 3 инструмента «предложи повторяющееся». Флаг выключен по умолчанию |
+| Только чтение (`--read-only`) | **36 / 107** | С базовыми тулсетами — 36, с `--toolsets all` — 107. Ничего не меняет в проекте — можно спокойно пробовать |
 
 Личные «запечённые» инструменты (baked tools) в это число не входят.
 
@@ -123,7 +123,7 @@ RvtVerify.Server --doctor
 | `query` | Осмотр: вид, выделение, фильтры, статистика, параметры, связи элементов, рабочие наборы |
 | `create` | Создание: оси, уровни, комнаты, линейные и точечные элементы, группы |
 | `view` | Виды, листы, снимки экрана, камера, обрезка и масштаб |
-| `meta` | Пакетное выполнение (до 20 команд), несколько запущенных Revit, инфо проекта, `send_code` |
+| `meta` | Пакетное выполнение (`revit_batch_execute`, до 20 команд), несколько Revit, инфо проекта, очистка неиспользуемого, `send_code` |
 | `lint` | Проверка именованных видов, профиль фирмы, сводка предупреждений модели |
 | `schedule` | Спецификации: создание, поля, формулы, данные |
 | `families` | Семейства: загрузка, типы, экземпляры, аудит |
@@ -174,10 +174,14 @@ RvtVerify.Server --doctor
 13. **Автонумерация** дверей, окон и комнат (`revit_renumber_elements`) — номера по порядку, сверху вниз по этажам и по плану; по умолчанию только показывает, что будет.
 14. **Зеркальное копирование** (`revit_transform_elements` с `op=mirror`) — отразить элементы относительно оси, с вариантом «копировать».
 15. **Одно свойство по запросу** (`revit_reflect_get`) — достать ровно одно значение: имя, категорию, этаж, габарит или параметр — без `send_code`.
-16. **Доктор** (`RvtVerify.Server --doctor`) — проверка установки без запуска Revit.
-17. **Фоновые задания** (`revit_job`) — долгие экспорты и коллизии не блокируют ассистента: submit / status / cancel / list, ID сохраняются между перезапусками.
-18. **Отчёт по работе** (`revit_distill_session`) — анализ журнала команд: что чаще всего делаете, где ошибки, длительность p50/p95.
-19. **Умное поведение с окнами Revit** — при массовом построении Revit иногда спрашивает «стены пересекаются, соединить?». Программа **сама отвечает** «да», пока идёт команда, поэтому автоматизация не встаёт (вне команд окно остаётся для ручного использования). Плюс новые стены заранее соединяются геометрией (pre-join) — таких вопросов примерно вдвое меньше.
+16. **Память проекта** (`revit_create_memory_note` / `revit_read_memory_notes`) — заметки о договорённостях проекта (единицы, именование, допуски, предположения), которые ассистент прочтёт в следующий раз. Хранится локально, максимум 200 заметок, никуда не отправляется.
+17. **История изменений** (`revit_record_change`, `revit_get_change_records`, `revit_survey_change_impact`) — журнал: что, кем и когда менялось в модели, плюс оценка влияния изменения. Подробнее — [docs/change-tracking.md](docs/change-tracking.md) и [docs/change-survey.md](docs/change-survey.md).
+18. **Файлы моделей** (`revit_list_recent_models`, `revit_open_model`, `revit_save_document`) — список последних файлов, открытие и сохранение модели прямо из ассистента.
+19. **Точная камера** (`revit_set_view_orientation`) — точная постановка вида: точка глаза, точка цели и наклон (roll) в миллиметрах, а не только «направление + дистанция».
+20. **Доктор** (`RvtVerify.Server --doctor`) — проверка установки без запуска Revit.
+21. **Фоновые задания** (`revit_job`) — долгие экспорты и коллизии не блокируют ассистента: submit / status / cancel / list, ID сохраняются между перезапусками.
+22. **Отчёт по работе** (`revit_distill_session`) — анализ журнала команд: что чаще всего делаете, где ошибки, длительность p50/p95.
+23. **Умное поведение с окнами Revit** — при массовом построении Revit иногда спрашивает «стены пересекаются, соединить?». Программа **сама отвечает** «да», пока идёт команда, поэтому автоматизация не встаёт (вне команд окно остаётся для ручного использования). Плюс новые стены заранее соединяются геометрией (pre-join) — таких вопросов примерно вдвое меньше.
 
 ### Готовые сценарии (промпты)
 
@@ -206,12 +210,143 @@ RvtVerify.Server --doctor
 
 - `--toolsets all` — включить все 259 инструментов;
 - `--read-only` — только смотреть, ничего не менять (удобно для первого знакомства);
+- `--enable-adaptive-bake` — включить подсказки «повторить действие» (по умолчанию выключено);
 - `autoJoinOverlapDialog` (по умолчанию — включено) — автоответ на окно «соединить стены»;
 - `--disable-send-code` — отключить выполнение произвольного C#-кода;
 - `--target` / `revit_switch_target` — выбор конкретного Revit, если запущено несколько;
 - язык интерфейса плагина берётся из языка Revit, но его можно сменить кнопкой на ленте.
 
 Подробнее — в [CLAUDE.md](CLAUDE.md), [ARCHITECTURE.md](ARCHITECTURE.md) и [docs/](docs/).
+
+---
+
+## Permissions & auto mode (права доступа и авторежим)
+
+Аннотации каждого инструмента описывают, может ли он менять документ или файлы. Временное выделение, активный вид и приближение считаются чтением. `send_code` не имеет аннотаций вообще: не включайте его в автоматические разрешения и подтверждайте каждый вызов произвольного кода.
+
+Для Claude Code копируйте **только** список read-only ниже. Не используйте широкий wildcard `mcp__revit-verify__*` — он разрешит всё, включая удаление. Список соответствует `--toolsets all`; при выбранных тулсетах инструментов будет меньше. Режим `--read-only` применяет этот же список на стороне сервера.
+
+<details>
+<summary>Список разрешённых для чтения инструментов (генерируется из аннотаций)</summary>
+
+<!-- BEGIN READ_ONLY_ALLOWLIST -->
+```json
+{
+  "permissions": {
+    "allow": [
+      "mcp__revit-verify__revit_activate_view",
+      "mcp__revit-verify__revit_ai_element_filter",
+      "mcp__revit-verify__revit_analyze_geometry_complexity",
+      "mcp__revit-verify__revit_analyze_mep_network",
+      "mcp__revit-verify__revit_analyze_model_statistics",
+      "mcp__revit-verify__revit_analyze_sheet_layout",
+      "mcp__revit-verify__revit_analyze_structural_connections",
+      "mcp__revit-verify__revit_analyze_usage_patterns",
+      "mcp__revit-verify__revit_analyze_view_naming_patterns",
+      "mcp__revit-verify__revit_audit_families",
+      "mcp__revit-verify__revit_cad_audit",
+      "mcp__revit-verify__revit_cad_extract",
+      "mcp__revit-verify__revit_cad_plan",
+      "mcp__revit-verify__revit_capture_model_snapshot",
+      "mcp__revit-verify__revit_check_model_health",
+      "mcp__revit-verify__revit_clash_detection",
+      "mcp__revit-verify__revit_compare_model_snapshot",
+      "mcp__revit-verify__revit_compute_element_area",
+      "mcp__revit-verify__revit_compute_element_volume",
+      "mcp__revit-verify__revit_detect_firm_profile",
+      "mcp__revit-verify__revit_detect_system_elements",
+      "mcp__revit-verify__revit_distill_session",
+      "mcp__revit-verify__revit_find_elements_in_volume",
+      "mcp__revit-verify__revit_find_mep_disconnects",
+      "mcp__revit-verify__revit_find_overlapping_elements",
+      "mcp__revit-verify__revit_find_schedule_elements",
+      "mcp__revit-verify__revit_find_undimensioned_elements",
+      "mcp__revit-verify__revit_find_untagged_elements",
+      "mcp__revit-verify__revit_get_assembly_members",
+      "mcp__revit-verify__revit_get_available_family_types",
+      "mcp__revit-verify__revit_get_change_records",
+      "mcp__revit-verify__revit_get_current_target",
+      "mcp__revit-verify__revit_get_current_view_info",
+      "mcp__revit-verify__revit_get_element_bounding_box",
+      "mcp__revit-verify__revit_get_element_centroid",
+      "mcp__revit-verify__revit_get_element_details",
+      "mcp__revit-verify__revit_get_element_geometry",
+      "mcp__revit-verify__revit_get_element_parameters",
+      "mcp__revit-verify__revit_get_element_relationships",
+      "mcp__revit-verify__revit_get_family_instances",
+      "mcp__revit-verify__revit_get_group_members",
+      "mcp__revit-verify__revit_get_link_coordinate_system",
+      "mcp__revit-verify__revit_get_link_elements",
+      "mcp__revit-verify__revit_get_material_properties",
+      "mcp__revit-verify__revit_get_material_quantities",
+      "mcp__revit-verify__revit_get_mep_element_connectors",
+      "mcp__revit-verify__revit_get_model_warnings_summary",
+      "mcp__revit-verify__revit_get_panel_schedule",
+      "mcp__revit-verify__revit_get_print_settings",
+      "mcp__revit-verify__revit_get_project_coordinate_system",
+      "mcp__revit-verify__revit_get_room_boundaries",
+      "mcp__revit-verify__revit_get_room_openings",
+      "mcp__revit-verify__revit_get_schedulable_fields",
+      "mcp__revit-verify__revit_get_schedule_data",
+      "mcp__revit-verify__revit_get_schedule_definition",
+      "mcp__revit-verify__revit_get_schedule_formulas",
+      "mcp__revit-verify__revit_get_selected_elements",
+      "mcp__revit-verify__revit_get_structural_loads",
+      "mcp__revit-verify__revit_get_system_inventory",
+      "mcp__revit-verify__revit_get_titleblock_parameters",
+      "mcp__revit-verify__revit_get_type_parameters",
+      "mcp__revit-verify__revit_get_view_visibility",
+      "mcp__revit-verify__revit_get_viewport_geometry",
+      "mcp__revit-verify__revit_list_areas",
+      "mcp__revit-verify__revit_list_assemblies",
+      "mcp__revit-verify__revit_list_available_targets",
+      "mcp__revit-verify__revit_list_baked_tools",
+      "mcp__revit-verify__revit_list_export_settings",
+      "mcp__revit-verify__revit_list_family_types_in_family",
+      "mcp__revit-verify__revit_list_groups",
+      "mcp__revit-verify__revit_list_keynotes",
+      "mcp__revit-verify__revit_list_linked_cad",
+      "mcp__revit-verify__revit_list_linked_models",
+      "mcp__revit-verify__revit_list_loaded_families",
+      "mcp__revit-verify__revit_list_materials",
+      "mcp__revit-verify__revit_list_mep_systems",
+      "mcp__revit-verify__revit_list_phases",
+      "mcp__revit-verify__revit_list_project_parameter_bindings",
+      "mcp__revit-verify__revit_list_project_parameters",
+      "mcp__revit-verify__revit_list_rebar",
+      "mcp__revit-verify__revit_list_recent_models",
+      "mcp__revit-verify__revit_list_revisions",
+      "mcp__revit-verify__revit_list_rooms",
+      "mcp__revit-verify__revit_list_saved_selections",
+      "mcp__revit-verify__revit_list_schedules",
+      "mcp__revit-verify__revit_list_shared_parameters",
+      "mcp__revit-verify__revit_list_sheets",
+      "mcp__revit-verify__revit_list_titleblocks",
+      "mcp__revit-verify__revit_list_view_filters",
+      "mcp__revit-verify__revit_list_view_templates",
+      "mcp__revit-verify__revit_list_worksets",
+      "mcp__revit-verify__revit_load_selection",
+      "mcp__revit-verify__revit_measure_distance_between_elements",
+      "mcp__revit-verify__revit_project_point_onto_face",
+      "mcp__revit-verify__revit_raycast_from_point",
+      "mcp__revit-verify__revit_read_memory_notes",
+      "mcp__revit-verify__revit_reflect_get",
+      "mcp__revit-verify__revit_resolve_targets",
+      "mcp__revit-verify__revit_select_elements",
+      "mcp__revit-verify__revit_show_element_in_view",
+      "mcp__revit-verify__revit_show_message",
+      "mcp__revit-verify__revit_suggest_view_name_corrections",
+      "mcp__revit-verify__revit_survey_change_impact",
+      "mcp__revit-verify__revit_verify_assert",
+      "mcp__revit-verify__revit_verify_run_rules",
+      "mcp__revit-verify__revit_workflow_model_audit"
+    ]
+  }
+}
+```
+<!-- END READ_ONLY_ALLOWLIST -->
+
+</details>
 
 ---
 
@@ -244,7 +379,7 @@ RvtVerify.Server --doctor
 
 Проект находится в активной разработке. Уже сделано и проверено вживую на реальных моделях:
 
-- ✅ 259 инструментов, из них 107 строго read-only;
+- ✅ 259 инструментов; в режиме `--read-only` остаётся 107 (36 — на базовых тулсетах);
 - ✅ проверки результата (assert, YAML-правила, история оценок, слепки модели, сравнение «до/после»);
 - ✅ полный конвейер работы с чертежом DWG: извлечение → план → сверка → применение с подтверждением;
 - ✅ автоответ на блокирующие окна Revit + предварительное соединение стен;
@@ -277,4 +412,4 @@ RvtVerify.Server --doctor
 - [CHANGELOG.md](CHANGELOG.md) — что нового.
 - [CLAUDE.md](CLAUDE.md) — как устроено внутри (для разработчиков и ассистентов).
 - [ARCHITECTURE.md](ARCHITECTURE.md) — архитектура подробно.
-- [docs/](docs/) — инструкции: [установка](docs/install.md), [подключение клиентов](docs/mcp-client-wiring.md), [чертежи DWG](docs/cad-planning.md), [лестницы](docs/stairs-workflow.md), [send_code](docs/send-code.md), [ToolBaker](docs/bake.md), [локализация](docs/localization.md), [отслеживание изменений](docs/change-tracking.md).
+- [docs/](docs/) — инструкции: [установка](docs/install.md), [подключение клиентов](docs/mcp-client-wiring.md), [чертежи DWG](docs/cad-planning.md), [лестницы](docs/stairs-workflow.md), [send_code](docs/send-code.md), [ToolBaker](docs/bake.md), [локализация](docs/localization.md), [отслеживание изменений](docs/change-tracking.md), [анализ влияния изменений](docs/change-survey.md), [профили фирмы](docs/firm-profiles/README.md), [контракты размещения и MEP](docs/placement-and-mep-contracts.md).

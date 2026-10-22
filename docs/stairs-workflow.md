@@ -87,4 +87,4 @@ Provide an iso view/image when requested or useful for reviewing the layout. A c
 - [Continuous rail properties](https://help.autodesk.com/cloudhelp/2020/ENU/Revit-Model/files/GUID-B6A3CEF7-E14C-46DA-8F0C-61556908EB99.htm)
 - [Host-based Railing.Create](https://help.autodesk.com/cloudhelp/2026/ENU/Revit-API-MainReference/files/html/1c9de88b-8038-4ac9-37bd-9b6fd5e1f801.htm)
 
-Confirm API availability for the target Revit year when adapting beyond the tested examples. Reconsider a dedicated tool only if repeated real requests establish a stable, useful input contract. The current choice to document a conversational workflow does not resolve the outstanding Revit 2025 crash confirmation in [issue #14](https://github.com/bimwright/rvt-mcp/issues/14).
+Confirm API availability for the target Revit year when adapting beyond the tested examples. Reconsider a dedicated tool only if repeated real requests establish a stable, useful input contract. The current choice to document a conversational workflow does not resolve the outstanding Revit 2025 crash confirmation in [issue #14](https://github.com/Daii1414/revit-verify/issues).

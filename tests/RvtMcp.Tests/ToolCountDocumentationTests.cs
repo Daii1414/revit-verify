@@ -15,12 +15,12 @@ namespace RvtMcp.Tests
             var standard = ReadToolCount(Path.Combine(goldenRoot, "tools-list.json"));
             var adaptive = ReadToolCount(Path.Combine(goldenRoot, "tools-list-adaptive-bake.json"));
 
-            foreach (var readmeName in new[] { "README.md", "README.vi.md", "README.zh-CN.md", "README.ja.md" })
+            foreach (var readmeName in new[] { "README.md" })
             {
                 var readme = File.ReadAllText(Path.Combine(root, readmeName));
                 Assert.Contains("MCP-" + standard + "%20tools", readme);
-                Assert.Contains("| `--toolsets all` | **" + standard + "**", readme);
-                Assert.Contains("| `all` + adaptive bake | **" + adaptive + "**", readme);
+                Assert.Contains("(`--toolsets all`) | **" + standard + "**", readme);
+                Assert.Contains("`--enable-adaptive-bake`) | **" + adaptive + "**", readme);
             }
 
             var claude = File.ReadAllText(Path.Combine(root, "CLAUDE.md"));

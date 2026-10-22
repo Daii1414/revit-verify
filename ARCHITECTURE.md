@@ -6,10 +6,10 @@
 MCP client (Claude Code / Cursor / …)
         │  stdio (NDJSON)
         ▼
-RvtMcp.Server  (.NET 8 console app, global tool)
-        │  TCP (2022–2024)  OR  Named Pipe (2025–2027) — NDJSON + token auth
+RvtVerify.Server  (.NET 8 console app)
+        │  Named Pipe (2025–2026) — NDJSON + token auth
         ▼
-RvtMcp.Plugin  (Revit add-in DLL, one per year)
+RvtVerify.Plugin  (Revit add-in DLL, one per year)
         │  ExternalEvent.Raise()
         ▼
 Revit API  (UIApplication / Document)
@@ -17,20 +17,16 @@ Revit API  (UIApplication / Document)
 
 **Server** is an MCP server. It talks stdio to the client, translates each tool call into a JSON envelope, and forwards it over a local transport to whichever Revit plugin is running. Server is a plain `.NET tool` — no GUI, no Revit reference.
 
-**Plugin** is an `IExternalApplication` loaded by Revit. It runs a TCP listener (Revit 2022–2024) or a Named Pipe server (Revit 2025–2027) on a background thread, enqueues requests, and marshals them onto the Revit UI thread via `ExternalEvent.Raise()`. Each request opens its own `Transaction` when it needs one; `batch_execute` wraps many into one `TransactionGroup`.
+**Plugin** is an `IExternalApplication` loaded by Revit. It runs a Named Pipe server (Revit 2025–2026) on a background thread, enqueues requests, and marshals them onto the Revit UI thread via `ExternalEvent.Raise()`. Each request opens its own `Transaction` when it needs one; `batch_execute` wraps many into one `TransactionGroup`.
 
 ## Discovery
 
-Every plugin instance writes a per-instance discovery file to `%LOCALAPPDATA%\Bimwright\rvt-mcp\` on startup, named `revit-<year>-<pid>.json`, and additionally publishes the legacy per-year file `revit-<year>.json` for older servers:
+Every plugin instance writes a per-instance discovery file to `%LOCALAPPDATA%\RvtVerify\` on startup, named `revit-<year>-<pid>.json`, and additionally publishes the legacy per-year file `revit-<year>.json` for older servers:
 
 | Revit | Per-instance file | Legacy file | Transport |
 |-------|-------------------|-------------|-----------|
-| 2022  | `revit-2022-<pid>.json` | `revit-2022.json` | TCP |
-| 2023  | `revit-2023-<pid>.json` | `revit-2023.json` | TCP |
-| 2024  | `revit-2024-<pid>.json` | `revit-2024.json` | TCP |
 | 2025  | `revit-2025-<pid>.json` | `revit-2025.json` | Named Pipe |
 | 2026  | `revit-2026-<pid>.json` | `revit-2026.json` | Named Pipe |
-| 2027  | `revit-2027-<pid>.json` | `revit-2027.json` | Named Pipe |
 
 Each per-instance file is a self-describing JSON object (schema 3; the legacy file keeps the same payload so old servers can read it):
 

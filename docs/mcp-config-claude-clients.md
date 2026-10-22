@@ -1,6 +1,6 @@
 # MCP Configuration for Claude Clients (Claude Code CLI, VS Code Extension, Claude Desktop)
 
-> **Audience:** anyone wiring `rvt-mcp.exe` (or any other stdio MCP server) into a Claude client.
+> **Audience:** anyone wiring `RvtVerify.Server.exe` (or any other stdio MCP server) into a Claude client.
 > **Last verified:** 2026-09-25 against official docs at `code.claude.com/docs/en/mcp` and `support.claude.com`.
 > **Canonical procedure:** [mcp-client-wiring.md](mcp-client-wiring.md) — this file is the deeper per-vendor reference.
 
@@ -10,7 +10,7 @@ This document consolidates the research needed to register and operate the RvtMc
 
 ## 1. Three clients, three config files
 
-All three clients speak the same Model Context Protocol over stdio, but store their server registry in different files. **A single `rvt-mcp.exe` binary works for all three** — only the registration entry differs.
+All three clients speak the same Model Context Protocol over stdio, but store their server registry in different files. **A single `RvtVerify.Server.exe` binary works for all three** — only the registration entry differs.
 
 | Client | Config file (Windows) | Native UI to edit |
 |---|---|---|
@@ -173,7 +173,7 @@ Claude does **not** see the bare tool name your server exposes. It sees a prefix
 mcp__<server-name>__<tool-name>
 ```
 
-Example: server registered as `rvt-mcp`, server's `revit_create_grid` tool → Claude sees `mcp__rvt-mcp__revit_create_grid`.
+Example: server registered as `revit-verify`, server's `revit_create_grid` tool → Claude sees `mcp__revit-verify__revit_create_grid`.
 
 Source: `code.claude.com/docs/en/mcp` (search `mcp__` in page) and [anthropics/claude-code#18763](https://github.com/anthropics/claude-code/issues/18763).
 
@@ -193,7 +193,7 @@ The full string `mcp__<server-name>__<tool-name>` must be **≤ 64 characters**.
 | `revit-mcp` (9) | 15 | **49** chars |
 | `rvt` (3) | 9 | **55** chars |
 
-For RvtMcp v0.5+ (all tools prefixed with `revit_`): longest tool is `revit_measure_distance_between_elements` (39 chars). Full prefixed name `mcp__rvt-mcp__revit_measure_distance_between_elements` = 53 chars — comfortably under the 64-char ceiling.
+For RvtMcp v0.5+ (all tools prefixed with `revit_`): longest tool is `revit_measure_distance_between_elements` (39 chars). Full prefixed name `mcp__revit-verify__revit_measure_distance_between_elements` = 58 chars — comfortably under the 64-char ceiling.
 
 ### 5.3 Tool Search — the *critical* default behavior
 
@@ -228,7 +228,7 @@ To verify discovery is working after install:
 You: list every Revit-related MCP tool you have access to
 ```
 
-On a machine installed via `install.ps1` (which seeds `toolsets=all`), Claude should expose the full 229 tools prefixed `mcp__rvt-mcp__revit_*` (232 with adaptive bake); a bare server without that seeded config exposes 44. If the configured surface is smaller than expected, check Tool Search and the server's `--toolsets` / adaptive-bake settings.
+On a machine installed via `install.ps1` (which seeds `toolsets=all`), Claude should expose the full 259 tools prefixed `mcp__revit-verify__revit_*` (262 with adaptive bake); a bare server without that seeded config exposes 44. If the configured surface is smaller than expected, check Tool Search and the server's `--toolsets` / adaptive-bake settings.
 
 ### 5.4 Server `instructions` and tool `description` are truncated at 2 KB each
 
@@ -291,12 +291,12 @@ claude mcp list                    # verify ✓ Connected
 ```
 You: list all Revit-related tools you have
 ```
-If Claude lists `mcp__rvt-mcp__*` tools, discovery is working. If it says "I don't have Revit-specific tools," the server `instructions` field is likely missing — see §5.3.
+If Claude lists `mcp__revit-verify__*` tools, discovery is working. If it says "I don't have Revit-specific tools," the server `instructions` field is likely missing — see §5.3.
 
 **Debug a stuck connection:**
 - Claude Code CLI/VS Code: `/mcp` panel shows status; click reconnect.
 - Claude Desktop: quit + relaunch (no in-app reconnect).
-- All clients: tail `%LOCALAPPDATA%\Bimwright\rvt-mcp\debug.log` for plugin/server messages.
+- All clients: tail `%LOCALAPPDATA%\RvtVerify\debug.log` for plugin/server messages.
 
 ---
 

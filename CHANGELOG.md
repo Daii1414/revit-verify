@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Fix documentation drift found by a full repo audit: README now documents the Permissions section with a generated read-only allow list, the correct read-only counts (36 on default toolsets, 107 with \--toolsets all\) and the \--enable-adaptive-bake\ flag; all docs now point at the real \%LOCALAPPDATA%\RvtVerify\\ data root instead of the upstream \Bimwright\rvt-mcp\ path; upstream GitHub URLs, solution/exe names, supported Revit years and the server banner were corrected. Documentation tests now cover the single Russian README and accept any MCP server-name prefix.
 - Pre-join newly created walls to the walls they cross before commit (WallJoiner). Measured on a 200-wall overlap grid: Revit overlap prompts dropped from 132 to 76.- Auto-answer the Revit overlap/join dialog while an MCP command runs (new OverlapDialogResponder, config utoJoinOverlapDialog default true). Wall creation no longer blocks waiting for a human to click Ok; outside MCP commands the dialog stays for manual use.
 - Add read-only `revit_distill_session` for eval reports over mcp-calls logs: per-tool counts, success rates, duration p50/p95, top errors, sessions and span. Malformed lines counted and skipped.
 - Add `revit_cad_apply` for confirmed CAD wall application: integrity-checked plan, explicit selection, dry_run plus confirm double-gate, at most 20 walls per apply (one undo step), local provenance journal with apply IDs and revisions.

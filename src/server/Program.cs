@@ -249,9 +249,9 @@ namespace RvtMcp.Server
         {
             var usage = string.Join("\n", new[]
             {
-                "rvt-mcp — Revit MCP server (bimwright.dev)",
+                "RvtVerify — MCP server for Autodesk Revit",
                 "",
-                "Usage: rvt-mcp [options]",
+                "Usage: RvtVerify.Server [options]",
                 "",
                 "Transport:",
                 "  --http <port>           Run HTTP SSE on 127.0.0.1:<port> (1-65535). Default = stdio.",
