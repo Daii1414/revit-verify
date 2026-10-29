@@ -83,7 +83,7 @@
     <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.11" />
     <!-- Pin patched native SQLite without changing managed assembly bindings. -->
     <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.13" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
   </ItemGroup>
 
